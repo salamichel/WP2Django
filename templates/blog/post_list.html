@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Articles - {{ site_name }}{% endblock %}
+
+{% block content %}
+<h1>Articles</h1>
+
+<div class="post-list">
+    {% for post in posts %}
+    <article class="post-card horizontal">
+        {% if post.featured_image and post.featured_image.file %}
+        <div class="post-card-image">
+            <a href="{{ post.get_absolute_url }}">
+                <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
+            </a>
+        </div>
+        {% endif %}
+        <div class="post-card-body">
+            <div class="post-meta">
+                <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
+                {% if post.author %}
+                <span class="post-author">par {{ post.author.get_full_name|default:post.author.username }}</span>
+                {% endif %}
+            </div>
+            <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+            {% if post.excerpt %}
+            <p>{{ post.excerpt|truncatewords:40 }}</p>
+            {% endif %}
+            <div class="post-tags">
+                {% for cat in post.categories.all %}
+                    <a href="{{ cat.get_absolute_url }}" class="tag">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <p>Aucun article pour le moment.</p>
+    {% endfor %}
+</div>
+
+{% if posts.has_other_pages %}
+<nav class="pagination">
+    {% if posts.has_previous %}
+    <a href="?page={{ posts.previous_page_number }}" class="btn btn-outline">&laquo; Précédent</a>
+    {% endif %}
+    <span class="page-info">Page {{ posts.number }} sur {{ posts.paginator.num_pages }}</span>
+    {% if posts.has_next %}
+    <a href="?page={{ posts.next_page_number }}" class="btn btn-outline">Suivant &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

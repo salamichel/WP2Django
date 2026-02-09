@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_name }} - Accueil{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Bienvenue sur {{ site_name }}</h1>
+</section>
+
+<section class="latest-posts">
+    <h2>Derniers articles</h2>
+    <div class="post-grid">
+        {% for post in posts %}
+        <article class="post-card">
+            {% if post.featured_image and post.featured_image.file %}
+            <div class="post-card-image">
+                <a href="{{ post.get_absolute_url }}">
+                    <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
+                </a>
+            </div>
+            {% endif %}
+            <div class="post-card-body">
+                <div class="post-meta">
+                    <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
+                    {% for cat in post.categories.all %}
+                        <a href="{{ cat.get_absolute_url }}" class="post-category">{{ cat.name }}</a>
+                    {% endfor %}
+                </div>
+                <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+                {% if post.excerpt %}
+                <p>{{ post.excerpt|truncatewords:30 }}</p>
+                {% endif %}
+            </div>
+        </article>
+        {% empty %}
+        <p>Aucun article pour le moment.</p>
+        {% endfor %}
+    </div>
+    {% if posts %}
+    <div class="text-center">
+        <a href="{% url 'blog:post_list' %}" class="btn">Voir tous les articles</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

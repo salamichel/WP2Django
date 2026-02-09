@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site_name }}{% endblock %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="{% url 'blog:home' %}" class="site-logo">{{ site_name }}</a>
+                <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+                <nav class="main-nav" id="main-nav">
+                    {% if menus.main %}
+                        <ul class="nav-list">
+                        {% for item in menus.main.items.all %}
+                            {% if not item.parent %}
+                            <li class="nav-item{% if item.children.exists %} has-children{% endif %}">
+                                <a href="{{ item.get_url }}">{{ item.title }}</a>
+                                {% if item.children.exists %}
+                                <ul class="sub-menu">
+                                    {% for child in item.children.all %}
+                                    <li><a href="{{ child.get_url }}">{{ child.title }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul class="nav-list">
+                            <li class="nav-item"><a href="{% url 'blog:home' %}">Accueil</a></li>
+                            <li class="nav-item"><a href="{% url 'blog:post_list' %}">Articles</a></li>
+                            <li class="nav-item"><a href="{% url 'contact:contact' %}">Contact</a></li>
+                        </ul>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-col">
+                    <h3>{{ site_name }}</h3>
+                    <p>&copy; {{ site_name }} {% now "Y" %}</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Navigation</h3>
+                    <ul>
+                        <li><a href="{% url 'blog:home' %}">Accueil</a></li>
+                        <li><a href="{% url 'blog:post_list' %}">Articles</a></li>
+                        <li><a href="{% url 'contact:contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Categories</h3>
+                    <ul>
+                    {% for cat in all_categories %}
+                        <li><a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

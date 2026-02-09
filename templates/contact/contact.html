@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - {{ site_name }}{% endblock %}
+
+{% block content %}
+<h1>Contact</h1>
+
+<div class="contact-form-wrapper">
+    <form method="post" class="contact-form">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <span class="form-error">{{ field.errors.0 }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn">Envoyer</button>
+    </form>
+</div>
+{% endblock %}
