@@ -172,6 +172,30 @@ class RedirectMiddlewareTest(TestCase):
         resp = self.client.get("/temp/")
         self.assertEqual(resp.status_code, 302)
 
+    def test_redirect_wp_post_id(self):
+        Redirect.objects.create(old_path="/?p=42", new_path="/articles/mon-article/")
+        resp = self.client.get("/?p=42")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp["Location"], "/articles/mon-article/")
+
+    def test_redirect_wp_page_id(self):
+        Redirect.objects.create(old_path="/?page_id=219", new_path="/ma-page/")
+        resp = self.client.get("/?page_id=219")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp["Location"], "/ma-page/")
+
+    def test_redirect_wp_cat(self):
+        Redirect.objects.create(old_path="/?cat=71", new_path="/categorie/chiens/")
+        resp = self.client.get("/?cat=71")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp["Location"], "/categorie/chiens/")
+
+    def test_redirect_wp_tag(self):
+        Redirect.objects.create(old_path="/?tag=adoption", new_path="/tag/adoption/")
+        resp = self.client.get("/?tag=adoption")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp["Location"], "/tag/adoption/")
+
 
 class ContactViewTest(TestCase):
     def test_contact_get(self):

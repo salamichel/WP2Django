@@ -729,8 +729,38 @@ class RedirectGenerator:
                             defaults={"new_path": new_url},
                         )
                         count += 1
+
+                    # Also redirect /?page_id=ID
+                    Redirect.objects.get_or_create(
+                        old_path=f"/?page_id={wp_id}",
+                        defaults={"new_path": new_url},
+                    )
             except Exception as e:
                 logger.warning("Skipping redirect for post %d: %s", wp_id, e)
+
+        # Generate category redirects (?cat=ID)
+        for wp_term_id, category in self.category_map.items():
+            try:
+                new_url = category.get_absolute_url()
+                Redirect.objects.get_or_create(
+                    old_path=f"/?cat={wp_term_id}",
+                    defaults={"new_path": new_url},
+                )
+                count += 1
+            except Exception as e:
+                logger.warning("Skipping redirect for category %d: %s", wp_term_id, e)
+
+        # Generate tag redirects (?tag=slug)
+        for wp_term_id, tag in self.tag_map.items():
+            try:
+                new_url = tag.get_absolute_url()
+                Redirect.objects.get_or_create(
+                    old_path=f"/?tag={tag.slug}",
+                    defaults={"new_path": new_url},
+                )
+                count += 1
+            except Exception as e:
+                logger.warning("Skipping redirect for tag %d: %s", wp_term_id, e)
 
         logger.info("Generated %d redirects", count)
 
