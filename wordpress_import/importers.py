@@ -307,12 +307,12 @@ class PostImporter:
         return slug
 
     def _import_attachment(self, wp_id, row, meta):
-        guid = row.get("guid", "")
-        title = row.get("post_title", "")
-        mime = row.get("post_mime_type", "")
+        guid = str(row.get("guid", "") or "")
+        title = str(row.get("post_title", "") or "")
+        mime = str(row.get("post_mime_type", "") or "")
 
         # Extract the relative file path from meta or guid
-        file_path = meta.get("_wp_attached_file", "")
+        file_path = str(meta.get("_wp_attached_file", "") or "")
         if not file_path and guid:
             # Try to extract path from URL
             match = re.search(r"/wp-content/uploads/(.+)$", guid)
@@ -322,11 +322,11 @@ class PostImporter:
         media, _ = Media.objects.get_or_create(
             wp_post_id=wp_id,
             defaults={
-                "title": title or "",
+                "title": title[:512],
                 "file": f"uploads/{file_path}" if file_path else "",
-                "alt_text": meta.get("_wp_attachment_image_alt", ""),
-                "mime_type": mime or "",
-                "original_url": guid or "",
+                "alt_text": str(meta.get("_wp_attachment_image_alt", "") or "")[:512],
+                "mime_type": mime[:255],
+                "original_url": guid[:1024],
             },
         )
         self.attachment_map[wp_id] = media

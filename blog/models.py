@@ -57,7 +57,7 @@ class Media(models.Model):
     alt_text = models.CharField(max_length=512, blank=True, default="")
     caption = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
-    mime_type = models.CharField(max_length=100, blank=True, default="")
+    mime_type = models.CharField(max_length=255, blank=True, default="")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     wp_post_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
     original_url = models.URLField(max_length=1024, blank=True, default="")
