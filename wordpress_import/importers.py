@@ -37,6 +37,22 @@ def _safe_slug(text, max_length=500):
     return slug[:max_length]
 
 
+def _clean_wp_slug(slug):
+    """Clean a WordPress slug to be Django-compatible.
+
+    WordPress allows URL-encoded unicode in slugs (e.g. %e2%80%99 for
+    curly apostrophe). Django's SlugField only accepts [-a-zA-Z0-9_].
+    """
+    if not slug:
+        return slug
+    # URL-decode first (e.g. %e2%80%99 -> ')
+    from urllib.parse import unquote
+    slug = unquote(slug)
+    # Re-slugify to strip non-ASCII and invalid chars
+    cleaned = slugify(slug)
+    return cleaned or slugify(slug.encode("ascii", "ignore").decode()) or "untitled"
+
+
 def _map_post_status(wp_status):
     """Map WordPress post status to Django status."""
     mapping = {
@@ -132,7 +148,7 @@ class TaxonomyImporter:
             tid = int(row.get("term_id", 0))
             term_data[tid] = {
                 "name": row.get("name", ""),
-                "slug": row.get("slug", ""),
+                "slug": _clean_wp_slug(row.get("slug", "")),
             }
 
         # Build taxonomy info: term_taxonomy_id -> {term_id, taxonomy, description, parent}
@@ -251,7 +267,7 @@ class PostImporter:
             post_type = row.get("post_type", "post")
             status = row.get("post_status", "draft")
             title = row.get("post_title", "") or ""
-            slug = row.get("post_name", "") or _safe_slug(title)
+            slug = _clean_wp_slug(row.get("post_name", "")) or _safe_slug(title)
             content = row.get("post_content", "") or ""
             excerpt = row.get("post_excerpt", "") or ""
             author_id = int(row.get("post_author", 0))
@@ -685,31 +701,36 @@ class RedirectGenerator:
             if not slug:
                 continue
 
-            if post_type == "post" and wp_id in self.post_map:
-                post = self.post_map[wp_id]
-                old_path = self._build_wp_url(permalink_structure, slug, date)
-                if old_path and old_path != post.get_absolute_url():
-                    Redirect.objects.get_or_create(
-                        old_path=old_path,
-                        defaults={"new_path": post.get_absolute_url()},
-                    )
-                    count += 1
+            try:
+                if post_type == "post" and wp_id in self.post_map:
+                    post = self.post_map[wp_id]
+                    new_url = post.get_absolute_url()
+                    old_path = self._build_wp_url(permalink_structure, slug, date)
+                    if old_path and old_path != new_url:
+                        Redirect.objects.get_or_create(
+                            old_path=old_path,
+                            defaults={"new_path": new_url},
+                        )
+                        count += 1
 
-                # Also redirect /?p=ID
-                Redirect.objects.get_or_create(
-                    old_path=f"/?p={wp_id}",
-                    defaults={"new_path": post.get_absolute_url()},
-                )
-
-            elif post_type == "page" and wp_id in self.page_map:
-                page = self.page_map[wp_id]
-                old_path = f"/{slug}/"
-                if old_path != page.get_absolute_url():
+                    # Also redirect /?p=ID
                     Redirect.objects.get_or_create(
-                        old_path=old_path,
-                        defaults={"new_path": page.get_absolute_url()},
+                        old_path=f"/?p={wp_id}",
+                        defaults={"new_path": new_url},
                     )
-                    count += 1
+
+                elif post_type == "page" and wp_id in self.page_map:
+                    page = self.page_map[wp_id]
+                    new_url = page.get_absolute_url()
+                    old_path = f"/{slug}/"
+                    if old_path != new_url:
+                        Redirect.objects.get_or_create(
+                            old_path=old_path,
+                            defaults={"new_path": new_url},
+                        )
+                        count += 1
+            except Exception as e:
+                logger.warning("Skipping redirect for post %d: %s", wp_id, e)
 
         logger.info("Generated %d redirects", count)
 
