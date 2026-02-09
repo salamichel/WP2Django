@@ -55,6 +55,11 @@ class Command(BaseCommand):
             "--media-dir",
             help="Path to wp-content/uploads directory to copy media files from",
         )
+        parser.add_argument(
+            "--flush",
+            action="store_true",
+            help="Delete all previously imported data before importing",
+        )
 
     def handle(self, *args, **options):
         sql_file = options["sql_file"]
@@ -79,6 +84,11 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(self.style.SUCCESS("\nDry run complete. No data imported."))
             return
+
+        if options["flush"]:
+            self._flush_data()
+
+
 
         # Phase 2: Import users
         self.stdout.write("\n[2/7] Importing users...")
@@ -135,6 +145,24 @@ class Command(BaseCommand):
         self.stdout.write(self.style.MIGRATE_HEADING("\n" + "=" * 60))
         self.stdout.write(self.style.SUCCESS("Import complete!"))
         self._print_summary(user_map, category_map, tag_map, post_map, page_map, attachment_map, comment_map)
+
+    def _flush_data(self):
+        """Delete all previously imported data."""
+        from blog.models import (
+            Post, Page, Media, Category, Tag, Comment,
+            Menu, MenuItem, Redirect, PluginData,
+        )
+        from django.contrib.auth.models import User
+
+        self.stdout.write(self.style.WARNING("\nFlushing all imported data..."))
+        for model in [PluginData, Redirect, MenuItem, Menu, Comment, Post, Page, Media, Tag, Category]:
+            count = model.objects.count()
+            model.objects.all().delete()
+            self.stdout.write(f"  Deleted {count} {model.__name__}")
+        # Delete non-superuser users (imported from WP)
+        wp_users = User.objects.filter(is_superuser=False).count()
+        User.objects.filter(is_superuser=False).delete()
+        self.stdout.write(f"  Deleted {wp_users} imported users")
 
     def _print_analysis(self, parser, tables):
         """Print analysis of the SQL dump."""
