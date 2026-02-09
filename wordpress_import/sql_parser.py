@@ -68,12 +68,22 @@ class SQLParser:
 
     def _parse_create_tables(self, content):
         """Extract all CREATE TABLE definitions."""
+        # Lines that are index/key definitions, not column definitions
+        skip_re = re.compile(
+            r"^\s*(?:PRIMARY\s+KEY|(?:UNIQUE\s+)?KEY|INDEX|CONSTRAINT|FULLTEXT|SPATIAL)",
+            re.IGNORECASE,
+        )
         for match in self.RE_CREATE_TABLE.finditer(content):
             table_name = match.group(1)
             body = match.group(2)
             columns = []
-            for col_match in self.RE_COLUMN_DEF.finditer(body):
-                columns.append(col_match.group(1))
+            for line in body.split("\n"):
+                line_stripped = line.strip()
+                if skip_re.match(line_stripped):
+                    continue
+                col_match = self.RE_COLUMN_DEF.match(line_stripped)
+                if col_match:
+                    columns.append(col_match.group(1))
             if columns:
                 self.tables[table_name] = {"columns": columns, "rows": []}
 
@@ -97,12 +107,19 @@ class SQLParser:
             start = match.end()
             rows = self._extract_value_tuples(content, start)
 
+            warned = False
             for values in rows:
                 if cols and len(values) == len(cols):
                     row = dict(zip(cols, values))
                     self.tables[table_name]["rows"].append(row)
                 elif values:
-                    # Fallback: use index-based access
+                    if not warned:
+                        logger.warning(
+                            "Column count mismatch for %s: %d columns vs %d values. "
+                            "Using index-based keys.",
+                            table_name, len(cols), len(values),
+                        )
+                        warned = True
                     self.tables[table_name]["rows"].append(
                         {str(i): v for i, v in enumerate(values)}
                     )

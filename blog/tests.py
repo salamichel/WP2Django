@@ -246,6 +246,43 @@ INSERT INTO `wp_posts` VALUES
         finally:
             os.unlink(path)
 
+    def test_columns_exclude_keys_and_indexes(self):
+        """Ensure KEY/PRIMARY KEY/UNIQUE KEY lines are not parsed as columns."""
+        from wordpress_import.sql_parser import SQLParser
+        import tempfile
+        import os
+
+        sql = """
+CREATE TABLE `wp_users` (
+  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_login` varchar(60) NOT NULL DEFAULT '',
+  `user_email` varchar(100) NOT NULL DEFAULT '',
+  PRIMARY KEY (`ID`),
+  KEY `user_login_key` (`user_login`),
+  UNIQUE KEY `user_email` (`user_email`)
+) ENGINE=InnoDB;
+
+INSERT INTO `wp_users` VALUES (1, 'admin', 'admin@example.com');
+"""
+        fd, path = tempfile.mkstemp(suffix=".sql")
+        try:
+            with os.fdopen(fd, "w") as f:
+                f.write(sql)
+
+            parser = SQLParser(path)
+            tables = parser.parse()
+
+            # Should only have 3 real columns, not 6 (with KEY names)
+            self.assertEqual(tables["wp_users"]["columns"], ["ID", "user_login", "user_email"])
+            self.assertEqual(len(tables["wp_users"]["rows"]), 1)
+            # Values should map to column names, not index-based keys
+            row = tables["wp_users"]["rows"][0]
+            self.assertEqual(row["ID"], 1)
+            self.assertEqual(row["user_login"], "admin")
+            self.assertEqual(row["user_email"], "admin@example.com")
+        finally:
+            os.unlink(path)
+
     def test_parse_escaped_strings(self):
         from wordpress_import.sql_parser import SQLParser
         import tempfile

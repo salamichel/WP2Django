@@ -13,6 +13,10 @@ DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# CSRF trusted origins (required when behind reverse proxy with HTTPS)
+_csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
