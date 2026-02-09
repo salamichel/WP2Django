@@ -53,7 +53,7 @@ class Tag(models.Model):
 
 class Media(models.Model):
     title = models.CharField(max_length=512, blank=True, default="")
-    file = models.FileField(upload_to="uploads/%Y/%m/")
+    file = models.FileField(upload_to="uploads/%Y/%m/", max_length=512)
     alt_text = models.CharField(max_length=512, blank=True, default="")
     caption = models.TextField(blank=True, default="")
     description = models.TextField(blank=True, default="")
