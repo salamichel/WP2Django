@@ -506,7 +506,13 @@ select:focus {
 }
 
 .dashboard .module table th {
-    display: none;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.dashboard .module table th a {
+    font-weight: 600;
+    color: var(--body-fg);
 }
 
 /* Recent actions */
