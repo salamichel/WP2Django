@@ -1224,8 +1224,207 @@ textarea {
 .alignright { float: right; margin: 0 0 1rem 1.5rem; }
 .aligncenter { display: block; margin: 1.5rem auto; }
 
+/* --- Site Layout with Sidebar --- */
+.site-layout {
+    display: grid;
+    grid-template-columns: 270px 1fr;
+    gap: 2rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+    align-items: start;
+}
+
+.site-layout .layout-content {
+    min-width: 0;
+}
+
+/* Override inner containers when inside sidebar layout */
+.site-layout .layout-content .container {
+    max-width: 100%;
+    padding: 0;
+}
+.site-layout .layout-content .container--narrow {
+    max-width: 100%;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.sidebar-menu {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+}
+
+.sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-bg);
+    background: var(--color-primary);
+    padding: 0.85rem 1rem;
+    margin: 0;
+}
+
+.sidebar-title svg {
+    flex-shrink: 0;
+}
+
+.sidebar-list {
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-item:last-child {
+    border-bottom: none;
+}
+
+.sidebar-item > a {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition);
+}
+
+.sidebar-item > a::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary-light);
+    margin-right: 0.65rem;
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+
+.sidebar-item > a:hover {
+    background: var(--color-bg-warm);
+    color: var(--color-primary);
+}
+
+.sidebar-item > a:hover::before {
+    background: var(--color-primary);
+}
+
+.sidebar-item.has-children > a::after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--color-text-light);
+    border-bottom: 1.5px solid var(--color-text-light);
+    transform: rotate(-45deg);
+    margin-left: auto;
+    transition: transform var(--transition);
+}
+
+.sidebar-sublist {
+    list-style: none;
+    padding: 0 0 0.25rem;
+    margin: 0;
+}
+
+.sidebar-sublist li a {
+    display: block;
+    padding: 0.4rem 1rem 0.4rem 2.25rem;
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all var(--transition);
+}
+
+.sidebar-sublist li a:hover {
+    color: var(--color-primary);
+    background: var(--color-bg-warm);
+}
+
+/* Sidebar toggle button (mobile only) */
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 1000;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--transition), background var(--transition);
+}
+
+.sidebar-toggle:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.05);
+}
+
 /* --- Responsive --- */
 @media (max-width: 968px) {
+    .site-layout {
+        grid-template-columns: 1fr;
+        padding-top: 1rem;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 999;
+        background: var(--color-bg-alt);
+        overflow-y: auto;
+        padding: 1rem;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: none;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+        background: rgba(0,0,0,0.4);
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
     .contact-layout {
         grid-template-columns: 1fr;
     }

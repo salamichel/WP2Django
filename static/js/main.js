@@ -92,6 +92,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 300);
     }
 
+    // --- Sidebar toggle (mobile) ---
+    var sidebarToggle = document.querySelector(".sidebar-toggle");
+    var sidebar = document.getElementById("sidebar");
+    if (sidebarToggle && sidebar) {
+        // Create overlay element
+        var overlay = document.createElement("div");
+        overlay.className = "sidebar-overlay";
+        document.body.appendChild(overlay);
+
+        function openSidebar() {
+            sidebar.classList.add("open");
+            overlay.classList.add("active");
+            sidebarToggle.setAttribute("aria-expanded", "true");
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove("open");
+            overlay.classList.remove("active");
+            sidebarToggle.setAttribute("aria-expanded", "false");
+        }
+
+        sidebarToggle.addEventListener("click", function () {
+            if (sidebar.classList.contains("open")) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+
+        overlay.addEventListener("click", closeSidebar);
+    }
+
     // --- Sticky header shadow on scroll ---
     var header = document.querySelector(".site-header");
     if (header) {
