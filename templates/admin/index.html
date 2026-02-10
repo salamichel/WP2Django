@@ -1,88 +1,227 @@
-{% extends "admin/index.html" %}
-{% load static %}
+{% extends "admin/base_site.html" %}
+{% load i18n static dashboard_tags %}
+
+{% block title %}{{ title }} | {{ site_header }}{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-<div id="dashboard-stats">
-    <div class="stats-row">
-        <div class="dash-stat">
-            <span class="dash-stat-icon" style="background: #fdf0ec; color: #e8734a;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </span>
-            <div class="dash-stat-info">
-                <span class="dash-stat-label">Articles</span>
-            </div>
+{% dashboard_stats as stats %}
+{% recent_posts as latest_posts %}
+{% recent_comments as latest_comments %}
+{% recent_messages as latest_msgs %}
+
+<!-- Quick stats cards -->
+<div class="dash-cards">
+    <a href="{% url 'admin:blog_post_changelist' %}" class="dash-card">
+        <div class="dash-card-icon dash-card-icon--orange">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
-        <div class="dash-stat">
-            <span class="dash-stat-icon" style="background: #eef5ee; color: #5b8c5a;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </span>
-            <div class="dash-stat-info">
-                <span class="dash-stat-label">Commentaires</span>
-            </div>
+        <div class="dash-card-info">
+            <span class="dash-card-number">{{ stats.posts }}</span>
+            <span class="dash-card-label">Articles publies</span>
         </div>
-        <div class="dash-stat">
-            <span class="dash-stat-icon" style="background: #fef7f4; color: #f5a623;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            </span>
-            <div class="dash-stat-info">
-                <span class="dash-stat-label">Messages</span>
-            </div>
+        {% if stats.posts_draft %}
+        <span class="dash-card-badge dash-card-badge--yellow">{{ stats.posts_draft }} brouillon{{ stats.posts_draft|pluralize:"s" }}</span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'admin:blog_comment_changelist' %}" class="dash-card">
+        <div class="dash-card-icon dash-card-icon--green">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div class="dash-stat">
-            <span class="dash-stat-icon" style="background: #f0e6ff; color: #7c3aed;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <div class="dash-card-info">
+            <span class="dash-card-number">{{ stats.comments }}</span>
+            <span class="dash-card-label">Commentaires</span>
+        </div>
+        {% if stats.comments_pending %}
+        <span class="dash-card-badge dash-card-badge--orange">{{ stats.comments_pending }} en attente</span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'admin:contact_contactmessage_changelist' %}" class="dash-card">
+        <div class="dash-card-icon dash-card-icon--amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="dash-card-info">
+            <span class="dash-card-number">{{ stats.messages }}</span>
+            <span class="dash-card-label">Messages</span>
+        </div>
+        {% if stats.messages_unread %}
+        <span class="dash-card-badge dash-card-badge--red">{{ stats.messages_unread }} non lu{{ stats.messages_unread|pluralize:"s" }}</span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'admin:blog_page_changelist' %}" class="dash-card">
+        <div class="dash-card-icon dash-card-icon--purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </div>
+        <div class="dash-card-info">
+            <span class="dash-card-number">{{ stats.pages }}</span>
+            <span class="dash-card-label">Pages</span>
+        </div>
+    </a>
+</div>
+
+<!-- Quick actions -->
+<div class="dash-actions">
+    <h2>Actions rapides</h2>
+    <div class="dash-actions-grid">
+        <a href="{% url 'admin:blog_post_add' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </span>
-            <div class="dash-stat-info">
-                <span class="dash-stat-label">Pages</span>
-            </div>
+            Nouvel article
+        </a>
+        <a href="{% url 'admin:blog_page_add' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </span>
+            Nouvelle page
+        </a>
+        <a href="{% url 'admin:blog_category_add' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            Categorie
+        </a>
+        <a href="{% url 'admin:blog_media_changelist' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </span>
+            Medias ({{ stats.media }})
+        </a>
+        <a href="{% url 'admin:blog_menu_changelist' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </span>
+            Menus ({{ stats.menus }})
+        </a>
+        <a href="{% url 'admin:blog_redirect_changelist' %}" class="dash-action">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+            </span>
+            Redirections ({{ stats.redirects }})
+        </a>
+        <a href="/" class="dash-action dash-action--site" target="_blank">
+            <span class="dash-action-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </span>
+            Voir le site
+        </a>
+    </div>
+</div>
+
+<div class="dash-grid">
+    <!-- Recent posts -->
+    <div class="dash-panel">
+        <div class="dash-panel-header">
+            <h2>Derniers articles</h2>
+            <a href="{% url 'admin:blog_post_changelist' %}">Tout voir</a>
+        </div>
+        <div class="dash-panel-body">
+            {% for post in latest_posts %}
+            <a href="{% url 'admin:blog_post_change' post.pk %}" class="dash-list-item">
+                <div class="dash-list-info">
+                    <span class="dash-list-title">{{ post.title|truncatewords:10 }}</span>
+                    <span class="dash-list-meta">
+                        {{ post.created_at|date:"d/m/Y H:i" }}
+                        {% if post.author %} — {{ post.author.get_full_name|default:post.author.username }}{% endif %}
+                    </span>
+                </div>
+                <span class="dash-list-badge dash-list-badge--{% if post.status == 'published' %}green{% elif post.status == 'draft' %}yellow{% else %}gray{% endif %}">
+                    {{ post.get_status_display }}
+                </span>
+            </a>
+            {% empty %}
+            <p class="dash-empty">Aucun article.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent comments -->
+    <div class="dash-panel">
+        <div class="dash-panel-header">
+            <h2>Derniers commentaires</h2>
+            <a href="{% url 'admin:blog_comment_changelist' %}">Tout voir</a>
+        </div>
+        <div class="dash-panel-body">
+            {% for comment in latest_comments %}
+            <a href="{% url 'admin:blog_comment_change' comment.pk %}" class="dash-list-item">
+                <div class="dash-list-avatar">{{ comment.author_name|first|upper }}</div>
+                <div class="dash-list-info">
+                    <span class="dash-list-title">{{ comment.author_name }}</span>
+                    <span class="dash-list-meta">sur {{ comment.post.title|truncatewords:6 }} — {{ comment.created_at|date:"d/m/Y" }}</span>
+                </div>
+                <span class="dash-list-badge dash-list-badge--{% if comment.status == 'approved' %}green{% elif comment.status == 'pending' %}yellow{% else %}red{% endif %}">
+                    {{ comment.get_status_display }}
+                </span>
+            </a>
+            {% empty %}
+            <p class="dash-empty">Aucun commentaire.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent messages -->
+    <div class="dash-panel">
+        <div class="dash-panel-header">
+            <h2>Derniers messages</h2>
+            <a href="{% url 'admin:contact_contactmessage_changelist' %}">Tout voir</a>
+        </div>
+        <div class="dash-panel-body">
+            {% for msg in latest_msgs %}
+            <a href="{% url 'admin:contact_contactmessage_change' msg.pk %}" class="dash-list-item">
+                <div class="dash-list-avatar dash-list-avatar--msg">{{ msg.name|first|upper }}</div>
+                <div class="dash-list-info">
+                    <span class="dash-list-title">{{ msg.name }}</span>
+                    <span class="dash-list-meta">{{ msg.subject|default:"(sans sujet)" }} — {{ msg.created_at|date:"d/m/Y" }}</span>
+                </div>
+                {% if not msg.is_read %}
+                <span class="dash-list-badge dash-list-badge--orange">Nouveau</span>
+                {% endif %}
+            </a>
+            {% empty %}
+            <p class="dash-empty">Aucun message.</p>
+            {% endfor %}
         </div>
     </div>
 </div>
 
-<style>
-    #dashboard-stats {
-        margin-bottom: 2rem;
-    }
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-    }
-    .dash-stat {
-        background: #fff;
-        border: 1px solid #e9e5e0;
-        border-radius: 12px;
-        padding: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .dash-stat:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-    .dash-stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .dash-stat-label {
-        font-size: 0.85rem;
-        color: #636e72;
-        font-weight: 500;
-    }
-    @media (max-width: 900px) {
-        .stats-row { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 500px) {
-        .stats-row { grid-template-columns: 1fr; }
-    }
-</style>
-
-{{ block.super }}
+<!-- Collapsible full app list -->
+<details class="dash-advanced">
+    <summary>Administration avancee</summary>
+    <div class="dash-advanced-content">
+        {% if app_list %}
+            {% for app in app_list %}
+                <div class="app-{{ app.app_label }} module">
+                    <table>
+                        <caption>
+                            <a href="{{ app.app_url }}" class="section" title="{{ app.name }}">{{ app.name }}</a>
+                        </caption>
+                        {% for model in app.models %}
+                        <tr class="model-{{ model.object_name|lower }}">
+                            <th scope="row">
+                                {% if model.admin_url %}<a href="{{ model.admin_url }}">{{ model.name }}</a>{% else %}{{ model.name }}{% endif %}
+                            </th>
+                            {% if model.add_url %}
+                            <td><a href="{{ model.add_url }}" class="addlink">Ajouter</a></td>
+                            {% else %}<td>&nbsp;</td>{% endif %}
+                            {% if model.admin_url and model.view_only %}
+                            <td><a href="{{ model.admin_url }}" class="viewlink">Voir</a></td>
+                            {% elif model.admin_url %}
+                            <td><a href="{{ model.admin_url }}" class="changelink">Modifier</a></td>
+                            {% else %}<td>&nbsp;</td>{% endif %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</details>
 {% endblock %}
+
+{% block sidebar %}{% endblock %}
