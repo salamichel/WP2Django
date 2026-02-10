@@ -1,45 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}{{ site_name }} - Accueil{% endblock %}
+{% block title %}{{ site_name }} - Protection animale{% endblock %}
 
 {% block content %}
+<!-- Hero -->
 <section class="hero">
-    <h1>Bienvenue sur {{ site_name }}</h1>
+    <div class="container">
+        <div class="hero-content">
+            <span class="hero-badge">Association de protection animale</span>
+            <h1>Chaque animal merite<br>une <em>seconde chance</em></h1>
+            <p class="hero-subtitle">Nous sauvons, soignons et trouvons des familles aimantes pour les chiens et chats abandonnes ou maltraites.</p>
+            <div class="hero-actions">
+                <a href="{% url 'blog:post_list' %}" class="btn btn-lg">Voir nos articles</a>
+                <a href="{% url 'contact:contact' %}" class="btn btn-outline btn-lg">Nous contacter</a>
+            </div>
+        </div>
+    </div>
 </section>
 
-<section class="latest-posts">
-    <h2>Derniers articles</h2>
-    <div class="post-grid">
-        {% for post in posts %}
-        <article class="post-card">
-            {% if post.featured_image and post.featured_image.file %}
-            <div class="post-card-image">
-                <a href="{{ post.get_absolute_url }}">
-                    <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
-                </a>
+<!-- Stats -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                </span>
+                <span class="stat-number">{{ posts|length }}</span>
+                <span class="stat-label">Publications recentes</span>
             </div>
-            {% endif %}
-            <div class="post-card-body">
-                <div class="post-meta">
-                    <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
-                    {% for cat in post.categories.all %}
-                        <a href="{{ cat.get_absolute_url }}" class="post-category">{{ cat.name }}</a>
-                    {% endfor %}
+            <div class="stat-card">
+                <span class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </span>
+                <span class="stat-number">365j</span>
+                <span class="stat-label">A vos cotes</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Benevoles</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest posts -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Derniers articles</h2>
+            <a href="{% url 'blog:post_list' %}" class="section-link">Tout voir &rarr;</a>
+        </div>
+        <div class="post-grid">
+            {% for post in posts %}
+            <article class="post-card" data-animate>
+                {% if post.featured_image and post.featured_image.file %}
+                <div class="post-card-image">
+                    <a href="{{ post.get_absolute_url }}">
+                        <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
+                    </a>
                 </div>
-                <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
-                {% if post.excerpt %}
-                <p>{{ post.excerpt|truncatewords:30 }}</p>
+                {% else %}
+                <div class="post-card-image post-card-image--placeholder">
+                    <a href="{{ post.get_absolute_url }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                    </a>
+                </div>
                 {% endif %}
+                <div class="post-card-body">
+                    <div class="post-meta">
+                        <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
+                        {% for cat in post.categories.all %}
+                            <a href="{{ cat.get_absolute_url }}" class="post-category">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                    <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+                    {% if post.excerpt %}
+                    <p>{{ post.excerpt|truncatewords:25 }}</p>
+                    {% endif %}
+                    <a href="{{ post.get_absolute_url }}" class="read-more">Lire la suite &rarr;</a>
+                </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">
+                <p>Aucun article pour le moment.</p>
             </div>
-        </article>
-        {% empty %}
-        <p>Aucun article pour le moment.</p>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
-    {% if posts %}
-    <div class="text-center">
-        <a href="{% url 'blog:post_list' %}" class="btn">Voir tous les articles</a>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>Vous souhaitez adopter ?</h2>
+            <p>Chaque adoption sauve deux vies : celle de l'animal adopte et celle qui prendra sa place au refuge.</p>
+            <a href="{% url 'contact:contact' %}" class="btn btn-lg btn-white">Contactez-nous</a>
+        </div>
     </div>
-    {% endif %}
 </section>
 {% endblock %}

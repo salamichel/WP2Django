@@ -3,40 +3,50 @@
 {% block title %}Recherche{% if query %} : {{ query }}{% endif %} - {{ site_name }}{% endblock %}
 
 {% block content %}
-<h1>Recherche</h1>
+<div class="container">
+    <div class="page-header">
+        <h1>Recherche</h1>
+    </div>
 
-<form action="{% url 'blog:search' %}" method="get" class="search-form">
-    <input type="search" name="q" value="{{ query }}" placeholder="Rechercher..." class="form-input" autofocus>
-    <button type="submit" class="btn">Rechercher</button>
-</form>
-
-{% if query %}
-<p class="search-info">{{ posts.paginator.count }} résultat{{ posts.paginator.count|pluralize }} pour &laquo; {{ query }} &raquo;</p>
-
-<div class="post-list">
-    {% for post in posts %}
-    <article class="post-card horizontal">
-        <div class="post-card-body">
-            <div class="post-meta">
-                <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
-            </div>
-            <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
-            {% if post.excerpt %}<p>{{ post.excerpt|truncatewords:30 }}</p>{% endif %}
+    <form action="{% url 'blog:search' %}" method="get" class="search-form-large">
+        <div class="search-input-wrap">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" name="q" value="{{ query }}" placeholder="Rechercher un article, un animal..." class="form-input search-input" autofocus>
         </div>
-    </article>
-    {% endfor %}
-</div>
+        <button type="submit" class="btn">Rechercher</button>
+    </form>
 
-{% if posts.has_other_pages %}
-<nav class="pagination">
-    {% if posts.has_previous %}
-    <a href="?q={{ query }}&page={{ posts.previous_page_number }}" class="btn btn-outline">&laquo;</a>
+    {% if query %}
+    <p class="search-info">{{ posts.paginator.count }} resultat{{ posts.paginator.count|pluralize }} pour &laquo; <strong>{{ query }}</strong> &raquo;</p>
+
+    <div class="post-grid">
+        {% for post in posts %}
+        <article class="post-card" data-animate>
+            {% if post.featured_image and post.featured_image.file %}
+            <div class="post-card-image">
+                <a href="{{ post.get_absolute_url }}">
+                    <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
+                </a>
+            </div>
+            {% endif %}
+            <div class="post-card-body">
+                <div class="post-meta">
+                    <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
+                </div>
+                <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+                {% if post.excerpt %}<p>{{ post.excerpt|truncatewords:25 }}</p>{% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if posts.has_other_pages %}
+    <nav class="pagination">
+        {% if posts.has_previous %}<a href="?q={{ query }}&page={{ posts.previous_page_number }}" class="btn btn-outline">&laquo;</a>{% endif %}
+        <span class="page-info">Page {{ posts.number }} / {{ posts.paginator.num_pages }}</span>
+        {% if posts.has_next %}<a href="?q={{ query }}&page={{ posts.next_page_number }}" class="btn btn-outline">&raquo;</a>{% endif %}
+    </nav>
     {% endif %}
-    <span class="page-info">Page {{ posts.number }} / {{ posts.paginator.num_pages }}</span>
-    {% if posts.has_next %}
-    <a href="?q={{ query }}&page={{ posts.next_page_number }}" class="btn btn-outline">&raquo;</a>
     {% endif %}
-</nav>
-{% endif %}
-{% endif %}
+</div>
 {% endblock %}

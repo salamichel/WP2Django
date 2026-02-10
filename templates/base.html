@@ -5,16 +5,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ site_name }}{% endblock %}">
+    <meta name="description" content="{% block meta_description %}{{ site_name }} - Association de protection animale{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="container top-bar-inner">
+            <span class="top-bar-text">Adoptez, sauvez une vie.</span>
+            <div class="top-bar-links">
+                <a href="{% url 'contact:contact' %}">Nous contacter</a>
+                <a href="{% url 'blog:search' %}">Rechercher</a>
+            </div>
+        </div>
+    </div>
+
     <header class="site-header">
         <div class="container">
             <div class="header-inner">
-                <a href="{% url 'blog:home' %}" class="site-logo">{{ site_name }}</a>
+                <a href="{% url 'blog:home' %}" class="site-logo">
+                    <span class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                    </span>
+                    <span class="logo-text">{{ site_name }}</span>
+                </a>
                 <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
@@ -39,35 +58,47 @@
                     {% else %}
                         <ul class="nav-list">
                             <li class="nav-item"><a href="{% url 'blog:home' %}">Accueil</a></li>
-                            <li class="nav-item"><a href="{% url 'blog:post_list' %}">Articles</a></li>
+                            <li class="nav-item"><a href="{% url 'blog:post_list' %}">Nos animaux</a></li>
                             <li class="nav-item"><a href="{% url 'contact:contact' %}">Contact</a></li>
                         </ul>
                     {% endif %}
+                    <a href="{% url 'contact:contact' %}" class="btn btn-nav">Adopter</a>
                 </nav>
             </div>
         </div>
     </header>
 
     <main class="site-main">
+        {% if messages %}
         <div class="container">
-            {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                    <button class="alert-close" aria-label="Fermer">&times;</button>
+                </div>
                 {% endfor %}
             </div>
-            {% endif %}
-
-            {% block content %}{% endblock %}
         </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="site-footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z" fill="currentColor"/></svg>
+        </div>
         <div class="container">
             <div class="footer-inner">
-                <div class="footer-col">
-                    <h3>{{ site_name }}</h3>
-                    <p>&copy; {{ site_name }} {% now "Y" %}</p>
+                <div class="footer-col footer-about">
+                    <h3>
+                        <span class="footer-logo-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                        </span>
+                        {{ site_name }}
+                    </h3>
+                    <p>Association de protection animale. Nous sauvons, soignons et trouvons des familles pour les chiens et chats abandonnes.</p>
                 </div>
                 <div class="footer-col">
                     <h3>Navigation</h3>
@@ -75,6 +106,7 @@
                         <li><a href="{% url 'blog:home' %}">Accueil</a></li>
                         <li><a href="{% url 'blog:post_list' %}">Articles</a></li>
                         <li><a href="{% url 'contact:contact' %}">Contact</a></li>
+                        <li><a href="{% url 'blog:search' %}">Recherche</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -85,6 +117,9 @@
                     {% endfor %}
                     </ul>
                 </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} {{ site_name }}. Tous droits reserves.</p>
             </div>
         </div>
     </footer>

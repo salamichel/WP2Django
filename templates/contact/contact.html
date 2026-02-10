@@ -3,21 +3,49 @@
 {% block title %}Contact - {{ site_name }}{% endblock %}
 
 {% block content %}
-<h1>Contact</h1>
+<div class="container">
+    <div class="contact-layout">
+        <div class="contact-info">
+            <h1>Contactez-nous</h1>
+            <p>Vous souhaitez adopter, devenir benevole, ou simplement nous poser une question ? N'hesitez pas a nous ecrire.</p>
 
-<div class="contact-form-wrapper">
-    <form method="post" class="contact-form">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <span class="form-error">{{ field.errors.0 }}</span>
-            {% endif %}
+            <div class="contact-details">
+                <div class="contact-detail">
+                    <span class="contact-detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </span>
+                    <div>
+                        <strong>Adoptions</strong>
+                        <p>Consultez nos articles pour decouvrir les animaux a adopter.</p>
+                    </div>
+                </div>
+                <div class="contact-detail">
+                    <span class="contact-detail-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </span>
+                    <div>
+                        <strong>Par email</strong>
+                        <p>Nous repondons sous 48h.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn">Envoyer</button>
-    </form>
+
+        <div class="contact-form-card">
+            <form method="post" class="contact-form">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <span class="form-error">{{ field.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-lg btn-full">Envoyer le message</button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
