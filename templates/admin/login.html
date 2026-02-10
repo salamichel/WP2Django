@@ -1,0 +1,48 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+<style>
+    body.login {
+        background: linear-gradient(135deg, #fef7f4 0%, #fef0e8 50%, #eef5ee 100%);
+    }
+    #container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    #header {
+        background: transparent !important;
+        padding: 2rem 0 1rem;
+    }
+    #header a:link, #header a:visited {
+        color: #2d3436 !important;
+    }
+    #content-main {
+        max-width: 420px;
+        width: 100%;
+        margin: 0 auto;
+    }
+    #content {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        max-width: 420px;
+        margin: 0 auto;
+    }
+    .login #content-main .submit-row {
+        padding: 1rem 0 0;
+    }
+    .login .submit-row input {
+        border-radius: 50px !important;
+        padding: 0.7rem 2rem !important;
+    }
+</style>
+{% endblock %}

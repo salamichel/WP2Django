@@ -7,6 +7,11 @@ from django.contrib.sitemaps.views import sitemap
 from blog.sitemaps import PostSitemap, PageSitemap, CategorySitemap
 from blog.feeds import LatestPostsFeed
 
+# Admin site customization
+admin.site.site_header = settings.SITE_NAME + " — Administration"
+admin.site.site_title = settings.SITE_NAME + " Admin"
+admin.site.index_title = "Tableau de bord"
+
 sitemaps = {
     "posts": PostSitemap,
     "pages": PageSitemap,
