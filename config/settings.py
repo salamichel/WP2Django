@@ -28,9 +28,9 @@ INSTALLED_APPS = [
     # Third-party
     "django_ckeditor_5",
     # Local apps
-    "blog",
-    "contact",
-    "wordpress_import",
+    "blog.apps.BlogConfig",
+    "contact.apps.ContactConfig",
+    "wordpress_import.apps.WordpressImportConfig",
 ]
 
 MIDDLEWARE = [

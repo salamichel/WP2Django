@@ -15,7 +15,8 @@ class Category(models.Model):
     wp_term_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
-        verbose_name_plural = "categories"
+        verbose_name = "Categorie"
+        verbose_name_plural = "Categories"
         ordering = ["name"]
 
     def __str__(self):
@@ -37,6 +38,8 @@ class Tag(models.Model):
     wp_term_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Etiquette"
+        verbose_name_plural = "Etiquettes"
         ordering = ["name"]
 
     def __str__(self):
@@ -63,7 +66,8 @@ class Media(models.Model):
     original_url = models.URLField(max_length=1024, blank=True, default="")
 
     class Meta:
-        verbose_name_plural = "media"
+        verbose_name = "Media"
+        verbose_name_plural = "Medias"
         ordering = ["-uploaded_at"]
 
     def __str__(self):
@@ -102,6 +106,8 @@ class Post(models.Model):
     wp_post_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Article"
+        verbose_name_plural = "Articles"
         ordering = ["-published_at"]
 
     def __str__(self):
@@ -141,6 +147,8 @@ class Page(models.Model):
     wp_post_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Page"
+        verbose_name_plural = "Pages"
         ordering = ["menu_order", "title"]
 
     def __str__(self):
@@ -172,6 +180,8 @@ class Comment(models.Model):
     wp_comment_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Commentaire"
+        verbose_name_plural = "Commentaires"
         ordering = ["created_at"]
 
     def __str__(self):
@@ -185,6 +195,8 @@ class Menu(models.Model):
     wp_term_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Menu"
+        verbose_name_plural = "Menus"
         ordering = ["name"]
 
     def __str__(self):
@@ -209,6 +221,8 @@ class MenuItem(models.Model):
     wp_post_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
+        verbose_name = "Element de menu"
+        verbose_name_plural = "Elements de menu"
         ordering = ["position"]
 
     def __str__(self):
@@ -240,6 +254,8 @@ class Redirect(models.Model):
     is_permanent = models.BooleanField(default=True)
 
     class Meta:
+        verbose_name = "Redirection"
+        verbose_name_plural = "Redirections"
         ordering = ["old_path"]
 
     def __str__(self):
@@ -260,7 +276,8 @@ class PluginData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "plugin data"
+        verbose_name = "Donnee plugin"
+        verbose_name_plural = "Donnees plugins"
         ordering = ["plugin_name", "-created_at"]
 
     def __str__(self):
