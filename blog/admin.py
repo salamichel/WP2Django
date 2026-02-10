@@ -180,15 +180,26 @@ class CommentAdmin(admin.ModelAdmin):
         self.message_user(request, f"{count} commentaire(s) marque(s) comme spam.")
 
 
-class MenuItemInline(admin.TabularInline):
+class MenuItemInline(admin.StackedInline):
     model = MenuItem
-    extra = 0
-    fields = ("title", "url", "position", "parent", "content_type", "object_id")
+    extra = 1
+    fields = (
+        ("title", "position"),
+        ("linked_post", "linked_page", "linked_category"),
+        "url",
+        ("parent", "target"),
+        "css_classes",
+    )
+    autocomplete_fields = ("linked_post", "linked_page", "linked_category")
+
+    class Media:
+        css = {"all": ("css/admin_menu_inline.css",)}
 
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "location", "item_count")
+    prepopulated_fields = {"slug": ("name",)}
     inlines = [MenuItemInline]
 
     def item_count(self, obj):

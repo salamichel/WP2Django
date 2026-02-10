@@ -204,20 +204,40 @@ class Menu(models.Model):
 
 
 class MenuItem(models.Model):
+    TARGET_CHOICES = [
+        ("", "Meme fenetre"),
+        ("_blank", "Nouvelle fenetre"),
+    ]
+
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name="items")
-    title = models.CharField(max_length=255)
-    url = models.CharField(max_length=1024, blank=True, default="")
-    target = models.CharField(max_length=50, blank=True, default="")
-    css_classes = models.CharField(max_length=255, blank=True, default="")
-    position = models.IntegerField(default=0)
+    title = models.CharField("Titre", max_length=255)
+    url = models.CharField("URL personnalisee", max_length=1024, blank=True, default="",
+                           help_text="Laisser vide si un article, page ou categorie est selectionne.")
+    target = models.CharField("Ouvrir dans", max_length=50, blank=True, default="", choices=TARGET_CHOICES)
+    css_classes = models.CharField("Classes CSS", max_length=255, blank=True, default="")
+    position = models.IntegerField("Ordre", default=0)
     parent = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children"
+        "self", null=True, blank=True, on_delete=models.CASCADE,
+        related_name="children", verbose_name="Parent",
     )
 
-    # Links to internal content
+    # Links to internal content (user-friendly)
+    linked_post = models.ForeignKey(
+        Post, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="menu_items", verbose_name="Article lie",
+    )
+    linked_page = models.ForeignKey(
+        Page, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="menu_items", verbose_name="Page liee",
+    )
+    linked_category = models.ForeignKey(
+        Category, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="menu_items", verbose_name="Categorie liee",
+    )
+
+    # WordPress import fields (hidden from admin)
     content_type = models.CharField(max_length=50, blank=True, default="")
     object_id = models.PositiveIntegerField(null=True, blank=True)
-
     wp_post_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
 
     class Meta:
@@ -229,6 +249,14 @@ class MenuItem(models.Model):
         return self.title
 
     def get_url(self):
+        # Priority: linked FK objects > WP import fields > manual URL
+        if self.linked_post:
+            return self.linked_post.get_absolute_url()
+        if self.linked_page:
+            return self.linked_page.get_absolute_url()
+        if self.linked_category:
+            return self.linked_category.get_absolute_url()
+        # Fallback to WordPress import fields
         if self.content_type == "post" and self.object_id:
             try:
                 return Post.objects.get(wp_post_id=self.object_id).get_absolute_url()
