@@ -469,8 +469,11 @@ class CommentImporter:
 class MenuImporter:
     """Import WordPress navigation menus."""
 
-    def __init__(self, parser):
+    def __init__(self, parser, post_map=None, page_map=None, category_map=None):
         self.parser = parser
+        self.post_map = post_map or {}
+        self.page_map = page_map or {}
+        self.category_map = category_map or {}
 
     def run(self):
         terms = self.parser.get_table("terms")
@@ -565,23 +568,41 @@ class MenuImporter:
                 "object": meta.get("_menu_item_object", ""),
             })
 
-        # Create menu items
+        # Create menu items with resolved FK links
         item_map = {}
         for data in menu_items_data:
             content_type = ""
             object_id = None
+            linked_post = None
+            linked_page = None
+            linked_category = None
+
             if data["object_type"] == "post_type":
                 content_type = data["object"]  # "post" or "page"
                 try:
                     object_id = int(data["object_id"])
                 except (ValueError, TypeError):
                     pass
+                # Resolve FK from import maps
+                if content_type == "post" and object_id:
+                    linked_post = self.post_map.get(object_id)
+                    if not linked_post:
+                        linked_post = Post.objects.filter(wp_post_id=object_id).first()
+                elif content_type == "page" and object_id:
+                    linked_page = self.page_map.get(object_id)
+                    if not linked_page:
+                        linked_page = Page.objects.filter(wp_post_id=object_id).first()
+
             elif data["object_type"] == "taxonomy":
                 content_type = data["object"]  # "category"
                 try:
                     object_id = int(data["object_id"])
                 except (ValueError, TypeError):
                     pass
+                if content_type == "category" and object_id:
+                    linked_category = self.category_map.get(object_id)
+                    if not linked_category:
+                        linked_category = Category.objects.filter(wp_term_id=object_id).first()
 
             item, _ = MenuItem.objects.get_or_create(
                 wp_post_id=data["wp_id"],
@@ -594,6 +615,9 @@ class MenuImporter:
                     "position": data["position"],
                     "content_type": content_type,
                     "object_id": object_id,
+                    "linked_post": linked_post,
+                    "linked_page": linked_page,
+                    "linked_category": linked_category,
                 },
             )
             item_map[data["wp_id"]] = item
