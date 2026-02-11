@@ -56,19 +56,13 @@ class MediaAdmin(admin.ModelAdmin):
 class GalleryImageInline(admin.TabularInline):
     model = PostGalleryImage
     extra = 1
-    fields = ("media", "position", "thumbnail_preview")
-    readonly_fields = ("thumbnail_preview",)
+    fields = ("media", "position")
     autocomplete_fields = ("media",)
+    template = "admin/blog/post/gallery_inline.html"
 
-    def thumbnail_preview(self, obj):
-        if obj.pk and obj.media and obj.media.file:
-            return format_html(
-                '<img src="{}" style="width:60px;height:60px;object-fit:cover;'
-                'border-radius:6px;border:1px solid #e9e5e0" />',
-                obj.media.file.url,
-            )
-        return "-"
-    thumbnail_preview.short_description = "Apercu"
+    class Media:
+        css = {"all": ("css/admin_gallery_dnd.css",)}
+        js = ("js/admin_gallery_dnd.js",)
 
 
 class CommentInline(admin.TabularInline):
