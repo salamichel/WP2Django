@@ -26,13 +26,19 @@ def post_list(request):
 def post_detail(request, slug):
     post = get_object_or_404(
         Post.objects.select_related("author", "featured_image").prefetch_related(
-            "categories", "tags", "comments"
+            "categories", "tags", "comments",
+            "gallery_images__media",
         ),
         slug=slug,
         status="published",
     )
     comments = post.comments.filter(status="approved", parent__isnull=True).prefetch_related("replies")
-    return render(request, "blog/post_detail.html", {"post": post, "comments": comments})
+    gallery_images = post.gallery_images.select_related("media").all()
+    return render(request, "blog/post_detail.html", {
+        "post": post,
+        "comments": comments,
+        "gallery_images": gallery_images,
+    })
 
 
 def page_detail(request, slug):

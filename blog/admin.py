@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from blog.models import (
     Post, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
+    PostGalleryImage,
 )
 
 
@@ -52,6 +53,24 @@ class MediaAdmin(admin.ModelAdmin):
     thumbnail_preview.short_description = ""
 
 
+class GalleryImageInline(admin.TabularInline):
+    model = PostGalleryImage
+    extra = 1
+    fields = ("media", "position", "thumbnail_preview")
+    readonly_fields = ("thumbnail_preview",)
+    autocomplete_fields = ("media",)
+
+    def thumbnail_preview(self, obj):
+        if obj.pk and obj.media and obj.media.file:
+            return format_html(
+                '<img src="{}" style="width:60px;height:60px;object-fit:cover;'
+                'border-radius:6px;border:1px solid #e9e5e0" />',
+                obj.media.file.url,
+            )
+        return "-"
+    thumbnail_preview.short_description = "Apercu"
+
+
 class CommentInline(admin.TabularInline):
     model = Comment
     extra = 0
@@ -67,7 +86,7 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("categories", "tags")
     date_hierarchy = "published_at"
-    inlines = [CommentInline]
+    inlines = [GalleryImageInline, CommentInline]
     list_per_page = 25
     fieldsets = (
         (None, {"fields": ("title", "slug", "content", "excerpt", "status", "author")}),
