@@ -40,6 +40,7 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
 
         self._fix_fk_links(dry_run)
+        self._fix_empty_titles(dry_run)
         self._fix_php_serialized_fields(dry_run)
 
     def _fix_fk_links(self, dry_run):
@@ -91,6 +92,47 @@ class Command(BaseCommand):
         prefix = "[DRY RUN] " if dry_run else ""
         self.stdout.write(
             self.style.SUCCESS(f"{prefix}{fixed} FK links fixed, {errors} not resolved.")
+        )
+
+    def _fix_empty_titles(self, dry_run):
+        """Fill empty titles from linked content."""
+        fixed = 0
+        items = MenuItem.objects.filter(title="")
+
+        self.stdout.write(f"Found {items.count()} menu items with empty titles.")
+
+        for item in items:
+            title = ""
+            if item.linked_post:
+                title = item.linked_post.title
+            elif item.linked_page:
+                title = item.linked_page.title
+            elif item.linked_category:
+                title = item.linked_category.name
+            elif item.content_type == "post" and item.object_id:
+                post = Post.objects.filter(wp_post_id=item.object_id).first()
+                if post:
+                    title = post.title
+            elif item.content_type == "page" and item.object_id:
+                page = Page.objects.filter(wp_post_id=item.object_id).first()
+                if page:
+                    title = page.title
+            elif item.content_type == "category" and item.object_id:
+                cat = Category.objects.filter(wp_term_id=item.object_id).first()
+                if cat:
+                    title = cat.name
+
+            if title:
+                if dry_run:
+                    self.stdout.write(f'  [DRY RUN] #{item.pk} -> "{title}"')
+                else:
+                    item.title = title
+                    item.save(update_fields=["title"])
+                fixed += 1
+
+        prefix = "[DRY RUN] " if dry_run else ""
+        self.stdout.write(
+            self.style.SUCCESS(f"{prefix}{fixed} empty titles filled.")
         )
 
     def _fix_php_serialized_fields(self, dry_run):

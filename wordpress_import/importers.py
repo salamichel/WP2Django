@@ -620,11 +620,22 @@ class MenuImporter:
                     if not linked_category:
                         linked_category = Category.objects.filter(wp_term_id=object_id).first()
 
+            # Resolve title: WP often leaves post_title empty for nav_menu_items,
+            # falling back to the linked object's title
+            title = data["title"]
+            if not title:
+                if linked_post:
+                    title = linked_post.title
+                elif linked_page:
+                    title = linked_page.title
+                elif linked_category:
+                    title = linked_category.name
+
             item, _ = MenuItem.objects.get_or_create(
                 wp_post_id=data["wp_id"],
                 defaults={
                     "menu": data["menu"],
-                    "title": data["title"],
+                    "title": title or "",
                     "url": data["url"],
                     "target": data["target"],
                     "css_classes": data["css_classes"],
