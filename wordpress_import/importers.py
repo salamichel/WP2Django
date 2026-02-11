@@ -31,6 +31,22 @@ def _parse_datetime(value):
         return None
 
 
+def _php_unserialize_array(value):
+    """Extract string values from a PHP serialized array.
+
+    Handles common WordPress meta like:
+      a:1:{i:0;s:0:"";}          -> []
+      a:2:{i:0;s:3:"foo";i:1;s:3:"bar";} -> ["foo", "bar"]
+    Returns the non-empty strings joined by space, or empty string.
+    """
+    if not value or not isinstance(value, str):
+        return ""
+    if not value.startswith("a:"):
+        return value  # Not a PHP serialized array, return as-is
+    strings = re.findall(r's:\d+:"([^"]*)"', value)
+    return " ".join(s for s in strings if s)
+
+
 def _safe_slug(text, max_length=500):
     """Generate a unique-safe slug from text."""
     slug = slugify(text) or "untitled"
@@ -469,8 +485,11 @@ class CommentImporter:
 class MenuImporter:
     """Import WordPress navigation menus."""
 
-    def __init__(self, parser):
+    def __init__(self, parser, post_map=None, page_map=None, category_map=None):
         self.parser = parser
+        self.post_map = post_map or {}
+        self.page_map = page_map or {}
+        self.category_map = category_map or {}
 
     def run(self):
         terms = self.parser.get_table("terms")
@@ -557,7 +576,7 @@ class MenuImporter:
                 "title": row.get("post_title", "") or meta.get("_menu_item_title", ""),
                 "url": meta.get("_menu_item_url", ""),
                 "target": meta.get("_menu_item_target", ""),
-                "css_classes": meta.get("_menu_item_classes", ""),
+                "css_classes": _php_unserialize_array(meta.get("_menu_item_classes", "")),
                 "position": int(row.get("menu_order", 0) or 0),
                 "parent_wp_id": int(meta.get("_menu_item_menu_item_parent", 0) or 0),
                 "object_type": meta.get("_menu_item_type", ""),
@@ -565,35 +584,67 @@ class MenuImporter:
                 "object": meta.get("_menu_item_object", ""),
             })
 
-        # Create menu items
+        # Create menu items with resolved FK links
         item_map = {}
         for data in menu_items_data:
             content_type = ""
             object_id = None
+            linked_post = None
+            linked_page = None
+            linked_category = None
+
             if data["object_type"] == "post_type":
                 content_type = data["object"]  # "post" or "page"
                 try:
                     object_id = int(data["object_id"])
                 except (ValueError, TypeError):
                     pass
+                # Resolve FK from import maps
+                if content_type == "post" and object_id:
+                    linked_post = self.post_map.get(object_id)
+                    if not linked_post:
+                        linked_post = Post.objects.filter(wp_post_id=object_id).first()
+                elif content_type == "page" and object_id:
+                    linked_page = self.page_map.get(object_id)
+                    if not linked_page:
+                        linked_page = Page.objects.filter(wp_post_id=object_id).first()
+
             elif data["object_type"] == "taxonomy":
                 content_type = data["object"]  # "category"
                 try:
                     object_id = int(data["object_id"])
                 except (ValueError, TypeError):
                     pass
+                if content_type == "category" and object_id:
+                    linked_category = self.category_map.get(object_id)
+                    if not linked_category:
+                        linked_category = Category.objects.filter(wp_term_id=object_id).first()
+
+            # Resolve title: WP often leaves post_title empty for nav_menu_items,
+            # falling back to the linked object's title
+            title = data["title"]
+            if not title:
+                if linked_post:
+                    title = linked_post.title
+                elif linked_page:
+                    title = linked_page.title
+                elif linked_category:
+                    title = linked_category.name
 
             item, _ = MenuItem.objects.get_or_create(
                 wp_post_id=data["wp_id"],
                 defaults={
                     "menu": data["menu"],
-                    "title": data["title"],
+                    "title": title or "",
                     "url": data["url"],
                     "target": data["target"],
                     "css_classes": data["css_classes"],
                     "position": data["position"],
                     "content_type": content_type,
                     "object_id": object_id,
+                    "linked_post": linked_post,
+                    "linked_page": linked_page,
+                    "linked_category": linked_category,
                 },
             )
             item_map[data["wp_id"]] = item

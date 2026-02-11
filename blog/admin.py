@@ -183,14 +183,20 @@ class CommentAdmin(admin.ModelAdmin):
 class MenuItemInline(admin.StackedInline):
     model = MenuItem
     extra = 1
-    fields = (
-        ("title", "position"),
-        ("linked_post", "linked_page", "linked_category"),
-        "url",
-        ("parent", "target"),
-        "css_classes",
+    fieldsets = (
+        (None, {
+            "fields": (
+                ("position", "title", "parent"),
+                ("linked_post", "linked_page", "linked_category"),
+            ),
+        }),
+        ("Lien externe / Options", {
+            "classes": ("collapse",),
+            "fields": (("url", "target"), "css_classes"),
+        }),
     )
-    autocomplete_fields = ("linked_post", "linked_page", "linked_category")
+    autocomplete_fields = ("linked_post", "linked_page", "linked_category", "parent")
+    ordering = ("position",)
 
     class Media:
         css = {"all": ("css/admin_menu_inline.css",)}
@@ -200,11 +206,69 @@ class MenuItemInline(admin.StackedInline):
 class MenuAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "location", "item_count")
     prepopulated_fields = {"slug": ("name",)}
+    search_fields = ("name",)
     inlines = [MenuItemInline]
 
     def item_count(self, obj):
         return obj.items.count()
     item_count.short_description = "Elements"
+
+
+@admin.register(MenuItem)
+class MenuItemAdmin(admin.ModelAdmin):
+    list_display = ("title", "menu", "position", "linked_content_display", "parent")
+    list_filter = ("menu",)
+    search_fields = ("title",)
+    list_editable = ("position",)
+    autocomplete_fields = ("linked_post", "linked_page", "linked_category", "parent", "menu")
+    list_per_page = 50
+    fieldsets = (
+        (None, {"fields": ("menu", "title", "position", "parent")}),
+        ("Lien interne", {
+            "fields": ("linked_post", "linked_page", "linked_category"),
+            "description": "Selectionnez un article, une page ou une categorie. "
+                          "Laissez vide pour utiliser l'URL personnalisee.",
+        }),
+        ("Lien externe", {
+            "fields": ("url", "target", "css_classes"),
+            "classes": ("collapse",),
+        }),
+    )
+
+    def linked_content_display(self, obj):
+        if obj.linked_post:
+            return format_html(
+                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
+                'background:#fdf0ec;color:#e8734a;font-weight:500">Article</span> {}',
+                obj.linked_post.title[:40],
+            )
+        if obj.linked_page:
+            return format_html(
+                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
+                'background:#ecfdf5;color:#065f46;font-weight:500">Page</span> {}',
+                obj.linked_page.title[:40],
+            )
+        if obj.linked_category:
+            return format_html(
+                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
+                'background:#eff6ff;color:#1e40af;font-weight:500">Categorie</span> {}',
+                obj.linked_category.name[:40],
+            )
+        if obj.content_type and obj.object_id:
+            return format_html(
+                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
+                'background:#fef2f2;color:#991b1b;font-weight:500">Non mappe</span> '
+                '{}:{}',
+                obj.content_type, obj.object_id,
+            )
+        if obj.url:
+            return format_html(
+                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
+                'background:#f5f3f0;color:#636e72;font-weight:500">URL</span> {}',
+                obj.url[:50],
+            )
+        return "-"
+    linked_content_display.short_description = "Contenu lie"
 
 
 @admin.register(Redirect)

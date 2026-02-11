@@ -121,7 +121,7 @@ class Command(BaseCommand):
 
         # Phase 6: Import menus and plugin data
         self.stdout.write("\n[6/7] Importing menus and plugin data...")
-        menu_importer = MenuImporter(parser)
+        menu_importer = MenuImporter(parser, post_map, page_map, category_map)
         menu_importer.run()
 
         if not skip_plugins:
