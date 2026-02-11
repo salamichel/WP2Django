@@ -31,6 +31,22 @@ def _parse_datetime(value):
         return None
 
 
+def _php_unserialize_array(value):
+    """Extract string values from a PHP serialized array.
+
+    Handles common WordPress meta like:
+      a:1:{i:0;s:0:"";}          -> []
+      a:2:{i:0;s:3:"foo";i:1;s:3:"bar";} -> ["foo", "bar"]
+    Returns the non-empty strings joined by space, or empty string.
+    """
+    if not value or not isinstance(value, str):
+        return ""
+    if not value.startswith("a:"):
+        return value  # Not a PHP serialized array, return as-is
+    strings = re.findall(r's:\d+:"([^"]*)"', value)
+    return " ".join(s for s in strings if s)
+
+
 def _safe_slug(text, max_length=500):
     """Generate a unique-safe slug from text."""
     slug = slugify(text) or "untitled"
@@ -560,7 +576,7 @@ class MenuImporter:
                 "title": row.get("post_title", "") or meta.get("_menu_item_title", ""),
                 "url": meta.get("_menu_item_url", ""),
                 "target": meta.get("_menu_item_target", ""),
-                "css_classes": meta.get("_menu_item_classes", ""),
+                "css_classes": _php_unserialize_array(meta.get("_menu_item_classes", "")),
                 "position": int(row.get("menu_order", 0) or 0),
                 "parent_wp_id": int(meta.get("_menu_item_menu_item_parent", 0) or 0),
                 "object_type": meta.get("_menu_item_type", ""),

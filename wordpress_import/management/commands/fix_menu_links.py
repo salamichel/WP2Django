@@ -1,21 +1,33 @@
 """
-Fix MenuItem FK links after WordPress import.
+Fix MenuItem FK links and clean PHP serialized data after WordPress import.
 
-Menu items imported from WordPress have content_type/object_id set
-but linked_post/linked_page/linked_category may be NULL.
-This command resolves those references.
+Menu items imported from WordPress may have:
+- content_type/object_id set but linked_post/linked_page/linked_category NULL
+- css_classes containing raw PHP serialized arrays like a:1:{i:0;s:0:"";}
 
 Usage:
     python manage.py fix_menu_links [--dry-run]
 """
+
+import re
 
 from django.core.management.base import BaseCommand
 
 from blog.models import MenuItem, Post, Page, Category
 
 
+def _php_unserialize_array(value):
+    """Extract string values from a PHP serialized array."""
+    if not value or not isinstance(value, str):
+        return ""
+    if not value.startswith("a:"):
+        return value
+    strings = re.findall(r's:\d+:"([^"]*)"', value)
+    return " ".join(s for s in strings if s)
+
+
 class Command(BaseCommand):
-    help = "Resolve MenuItem FK links from WordPress content_type/object_id fields"
+    help = "Resolve MenuItem FK links and clean PHP serialized fields"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -26,6 +38,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
+
+        self._fix_fk_links(dry_run)
+        self._fix_php_serialized_fields(dry_run)
+
+    def _fix_fk_links(self, dry_run):
+        """Resolve FK links from content_type/object_id."""
         fixed = 0
         errors = 0
 
@@ -37,7 +55,7 @@ class Command(BaseCommand):
             linked_category__isnull=True,
         )
 
-        self.stdout.write(f"Found {items.count()} menu items to fix.")
+        self.stdout.write(f"Found {items.count()} menu items with missing FK links.")
 
         for item in items:
             target = None
@@ -72,5 +90,28 @@ class Command(BaseCommand):
 
         prefix = "[DRY RUN] " if dry_run else ""
         self.stdout.write(
-            self.style.SUCCESS(f"\n{prefix}{fixed} menu items fixed, {errors} not resolved.")
+            self.style.SUCCESS(f"{prefix}{fixed} FK links fixed, {errors} not resolved.")
+        )
+
+    def _fix_php_serialized_fields(self, dry_run):
+        """Clean PHP serialized data from css_classes."""
+        fixed = 0
+        items = MenuItem.objects.filter(css_classes__startswith="a:")
+
+        self.stdout.write(f"Found {items.count()} menu items with PHP serialized css_classes.")
+
+        for item in items:
+            cleaned = _php_unserialize_array(item.css_classes)
+            if dry_run:
+                self.stdout.write(
+                    f'  [DRY RUN] {item.title}: "{item.css_classes}" -> "{cleaned}"'
+                )
+            else:
+                item.css_classes = cleaned
+                item.save(update_fields=["css_classes"])
+            fixed += 1
+
+        prefix = "[DRY RUN] " if dry_run else ""
+        self.stdout.write(
+            self.style.SUCCESS(f"{prefix}{fixed} css_classes fields cleaned.")
         )
