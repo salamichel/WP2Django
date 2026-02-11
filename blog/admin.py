@@ -180,54 +180,23 @@ class CommentAdmin(admin.ModelAdmin):
         self.message_user(request, f"{count} commentaire(s) marque(s) comme spam.")
 
 
-class MenuItemInline(admin.TabularInline):
+class MenuItemInline(admin.StackedInline):
     model = MenuItem
     extra = 1
-    fields = (
-        "position", "title", "linked_content_display",
-        "linked_post", "linked_page", "linked_category",
-        "url", "parent", "target",
+    fieldsets = (
+        (None, {
+            "fields": (
+                ("position", "title", "parent"),
+                ("linked_post", "linked_page", "linked_category"),
+            ),
+        }),
+        ("Lien externe / Options", {
+            "classes": ("collapse",),
+            "fields": (("url", "target"), "css_classes"),
+        }),
     )
-    readonly_fields = ("linked_content_display",)
     autocomplete_fields = ("linked_post", "linked_page", "linked_category", "parent")
     ordering = ("position",)
-
-    def linked_content_display(self, obj):
-        if not obj.pk:
-            return "-"
-        if obj.linked_post:
-            return format_html(
-                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
-                'background:#fdf0ec;color:#e8734a;font-weight:500">Article</span> {}',
-                obj.linked_post.title[:40],
-            )
-        if obj.linked_page:
-            return format_html(
-                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
-                'background:#ecfdf5;color:#065f46;font-weight:500">Page</span> {}',
-                obj.linked_page.title[:40],
-            )
-        if obj.linked_category:
-            return format_html(
-                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
-                'background:#eff6ff;color:#1e40af;font-weight:500">Categorie</span> {}',
-                obj.linked_category.name[:40],
-            )
-        if obj.content_type and obj.object_id:
-            return format_html(
-                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
-                'background:#fef2f2;color:#991b1b;font-weight:500">Non mappe</span> '
-                '{}:{}',
-                obj.content_type, obj.object_id,
-            )
-        if obj.url:
-            return format_html(
-                '<span style="padding:2px 8px;border-radius:50px;font-size:0.75rem;'
-                'background:#f5f3f0;color:#636e72;font-weight:500">URL</span> {}',
-                obj.url[:50],
-            )
-        return "-"
-    linked_content_display.short_description = "Contenu lie"
 
     class Media:
         css = {"all": ("css/admin_menu_inline.css",)}
