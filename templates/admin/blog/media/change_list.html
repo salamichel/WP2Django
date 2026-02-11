@@ -1,0 +1,26 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin_media_upload.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="media-upload-zone" class="upload-zone">
+  <input type="file" id="media-upload-input" multiple hidden>
+  <div class="upload-zone-content">
+    <div class="upload-zone-icon">&#8693;</div>
+    <p class="upload-zone-text">Glissez vos fichiers ici ou <button type="button" id="media-upload-btn" class="upload-zone-link">parcourir</button></p>
+  </div>
+  <div id="media-upload-progress" class="upload-progress" style="display:none">
+    <div class="upload-progress-bar"><div class="upload-progress-fill" id="media-upload-fill"></div></div>
+    <span class="upload-progress-label" id="media-upload-label">Upload...</span>
+  </div>
+  <div id="media-upload-results" class="upload-results"></div>
+</div>
+
+{{ block.super }}
+
+<script src="{% static 'js/admin_media_upload.js' %}"></script>
+{% endblock %}

@@ -1,4 +1,8 @@
+import mimetypes
+
 from django.contrib import admin
+from django.http import JsonResponse
+from django.urls import path
 from django.utils.html import format_html
 from blog.models import (
     Post, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
@@ -36,6 +40,38 @@ class MediaAdmin(admin.ModelAdmin):
     search_fields = ("title", "alt_text")
     list_filter = ("mime_type",)
     list_display_links = ("thumbnail_preview", "title")
+    change_list_template = "admin/blog/media/change_list.html"
+
+    def get_urls(self):
+        custom = [
+            path("upload-dnd/", self.admin_site.admin_view(self.upload_dnd), name="blog_media_upload_dnd"),
+        ]
+        return custom + super().get_urls()
+
+    def upload_dnd(self, request):
+        if request.method != "POST":
+            return JsonResponse({"error": "POST required"}, status=405)
+        if not request.user.has_perm("blog.add_media"):
+            return JsonResponse({"error": "Permission denied"}, status=403)
+
+        uploaded = request.FILES.getlist("files")
+        if not uploaded:
+            return JsonResponse({"error": "No files"}, status=400)
+
+        results = []
+        for f in uploaded:
+            mime = f.content_type or mimetypes.guess_type(f.name)[0] or ""
+            title = f.name.rsplit(".", 1)[0] if "." in f.name else f.name
+            obj = Media.objects.create(title=title, file=f, mime_type=mime)
+            is_image = mime.startswith("image/")
+            results.append({
+                "id": obj.pk,
+                "title": obj.title,
+                "mime_type": mime,
+                "url": obj.file.url if is_image else "",
+                "is_image": is_image,
+            })
+        return JsonResponse({"uploaded": results})
 
     def thumbnail_preview(self, obj):
         if obj.file and obj.mime_type and obj.mime_type.startswith("image/"):
