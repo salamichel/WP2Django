@@ -70,19 +70,25 @@ class ExtractImagesTest(TestCase):
         self.assertEqual(len(images), 1)
         self.assertNotIn("<p>", content)
 
-    def test_skip_featured_image(self):
+    def test_featured_image_removed_from_content_but_not_in_gallery(self):
         html = '<img src="/media/uploads/2024/01/featured.jpg" alt="Featured"><img src="/media/uploads/2024/01/other.jpg" alt="Other">'
         content, images = self.processor.extract_images(
             html, featured_image_url="/media/uploads/2024/01/featured.jpg"
         )
+        # Featured image removed from content
+        self.assertNotIn("featured.jpg", content)
+        # But not added to the gallery list
         self.assertEqual(len(images), 1)
         self.assertEqual(images[0]["src"], "/media/uploads/2024/01/other.jpg")
 
-    def test_skip_featured_image_with_size_suffix(self):
+    def test_featured_image_with_size_suffix_removed_from_content(self):
         html = '<img src="/media/uploads/2024/01/featured-300x200.jpg" alt="Featured"><img src="/media/uploads/2024/01/other.jpg" alt="Other">'
         content, images = self.processor.extract_images(
             html, featured_image_url="/media/uploads/2024/01/featured.jpg"
         )
+        # Size-suffixed featured image also removed from content
+        self.assertNotIn("featured-300x200.jpg", content)
+        # But not in gallery
         self.assertEqual(len(images), 1)
         self.assertEqual(images[0]["src"], "/media/uploads/2024/01/other.jpg")
 

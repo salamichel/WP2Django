@@ -64,8 +64,9 @@ class ContentProcessor:
         """Extract image URLs from content and return (cleaned_content, image_list).
 
         Each image in the returned list is a dict with 'src' and 'alt' keys.
-        Images matching featured_image_url are skipped.
-        The content is returned with those image tags (and their wrappers) removed.
+        Images matching featured_image_url are removed from the content but
+        NOT added to the gallery list (they are already shown as featured image).
+        The content is returned with all upload image tags (and their wrappers) removed.
         """
         if not content:
             return "", []
@@ -89,9 +90,9 @@ class ContentProcessor:
 
             src_norm = self._normalize_upload_url(src)
 
-            # Skip featured image
+            # Featured image: remove from content but don't add to gallery
             if featured_norm and src_norm == featured_norm:
-                return False
+                return True
 
             if src_norm in seen_srcs:
                 return True  # Duplicate, still remove from content
