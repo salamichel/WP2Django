@@ -4,6 +4,19 @@
 
   {{ inline_admin_formset.formset.management_form }}
 
+  {# Upload drop zone #}
+  <div id="gallery-upload-zone" class="gallery-upload-zone">
+    <input type="file" id="gallery-upload-input" multiple accept="image/*" hidden>
+    <div class="gallery-upload-content">
+      <div class="gallery-upload-icon">&#8693;</div>
+      <p class="gallery-upload-text">Glissez vos images ici ou <button type="button" id="gallery-upload-btn" class="gallery-upload-link">parcourir</button></p>
+    </div>
+    <div id="gallery-upload-progress" class="gallery-upload-progress" style="display:none">
+      <div class="gallery-upload-bar"><div class="gallery-upload-fill" id="gallery-upload-fill"></div></div>
+      <span class="gallery-upload-label" id="gallery-upload-label"></span>
+    </div>
+  </div>
+
   {# Drag-and-drop visual zone #}
   <div class="gallery-dnd-zone">
     {% for inline_admin_form in inline_admin_formset %}
