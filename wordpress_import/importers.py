@@ -314,80 +314,90 @@ class AnimalDataExtractor:
                     continue
         return None
 
-    # Regex patterns to match HTML blocks containing animal data.
-    # These run directly on HTML so they handle inline tags, entities, etc.
-    _HTML_BLOCK_PATTERNS = [
-        # Each pattern matches a <p>...</p> or bare line containing the field label.
-        # The (?:<[^>]*>)* allows inline tags like <strong>, <em>, <span> anywhere.
-        r"age\s*:",
-        r"(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:",
-        r"(?:race|crois[eé])\s*:",
-        r"sexe\s*:",
-        r"(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:",
-        r"(?:vaccin(?:[eé])?|vaccination)\s*:",
-        r"(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:",
-        r"(?:poids)\s*:",
-        r"(?:en\s+)?(?:famille\s+d['\u2019]?accueil|accueil)\s+(?:chez\s+)?",
-        r"esp[eè]ce\s*:",
-        r"(?:nom|pr[eé]nom)\s*:",
-    ]
+    # Combined regex matching any animal field label (for HTML cleaning).
+    _COMBINED_LABEL_RE = re.compile(
+        r"(?:"
+        r"age\s*:"
+        r"|(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:"
+        r"|(?:race|crois[eé])\s*:"
+        r"|sexe\s*:"
+        r"|(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:"
+        r"|(?:vaccin(?:[eé])?|vaccination)\s*:"
+        r"|(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:"
+        r"|(?:poids)\s*:"
+        r"|(?:en\s+)?(?:famille\s+d['\u2019]?accueil|accueil)\s+(?:chez\s+)?"
+        r"|esp[eè]ce\s*:"
+        r"|(?:nom|pr[eé]nom)\s*:"
+        r")",
+        re.IGNORECASE,
+    )
+
+    @staticmethod
+    def _decode_entities(text):
+        """Decode common HTML entities for matching."""
+        text = text.replace("&eacute;", "é")
+        text = text.replace("&egrave;", "è")
+        text = text.replace("&agrave;", "à")
+        text = text.replace("&acirc;", "â")
+        text = text.replace("&ocirc;", "ô")
+        text = text.replace("&ucirc;", "û")
+        text = text.replace("&nbsp;", " ")
+        text = text.replace("&#8217;", "'")
+        text = text.replace("&#8216;", "'")
+        text = text.replace("&rsquo;", "'")
+        text = text.replace("&lsquo;", "'")
+        text = re.sub(r"&#(\d+);", lambda m: chr(int(m.group(1))), text)
+        return text
+
+    @classmethod
+    def _block_matches_label(cls, inner_html):
+        """Check if an HTML block's text content matches an animal field label."""
+        inner_text = re.sub(r"<[^>]+>", "", inner_html)
+        inner_text = cls._decode_entities(inner_text).strip()
+        return cls._COMBINED_LABEL_RE.search(inner_text) is not None
+
+    # Pre-compiled pattern to split HTML into <p> blocks and other content.
+    _P_BLOCK_RE = re.compile(r"(<p[^>]*>.+?</p>)", re.DOTALL | re.IGNORECASE)
+
+    # Pre-compiled pattern to split on <br> for bare-line handling.
+    _BR_SPLIT_RE = re.compile(r"(<br\s*/?>)", re.IGNORECASE)
 
     @classmethod
     def _clean_content_html(cls, html_content):
         """Remove HTML blocks that contain animal profile data.
 
-        Works directly on HTML, handling inline tags and entities.
+        Single-pass approach: split into <p> blocks, check each once
+        against all field patterns combined.
         """
-        cleaned = html_content
+        # Pass 1: Remove matching <p>...</p> blocks
+        parts = cls._P_BLOCK_RE.split(html_content)
+        kept = []
+        for part in parts:
+            if cls._P_BLOCK_RE.fullmatch(part):
+                # This is a <p> block — check if it's animal data
+                if cls._block_matches_label(part):
+                    continue  # Drop it
+            kept.append(part)
+        cleaned = "".join(kept)
 
-        # Decode common HTML entities for matching
-        def _decode_entities(text):
-            """Decode HTML entities in text for regex matching."""
-            text = text.replace("&eacute;", "é")
-            text = text.replace("&egrave;", "è")
-            text = text.replace("&agrave;", "à")
-            text = text.replace("&acirc;", "â")
-            text = text.replace("&nbsp;", " ")
-            text = text.replace("&#8217;", "'")
-            text = text.replace("&#8216;", "'")
-            text = text.replace("&rsquo;", "'")
-            text = text.replace("&lsquo;", "'")
-            text = re.sub(r"&#(\d+);", lambda m: chr(int(m.group(1))), text)
-            return text
-
-        for label_pattern in cls._HTML_BLOCK_PATTERNS:
-            # Build a pattern that matches <p> blocks containing the label,
-            # allowing for inline HTML tags anywhere in the text
-            inline_tags = r"(?:<[^>]*>)*"
-            # Inject inline_tags between each character group isn't practical,
-            # so we strip tags for matching then remove the original block.
-
-            # Strategy: find <p>...</p> blocks, check if their text matches
-            p_pattern = re.compile(r"<p[^>]*>(.+?)</p>", re.DOTALL | re.IGNORECASE)
-            new_parts = []
-            last_end = 0
-
-            for m in p_pattern.finditer(cleaned):
-                inner_html = m.group(1)
-                # Strip tags and decode entities for matching
-                inner_text = re.sub(r"<[^>]+>", "", inner_html)
-                inner_text = _decode_entities(inner_text).strip()
-
-                if re.search(label_pattern, inner_text, re.IGNORECASE):
-                    # Skip this <p> block (remove it)
-                    new_parts.append(cleaned[last_end:m.start()])
-                    last_end = m.end()
-
-            if new_parts:
-                new_parts.append(cleaned[last_end:])
-                cleaned = "".join(new_parts)
-
-            # Also handle bare lines (no <p> wrapper, separated by <br>)
-            br_line = re.compile(
-                r"([^\n<>]*?" + label_pattern + r"[^\n<]*?)(?:\s*<br\s*/?>)",
-                re.IGNORECASE,
-            )
-            cleaned = br_line.sub("", cleaned)
+        # Pass 2: Handle bare lines separated by <br>
+        # Split on <br>, check each text segment
+        segments = cls._BR_SPLIT_RE.split(cleaned)
+        kept2 = []
+        skip_next_br = False
+        for seg in segments:
+            if skip_next_br and cls._BR_SPLIT_RE.fullmatch(seg):
+                skip_next_br = False
+                continue
+            skip_next_br = False
+            if not cls._BR_SPLIT_RE.fullmatch(seg):
+                text = re.sub(r"<[^>]+>", "", seg)
+                text = cls._decode_entities(text).strip()
+                if text and cls._COMBINED_LABEL_RE.search(text):
+                    skip_next_br = True
+                    continue
+            kept2.append(seg)
+        cleaned = "".join(kept2)
 
         # Clean up empty paragraphs and excessive whitespace
         cleaned = re.sub(r"<p[^>]*>\s*</p>", "", cleaned)
