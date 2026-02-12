@@ -1,0 +1,79 @@
+<article class="post-card{% if post.is_animal_profile %} post-card--animal{% endif %}" data-animate>
+    <div class="post-card-image{% if not post.featured_image or not post.featured_image.file %} post-card-image--placeholder{% endif %}">
+        <a href="{{ post.get_absolute_url }}">
+            {% if post.featured_image and post.featured_image.file %}
+            <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
+            {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+            {% endif %}
+        </a>
+        {% if post.categories.exists %}
+        <div class="post-card-badges">
+            {% for cat in post.categories.all %}
+            <a href="{{ cat.get_absolute_url }}" class="post-card-badge">{{ cat.name }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if post.is_adoptable %}
+        <span class="post-card-adoptable">Cherche famille</span>
+        {% endif %}
+    </div>
+    <div class="post-card-body">
+        {% if post.is_animal_profile %}
+        <div class="animal-chips">
+            {% if post.species %}
+            <span class="animal-chip animal-chip--species">
+                {% if post.species == "chien" %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                {% elif post.species == "chat" %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5c-1.2-2.4-4-4-4-4v6c0 1.7 1.3 3 3 3h2c1.7 0 3-1.3 3-3V1s-2.8 1.6-4 4z"/><circle cx="12" cy="14" r="7"/><path d="M9 17l1.5-1 1.5 1 1.5-1 1.5 1"/></svg>
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                {% endif %}
+                {{ post.get_species_display }}
+            </span>
+            {% endif %}
+            {% if post.sex %}
+            <span class="animal-chip animal-chip--sex">
+                {% if post.sex == "male" %}&#9794;{% else %}&#9792;{% endif %}
+                {{ post.get_sex_display }}
+            </span>
+            {% endif %}
+            {% if post.age_display %}
+            <span class="animal-chip animal-chip--age">{{ post.age_display }}</span>
+            {% endif %}
+            {% if post.breed %}
+            <span class="animal-chip animal-chip--breed">{{ post.breed }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if not post.is_animal_profile %}
+        <div class="post-meta">
+            <time datetime="{{ post.published_at|date:'Y-m-d' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ post.published_at|date:"d F Y" }}
+            </time>
+            {% if post.author %}
+            <span class="post-author">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ post.author.get_full_name|default:post.author.username }}
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+        <h3><a href="{{ post.get_absolute_url }}">{{ post.animal_name|default:post.title }}</a></h3>
+        {% if post.excerpt %}
+        <p>{{ post.excerpt|truncatewords:30 }}</p>
+        {% endif %}
+        <div class="post-card-footer">
+            <a href="{{ post.get_absolute_url }}" class="read-more">
+                {% if post.is_animal_profile %}
+                <span>Decouvrir {{ post.animal_name|default:"ce petit protege" }}</span>
+                {% else %}
+                <span>Lire la suite</span>
+                {% endif %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+        </div>
+    </div>
+</article>

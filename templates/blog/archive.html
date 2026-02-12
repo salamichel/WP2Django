@@ -11,22 +11,7 @@
 
     <div class="post-grid">
         {% for post in posts %}
-        <article class="post-card" data-animate>
-            {% if post.featured_image and post.featured_image.file %}
-            <div class="post-card-image">
-                <a href="{{ post.get_absolute_url }}">
-                    <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
-                </a>
-            </div>
-            {% endif %}
-            <div class="post-card-body">
-                <div class="post-meta">
-                    <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
-                </div>
-                <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
-                {% if post.excerpt %}<p>{{ post.excerpt|truncatewords:25 }}</p>{% endif %}
-            </div>
-        </article>
+            {% include "includes/_post_card.html" %}
         {% empty %}
         <div class="empty-state"><p>Aucun article pour cette periode.</p></div>
         {% endfor %}

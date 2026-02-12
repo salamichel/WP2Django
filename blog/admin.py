@@ -71,6 +71,16 @@ class PostAdmin(admin.ModelAdmin):
     list_per_page = 25
     fieldsets = (
         (None, {"fields": ("title", "slug", "content", "excerpt", "status", "author")}),
+        ("Fiche animal", {
+            "fields": (
+                ("animal_name", "species", "breed"),
+                ("sex", "birth_date", "weight_kg"),
+                ("is_vaccinated", "is_sterilized", "is_adoptable"),
+                ("identification", "foster_family"),
+            ),
+            "classes": ("collapse",),
+            "description": "Remplir uniquement pour les fiches animaux. Laisser vide pour les articles classiques.",
+        }),
         ("Relations", {"fields": ("categories", "tags", "featured_image")}),
         ("Publication", {"fields": ("published_at",)}),
         ("SEO", {"fields": ("seo_title", "seo_description"), "classes": ("collapse",)}),

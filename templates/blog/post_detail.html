@@ -28,6 +28,78 @@
         </figure>
         {% endif %}
 
+        {% if post.is_animal_profile %}
+        <div class="animal-profile-card">
+            <h3 class="animal-profile-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                Fiche de {{ post.animal_name|default:post.title }}
+                {% if post.is_adoptable %}<span class="animal-adoptable-badge">Cherche famille</span>{% endif %}
+            </h3>
+            <div class="animal-profile-grid">
+                {% if post.species %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Espece</span>
+                    <span class="animal-profile-value">{{ post.get_species_display }}</span>
+                </div>
+                {% endif %}
+                {% if post.breed %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Race</span>
+                    <span class="animal-profile-value">{{ post.breed }}</span>
+                </div>
+                {% endif %}
+                {% if post.sex %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Sexe</span>
+                    <span class="animal-profile-value">{% if post.sex == "male" %}&#9794;{% else %}&#9792;{% endif %} {{ post.get_sex_display }}</span>
+                </div>
+                {% endif %}
+                {% if post.age_display %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Age</span>
+                    <span class="animal-profile-value">{{ post.age_display }}</span>
+                </div>
+                {% endif %}
+                {% if post.birth_date %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Date de naissance</span>
+                    <span class="animal-profile-value">{{ post.birth_date|date:"d/m/Y" }}</span>
+                </div>
+                {% endif %}
+                {% if post.weight_kg %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Poids</span>
+                    <span class="animal-profile-value">{{ post.weight_kg }} kg</span>
+                </div>
+                {% endif %}
+                {% if post.identification %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Identification</span>
+                    <span class="animal-profile-value">{{ post.identification }}</span>
+                </div>
+                {% endif %}
+                {% if post.is_vaccinated != None %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Vaccine</span>
+                    <span class="animal-profile-value">{% if post.is_vaccinated %}Oui{% else %}Non{% endif %}</span>
+                </div>
+                {% endif %}
+                {% if post.is_sterilized != None %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Sterilise / Castre</span>
+                    <span class="animal-profile-value">{% if post.is_sterilized %}Oui{% else %}Non{% endif %}</span>
+                </div>
+                {% endif %}
+                {% if post.foster_family %}
+                <div class="animal-profile-item">
+                    <span class="animal-profile-label">Famille d'accueil</span>
+                    <span class="animal-profile-value">{{ post.foster_family }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="post-content">
             {{ post.content|safe }}
         </div>
