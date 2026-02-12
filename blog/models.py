@@ -83,6 +83,20 @@ class Post(models.Model):
         ("trash", "Corbeille"),
     ]
 
+    SPECIES_CHOICES = [
+        ("", "---"),
+        ("chien", "Chien"),
+        ("chat", "Chat"),
+        ("rongeur", "Rongeur"),
+        ("autre", "Autre"),
+    ]
+
+    SEX_CHOICES = [
+        ("", "---"),
+        ("male", "Mâle"),
+        ("femelle", "Femelle"),
+    ]
+
     title = models.CharField(max_length=512)
     slug = models.SlugField(max_length=512, unique=True)
     content = CKEditor5Field(blank=True, default="", config_name="default")
@@ -97,6 +111,19 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     published_at = models.DateTimeField(null=True, blank=True, db_index=True)
+
+    # Animal profile fields (all optional - only used for animal listings)
+    animal_name = models.CharField("Nom de l'animal", max_length=255, blank=True, default="")
+    species = models.CharField("Espece", max_length=20, choices=SPECIES_CHOICES, blank=True, default="")
+    breed = models.CharField("Race", max_length=255, blank=True, default="")
+    sex = models.CharField("Sexe", max_length=10, choices=SEX_CHOICES, blank=True, default="")
+    birth_date = models.DateField("Date de naissance", null=True, blank=True)
+    weight_kg = models.DecimalField("Poids (kg)", max_digits=5, decimal_places=1, null=True, blank=True)
+    identification = models.CharField("Identification electronique", max_length=255, blank=True, default="")
+    is_vaccinated = models.BooleanField("Vaccine", null=True, blank=True)
+    is_sterilized = models.BooleanField("Sterilise/Castre", null=True, blank=True)
+    is_adoptable = models.BooleanField("Adoptable", default=False)
+    foster_family = models.CharField("Famille d'accueil", max_length=255, blank=True, default="")
 
     # SEO
     seo_title = models.CharField(max_length=512, blank=True, default="")
@@ -115,6 +142,29 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse("blog:post_detail", kwargs={"slug": self.slug})
+
+    @property
+    def is_animal_profile(self):
+        return bool(self.species)
+
+    @property
+    def age_display(self):
+        if not self.birth_date:
+            return ""
+        from django.utils import timezone
+        today = timezone.now().date()
+        delta = today - self.birth_date
+        months = delta.days // 30
+        if months < 1:
+            weeks = delta.days // 7
+            return f"{weeks} semaine{'s' if weeks > 1 else ''}" if weeks > 0 else "Nouveau-ne"
+        if months < 12:
+            return f"{months} mois"
+        years = months // 12
+        remaining = months % 12
+        if remaining:
+            return f"{years} an{'s' if years > 1 else ''} et {remaining} mois"
+        return f"{years} an{'s' if years > 1 else ''}"
 
 
 class Page(models.Model):

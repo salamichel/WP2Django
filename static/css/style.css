@@ -683,6 +683,119 @@ img {
     margin-top: 1rem;
 }
 
+/* --- Animal Card Variant --- */
+.post-card--animal .post-card-image {
+    aspect-ratio: 1 / 1;
+}
+
+.post-card-adoptable {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    background: var(--color-secondary);
+    color: #fff;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    animation: pulse-adoptable 2s ease-in-out infinite;
+}
+@keyframes pulse-adoptable {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.animal-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+}
+.animal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.animal-chip--species {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+}
+.animal-chip--sex {
+    background: #eef0ff;
+    color: #4a5acb;
+}
+.animal-chip--age {
+    background: var(--color-secondary-light);
+    color: #3d6b3c;
+}
+.animal-chip--breed {
+    background: #fef7ec;
+    color: #92600e;
+}
+
+/* --- Animal Profile Card (detail page) --- */
+.animal-profile-card {
+    background: var(--color-bg-warm);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0 2rem;
+}
+.animal-profile-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.15rem;
+    color: var(--color-text);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+.animal-profile-title svg {
+    color: var(--color-primary);
+}
+.animal-adoptable-badge {
+    display: inline-block;
+    margin-left: auto;
+    background: var(--color-secondary);
+    color: #fff;
+    padding: 0.3rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.animal-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.animal-profile-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.animal-profile-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-light);
+}
+.animal-profile-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
 /* --- Single Post --- */
 .post-single {
     padding: 2rem 0 4rem;
