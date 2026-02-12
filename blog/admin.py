@@ -87,7 +87,7 @@ class PostAdmin(admin.ModelAdmin):
     inlines = [GalleryImageInline, CommentInline]
     list_per_page = 25
     fieldsets = (
-        (None, {"fields": ("title", "slug", "content", "excerpt", "status", "author")}),
+        (None, {"fields": ("title", "slug", "content", "status", "author")}),
         ("Fiche animal", {
             "fields": (
                 ("animal_name", "species", "breed"),
@@ -95,7 +95,6 @@ class PostAdmin(admin.ModelAdmin):
                 ("is_vaccinated", "is_sterilized", "is_adoptable"),
                 ("identification", "foster_family"),
             ),
-            "classes": ("collapse",),
             "description": "Remplir uniquement pour les fiches animaux. Laisser vide pour les articles classiques.",
         }),
         ("Relations", {"fields": ("categories", "tags", "featured_image")}),
