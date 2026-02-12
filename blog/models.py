@@ -208,6 +208,22 @@ class Page(models.Model):
         return reverse("blog:page_detail", kwargs={"slug": self.slug})
 
 
+class PostGalleryImage(models.Model):
+    """Image extracted from post content, displayed in a lightbox gallery."""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="gallery_images")
+    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name="gallery_entries")
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Image de galerie"
+        verbose_name_plural = "Images de galerie"
+        ordering = ["position"]
+        unique_together = [("post", "media")]
+
+    def __str__(self):
+        return f"{self.post.title} - {self.media.title or self.media.file.name}"
+
+
 class Comment(models.Model):
     STATUS_CHOICES = [
         ("approved", "Approuvé"),

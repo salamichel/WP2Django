@@ -3,6 +3,12 @@
 {% block title %}{{ post.seo_title|default:post.title }} - {{ site_name }}{% endblock %}
 {% block meta_description %}{{ post.seo_description|default:post.excerpt|truncatewords:25 }}{% endblock %}
 
+{% block extra_head %}
+{% if gallery_images %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <article class="post-single">
     <div class="container container--narrow">
@@ -104,6 +110,19 @@
             {{ post.content|safe }}
         </div>
 
+        {% if gallery_images %}
+        <section class="post-gallery">
+            <h2>Galerie photos</h2>
+            <div class="gallery-grid">
+                {% for gi in gallery_images %}
+                <a href="{{ gi.media.file.url }}" class="glightbox gallery-item" data-gallery="post-gallery" data-alt="{{ gi.media.alt_text|default:post.title }}">
+                    <img src="{{ gi.media.file.url }}" alt="{{ gi.media.alt_text|default:post.title }}" loading="lazy">
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
         <footer class="post-footer">
             {% if post.tags.exists %}
             <div class="post-tags">
@@ -161,5 +180,20 @@
         {% endfor %}
     </div>
 </section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if gallery_images %}
+<script src="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/js/glightbox.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        GLightbox({
+            selector: '.glightbox',
+            touchNavigation: true,
+            loop: true,
+        });
+    });
+</script>
 {% endif %}
 {% endblock %}

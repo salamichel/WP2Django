@@ -1,0 +1,154 @@
+/* Gallery drag-and-drop zone */
+.gallery-dnd-zone {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    min-height: 120px;
+    background: #faf9f7;
+    border: 2px dashed #e0dbd5;
+    border-radius: 10px;
+    transition: border-color 0.2s;
+}
+.gallery-dnd-zone:empty::before {
+    content: "Aucune image dans la galerie";
+    color: #999;
+    font-style: italic;
+    margin: auto;
+}
+
+.gallery-card {
+    position: relative;
+    width: 110px;
+    background: #fff;
+    border: 1px solid #e9e5e0;
+    border-radius: 8px;
+    padding: 6px;
+    cursor: grab;
+    transition: box-shadow 0.2s, transform 0.15s;
+    user-select: none;
+}
+.gallery-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.gallery-card.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+}
+.gallery-card.drag-over {
+    border-color: #e8734a;
+}
+.gallery-card img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    display: block;
+}
+.gallery-card-label {
+    font-size: 0.68rem;
+    color: #636e72;
+    text-align: center;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gallery-card-delete {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    background: #e74c3c;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    display: none;
+    z-index: 2;
+}
+.gallery-card:hover .gallery-card-delete {
+    display: block;
+}
+/* Hide the raw inline forms — they're rendered inside the cards */
+.gallery-dnd-inline .inline-related {
+    display: none !important;
+}
+.gallery-dnd-inline .tabular {
+    display: none !important;
+}
+/* Position field is hidden (managed by JS) */
+.gallery-card .field-position {
+    display: none;
+}
+.gallery-card input[id$="-position"] {
+    display: none;
+}
+/* Hide DELETE checkbox (replaced by X button) */
+.gallery-card input[id$="-DELETE"] {
+    display: none;
+}
+
+/* ── Upload zone ── */
+.gallery-upload-zone {
+    margin-bottom: 14px;
+    padding: 22px 16px;
+    background: #faf9f7;
+    border: 2px dashed #ddd6cc;
+    border-radius: 10px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+}
+.gallery-upload-zone.drag-hover {
+    border-color: #e8734a;
+    background: #fdf5f2;
+}
+.gallery-upload-icon {
+    font-size: 1.8rem;
+    color: #ccc1b5;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+.gallery-upload-text {
+    color: #636e72;
+    font-size: 0.88rem;
+    margin: 0;
+}
+.gallery-upload-link {
+    background: none;
+    border: none;
+    color: #e8734a;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: inherit;
+    text-decoration: underline;
+    padding: 0;
+}
+.gallery-upload-link:hover {
+    color: #d4623a;
+}
+.gallery-upload-progress {
+    margin-top: 10px;
+}
+.gallery-upload-bar {
+    height: 5px;
+    background: #e9e5e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+.gallery-upload-fill {
+    height: 100%;
+    width: 0;
+    background: #e8734a;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+.gallery-upload-label {
+    font-size: 0.75rem;
+    color: #636e72;
+}

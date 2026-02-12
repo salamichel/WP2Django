@@ -1,7 +1,12 @@
+import mimetypes
+
 from django.contrib import admin
+from django.http import JsonResponse
+from django.urls import path
 from django.utils.html import format_html
 from blog.models import (
     Post, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
+    PostGalleryImage,
 )
 
 
@@ -52,6 +57,18 @@ class MediaAdmin(admin.ModelAdmin):
     thumbnail_preview.short_description = ""
 
 
+class GalleryImageInline(admin.TabularInline):
+    model = PostGalleryImage
+    extra = 1
+    fields = ("media", "position")
+    autocomplete_fields = ("media",)
+    template = "admin/blog/post/gallery_inline.html"
+
+    class Media:
+        css = {"all": ("css/admin_gallery_dnd.css",)}
+        js = ("js/admin_gallery_dnd.js",)
+
+
 class CommentInline(admin.TabularInline):
     model = Comment
     extra = 0
@@ -67,7 +84,7 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("categories", "tags")
     date_hierarchy = "published_at"
-    inlines = [CommentInline]
+    inlines = [GalleryImageInline, CommentInline]
     list_per_page = 25
     fieldsets = (
         (None, {"fields": ("title", "slug", "content", "excerpt", "status", "author")}),
@@ -85,6 +102,37 @@ class PostAdmin(admin.ModelAdmin):
         ("Publication", {"fields": ("published_at",)}),
         ("SEO", {"fields": ("seo_title", "seo_description"), "classes": ("collapse",)}),
     )
+
+    def get_urls(self):
+        custom = [
+            path("upload-media/", self.admin_site.admin_view(self.upload_media), name="blog_post_upload_media"),
+        ]
+        return custom + super().get_urls()
+
+    def upload_media(self, request):
+        if request.method != "POST":
+            return JsonResponse({"error": "POST required"}, status=405)
+        if not request.user.has_perm("blog.add_media"):
+            return JsonResponse({"error": "Permission denied"}, status=403)
+
+        uploaded = request.FILES.getlist("files")
+        if not uploaded:
+            return JsonResponse({"error": "No files"}, status=400)
+
+        results = []
+        for f in uploaded:
+            mime = f.content_type or mimetypes.guess_type(f.name)[0] or ""
+            title = f.name.rsplit(".", 1)[0] if "." in f.name else f.name
+            obj = Media.objects.create(title=title, file=f, mime_type=mime)
+            is_image = mime.startswith("image/")
+            results.append({
+                "id": obj.pk,
+                "title": obj.title,
+                "mime_type": mime,
+                "url": obj.file.url if is_image else "",
+                "is_image": is_image,
+            })
+        return JsonResponse({"uploaded": results})
 
     def status_badge(self, obj):
         colors = {

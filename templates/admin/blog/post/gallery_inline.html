@@ -1,0 +1,66 @@
+{% load i18n %}
+<div class="gallery-dnd-inline">
+  <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
+
+  {{ inline_admin_formset.formset.management_form }}
+
+  {# Upload drop zone #}
+  <div id="gallery-upload-zone" class="gallery-upload-zone">
+    <input type="file" id="gallery-upload-input" multiple accept="image/*" hidden>
+    <div class="gallery-upload-content">
+      <div class="gallery-upload-icon">&#8693;</div>
+      <p class="gallery-upload-text">Glissez vos images ici ou <button type="button" id="gallery-upload-btn" class="gallery-upload-link">parcourir</button></p>
+    </div>
+    <div id="gallery-upload-progress" class="gallery-upload-progress" style="display:none">
+      <div class="gallery-upload-bar"><div class="gallery-upload-fill" id="gallery-upload-fill"></div></div>
+      <span class="gallery-upload-label" id="gallery-upload-label"></span>
+    </div>
+  </div>
+
+  {# Drag-and-drop visual zone #}
+  <div class="gallery-dnd-zone">
+    {% for inline_admin_form in inline_admin_formset %}
+      {% if inline_admin_form.original %}
+        <div class="gallery-card" draggable="true"
+             data-inline-idx="{{ forloop.counter0 }}">
+          {% if inline_admin_form.original.media and inline_admin_form.original.media.file %}
+            <img src="{{ inline_admin_form.original.media.file.url }}"
+                 alt="{{ inline_admin_form.original.media.alt_text|default:'' }}">
+            <div class="gallery-card-label">{{ inline_admin_form.original.media.title|default:inline_admin_form.original.media.file.name|truncatechars:18 }}</div>
+          {% else %}
+            <div style="width:100%;height:80px;background:#f0eded;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.7rem">No file</div>
+          {% endif %}
+          <span class="gallery-card-delete" title="Retirer">&times;</span>
+          {# Hidden form fields #}
+          <div style="display:none">
+            {% for field in inline_admin_form %}
+              {{ field.field }}
+            {% endfor %}
+            {% if inline_admin_form.has_auto_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {# Empty/new forms stay hidden — standard inline mechanism for adding via autocomplete #}
+  <div style="display:none" class="gallery-dnd-extra-forms">
+    {% for inline_admin_form in inline_admin_formset %}
+      {% if not inline_admin_form.original %}
+        <div class="inline-related {% if forloop.last %}empty-form last-related{% endif %}"
+             id="{{ inline_admin_formset.formset.prefix }}-{{ forloop.counter0 }}">
+          <div style="display:none">
+            {% for field in inline_admin_form %}
+              {{ field.field }}
+            {% endfor %}
+            {% if inline_admin_form.has_auto_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>

@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from blog.models import Post, Page, Category, Tag, Comment, Menu, MenuItem, Redirect
+from blog.models import Post, Page, Category, Tag, Comment, Menu, MenuItem, Redirect, Media, PostGalleryImage
 
 
 class CategoryModelTest(TestCase):
@@ -70,6 +70,36 @@ class CommentModelTest(TestCase):
         self.assertIn("John", str(comment))
 
 
+class PostGalleryImageModelTest(TestCase):
+    def test_str(self):
+        user = User.objects.create_user("author", "a@a.com", "pass")
+        post = Post.objects.create(title="My Post", slug="my-post", status="published", author=user, published_at=timezone.now())
+        media = Media.objects.create(title="Photo", file="uploads/2024/01/photo.jpg", mime_type="image/jpeg")
+        gi = PostGalleryImage.objects.create(post=post, media=media, position=0)
+        self.assertIn("My Post", str(gi))
+        self.assertIn("Photo", str(gi))
+
+    def test_unique_together(self):
+        user = User.objects.create_user("author", "a@a.com", "pass")
+        post = Post.objects.create(title="P", slug="p", status="published", author=user, published_at=timezone.now())
+        media = Media.objects.create(title="M", file="uploads/2024/01/m.jpg", mime_type="image/jpeg")
+        PostGalleryImage.objects.create(post=post, media=media, position=0)
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            PostGalleryImage.objects.create(post=post, media=media, position=1)
+
+    def test_ordering(self):
+        user = User.objects.create_user("author", "a@a.com", "pass")
+        post = Post.objects.create(title="P", slug="p", status="published", author=user, published_at=timezone.now())
+        m1 = Media.objects.create(title="First", file="uploads/2024/01/a.jpg", mime_type="image/jpeg")
+        m2 = Media.objects.create(title="Second", file="uploads/2024/01/b.jpg", mime_type="image/jpeg")
+        PostGalleryImage.objects.create(post=post, media=m2, position=1)
+        PostGalleryImage.objects.create(post=post, media=m1, position=0)
+        images = list(post.gallery_images.all())
+        self.assertEqual(images[0].media, m1)
+        self.assertEqual(images[1].media, m2)
+
+
 class RedirectModelTest(TestCase):
     def test_str(self):
         r = Redirect.objects.create(old_path="/old/", new_path="/new/")
@@ -114,6 +144,23 @@ class ViewTests(TestCase):
         resp = self.client.get("/articles/published-post/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Content")
+
+    def test_post_detail_with_gallery(self):
+        m1 = Media.objects.create(title="Gallery1", file="uploads/2024/01/g1.jpg", mime_type="image/jpeg")
+        m2 = Media.objects.create(title="Gallery2", file="uploads/2024/01/g2.jpg", mime_type="image/jpeg")
+        PostGalleryImage.objects.create(post=self.post, media=m1, position=0)
+        PostGalleryImage.objects.create(post=self.post, media=m2, position=1)
+        resp = self.client.get("/articles/published-post/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Galerie photos")
+        self.assertContains(resp, "glightbox")
+        self.assertContains(resp, "g1.jpg")
+        self.assertContains(resp, "g2.jpg")
+
+    def test_post_detail_without_gallery(self):
+        resp = self.client.get("/articles/published-post/")
+        self.assertNotContains(resp, "Galerie photos")
+        self.assertNotContains(resp, "glightbox.min.css")
 
     def test_post_detail_draft_returns_404(self):
         Post.objects.create(title="Draft", slug="draft", status="draft", published_at=timezone.now())
