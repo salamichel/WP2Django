@@ -66,9 +66,32 @@ class AnimalDataExtractorTest(TestCase):
         self.assertTrue(data["is_vaccinated"])
         self.assertFalse(data["is_sterilized"])
         self.assertEqual(data["foster_family"], "Jacqueline")
-        # Content should be cleaned
+        # HTML should be cleaned of all data lines
         self.assertNotIn("Race :", cleaned)
+        self.assertNotIn("Sexe :", cleaned)
+        self.assertNotIn("Vaccin :", cleaned)
+        self.assertNotIn("Poids :", cleaned)
+        self.assertNotIn("accueil chez", cleaned)
+        self.assertNotIn("<p>Age", cleaned)
         self.assertIn("Arnold est calme", cleaned)
+
+    def test_html_cleaning_with_inline_tags(self):
+        """Ensure HTML is cleaned even when fields have inline tags."""
+        content = (
+            "<p><strong>Race</strong> : berger allemand</p>"
+            "<p>Sexe : <em>mâle</em></p>"
+            "<p>Vaccin&eacute; : oui</p>"
+            "<p>Description de l'animal tres gentil.</p>"
+        )
+        data, cleaned = AnimalDataExtractor.extract(
+            content, categories=["Chiens"]
+        )
+        self.assertEqual(data["breed"], "berger allemand")
+        # All data <p> blocks should be removed from HTML
+        self.assertNotIn("Race", cleaned)
+        self.assertNotIn("Sexe", cleaned)
+        self.assertNotIn("Vaccin", cleaned)
+        self.assertIn("Description de l'animal", cleaned)
 
     def test_no_animal_data(self):
         content = "<p>Actualité de l'association cette semaine.</p>"
