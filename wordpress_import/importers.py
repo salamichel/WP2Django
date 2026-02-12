@@ -101,11 +101,11 @@ class AnimalDataExtractor:
         (r"^\s*(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
         (r"^\s*(?:race|crois[eé])\s*:\s*(.+)", "breed"),
         (r"^\s*sexe\s*:\s*(.+)", "sex"),
-        (r"^\s*(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
+        (r"^\s*(?:n[eé]e?(?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
         (r"^\s*(?:poids)\s*:\s*(.+)", "weight_kg"),
         (r"^\s*(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:\s*(.+)", "identification"),
         (r"^\s*(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
-        (r"^\s*(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
+        (r"^\s*(?:castr[eé]e?|st[eé]rilis[eé]e?|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
         (r"^\s*(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)(.+)", "foster_family"),
         (r"^\s*[âa]ge\s*:\s*(.+)", "age_text"),
         (r"^\s*esp[eè]ce\s*:\s*(.+)", "species"),
@@ -163,9 +163,12 @@ class AnimalDataExtractor:
     def _strip_html(cls, html):
         """Strip HTML tags and decode entities for text parsing."""
         text = re.sub(r"<br\s*/?>", "\n", html or "")
+        text = re.sub(r"</div>\s*", "\n", text, flags=re.IGNORECASE)
         text = re.sub(r"</p>\s*<p[^>]*>", "\n", text)
         text = re.sub(r"<[^>]+>", "", text)
         text = cls._decode_entities(text)
+        # Normalize non-breaking spaces to regular spaces
+        text = text.replace("\xa0", " ")
         return text
 
     @classmethod
@@ -342,6 +345,7 @@ class AnimalDataExtractor:
         """Strip HTML tags, decode entities, normalize whitespace."""
         text = re.sub(r"<[^>]+>", "", text)
         text = cls._decode_entities(text)
+        text = text.replace("\xa0", " ")
         return " ".join(text.split())
 
     # Pre-compiled pattern to split HTML into <p> blocks and other content.
@@ -396,8 +400,19 @@ class AnimalDataExtractor:
             kept2.append(seg)
         cleaned = "".join(kept2)
 
-        # Clean up empty paragraphs and excessive whitespace
+        # Pass 3: Handle newline-separated lines (inline spans, divs, etc.)
+        raw_lines = cleaned.split("\n")
+        kept3 = []
+        for raw_line in raw_lines:
+            line_text = cls._normalize_text(raw_line)
+            if line_text and line_text.lower() in lines_to_remove:
+                continue
+            kept3.append(raw_line)
+        cleaned = "\n".join(kept3)
+
+        # Clean up empty paragraphs/divs and excessive whitespace
         cleaned = re.sub(r"<p[^>]*>\s*</p>", "", cleaned)
+        cleaned = re.sub(r"<div[^>]*>\s*</div>", "", cleaned)
         cleaned = re.sub(r"(?:\s*<br\s*/?>\s*){3,}", "<br>", cleaned)
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
 

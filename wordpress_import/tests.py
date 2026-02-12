@@ -131,6 +131,50 @@ class AnimalDataExtractorTest(TestCase):
         self.assertEqual(data["species"], "chat")
         self.assertEqual(data["sex"], "femelle")
 
+    def test_colored_span_html_format(self):
+        """Real WordPress format: colored spans with inline labels, no <p> blocks."""
+        content = (
+            '<span style="color: #ff00ff;"><strong>Age :&nbsp;</strong></span>3 mois\n'
+            '<span style="color: #ff00ff;"><strong>N\u00e9e le :</strong></span>&nbsp;29/10/2025\n'
+            '<b><strong><span style="color: #ff00ff;">Race :</span>&nbsp;</strong></b>crois\u00e9e\n'
+            '<span style="color: #ff00ff;"><b><strong>Sexe :</strong></b>&nbsp;</span>femelle\n'
+            '<span style="color: #ff00ff;"><b><strong>Identification \u00e9lectronique :&nbsp;</strong></b></span>250269611649979\n'
+            '<b><span style="color: #ff00ff;"><strong>Vaccin :</strong></span>&nbsp;</b>oui\n'
+            '<span style="color: #ff00ff;"><b><strong>St\u00e9rilis\u00e9e :&nbsp;</strong></b></span>non car trop jeune\n'
+            '<span style="color: #ff00ff;"><strong>Caract\u00e8re et histoire :</strong>&nbsp;</span>'
+            'Yuffie est la fille de Kid\u00e9lia. Et la soeur de Arnold.\n'
+            'Yuffie adore jouer avec ses soeurs et son fr\u00e8re.\n'
+            'Poids : 9,5 kg.\n'
+            '<div dir="ltr">En accueil chez Jacqueline.</div>\n'
+            '<div dir="ltr"><a href="/media/uploads/photo.jpg">'
+            '<img src="/media/uploads/photo.jpg"></a></div>'
+        )
+        data, cleaned = AnimalDataExtractor.extract(
+            content, categories=["Chiens"]
+        )
+        # All structured fields extracted
+        self.assertEqual(data["species"], "chien")
+        self.assertEqual(data["sex"], "femelle")
+        self.assertEqual(data["breed"], "crois\u00e9e")
+        self.assertEqual(data["birth_date"], date(2025, 10, 29))
+        self.assertAlmostEqual(float(data["weight_kg"]), 9.5)
+        self.assertEqual(data["identification"], "250269611649979")
+        self.assertTrue(data["is_vaccinated"])
+        self.assertFalse(data["is_sterilized"])
+        self.assertEqual(data["foster_family"], "Jacqueline")
+        # Data lines removed from HTML
+        self.assertNotIn("Age :", cleaned)
+        self.assertNotIn("Race :", cleaned)
+        self.assertNotIn("Sexe :", cleaned)
+        self.assertNotIn("Vaccin :", cleaned)
+        self.assertNotIn("Poids :", cleaned)
+        self.assertNotIn("accueil chez", cleaned)
+        # Narrative text preserved
+        self.assertIn("Yuffie est la fille", cleaned)
+        self.assertIn("Yuffie adore jouer", cleaned)
+        # Image preserved
+        self.assertIn("photo.jpg", cleaned)
+
     def test_extract_from_meta(self):
         content = "<p>Description libre.</p>"
         meta = {"race": "berger allemand", "sexe": "male", "espece": "chien"}
