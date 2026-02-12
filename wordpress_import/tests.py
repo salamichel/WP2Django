@@ -93,6 +93,30 @@ class AnimalDataExtractorTest(TestCase):
         self.assertNotIn("Vaccin", cleaned)
         self.assertIn("Description de l'animal", cleaned)
 
+    def test_narrative_text_with_keywords_preserved(self):
+        """Narrative text mentioning keywords like 'vaccin' must NOT be removed."""
+        content = (
+            "<p>Race : croisé</p>"
+            "<p>Sexe : mâle</p>"
+            "<p>Vaccin : oui</p>"
+            "<p>Castré : non car trop jeune</p>"
+            "<p>En accueil chez Jacqueline.</p>"
+            "<p>Arnold est calme et il a été vacciné la semaine dernière. "
+            "Il est en accueil dans une famille aimante.</p>"
+            "<p>Il adore jouer avec ses sœurs.</p>"
+        )
+        data, cleaned = AnimalDataExtractor.extract(
+            content, categories=["Chiens"]
+        )
+        # Data lines should be removed
+        self.assertNotIn("<p>Race : croisé</p>", cleaned)
+        self.assertNotIn("<p>Vaccin : oui</p>", cleaned)
+        # Narrative paragraphs with keywords must be PRESERVED
+        self.assertIn("Arnold est calme", cleaned)
+        self.assertIn("vacciné la semaine", cleaned)
+        self.assertIn("accueil dans une famille", cleaned)
+        self.assertIn("adore jouer", cleaned)
+
     def test_no_animal_data(self):
         content = "<p>Actualité de l'association cette semaine.</p>"
         data, cleaned = AnimalDataExtractor.extract(content)

@@ -95,20 +95,24 @@ class AnimalDataExtractor:
         En accueil chez Jacqueline.
     """
 
-    # Patterns for field extraction (case-insensitive, French labels)
+    # Patterns for field extraction (case-insensitive, French labels).
+    # All anchored to start of line (^\s*) to avoid matching inside narrative text.
     FIELD_PATTERNS = [
-        (r"(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
-        (r"(?:race|crois[eé])\s*:\s*(.+)", "breed"),
-        (r"sexe\s*:\s*(.+)", "sex"),
-        (r"(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
-        (r"(?:poids)\s*:\s*(.+)", "weight_kg"),
-        (r"(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:\s*(.+)", "identification"),
-        (r"(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
-        (r"(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
-        (r"(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)?(.+)", "foster_family"),
-        (r"[âa]ge\s*:\s*(.+)", "age_text"),
-        (r"esp[eè]ce\s*:\s*(.+)", "species"),
+        (r"^\s*(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
+        (r"^\s*(?:race|crois[eé])\s*:\s*(.+)", "breed"),
+        (r"^\s*sexe\s*:\s*(.+)", "sex"),
+        (r"^\s*(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
+        (r"^\s*(?:poids)\s*:\s*(.+)", "weight_kg"),
+        (r"^\s*(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:\s*(.+)", "identification"),
+        (r"^\s*(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
+        (r"^\s*(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
+        (r"^\s*(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)(.+)", "foster_family"),
+        (r"^\s*[âa]ge\s*:\s*(.+)", "age_text"),
+        (r"^\s*esp[eè]ce\s*:\s*(.+)", "species"),
     ]
+
+    # Lines longer than this are narrative text, not structured fields
+    MAX_FIELD_LINE_LENGTH = 120
 
     # Species detection keywords
     SPECIES_KEYWORDS = {
@@ -132,7 +136,7 @@ class AnimalDataExtractor:
             result.update(cls._extract_from_meta(meta))
 
         # Then parse from text content
-        text_data, _lines = cls._extract_from_text(text)
+        text_data, matched_lines = cls._extract_from_text(text)
         for key, value in text_data.items():
             if key not in result or not result[key]:
                 result[key] = value
@@ -150,19 +154,18 @@ class AnimalDataExtractor:
         if not normalized:
             return {}, content
 
-        # Clean the content: remove matching HTML blocks using field patterns
-        cleaned_content = cls._clean_content_html(content)
+        # Clean the content: remove only the specific lines that were extracted
+        cleaned_content = cls._clean_content_html(content, matched_lines)
 
         return normalized, cleaned_content
 
     @classmethod
     def _strip_html(cls, html):
-        """Strip HTML tags for text parsing."""
+        """Strip HTML tags and decode entities for text parsing."""
         text = re.sub(r"<br\s*/?>", "\n", html or "")
         text = re.sub(r"</p>\s*<p[^>]*>", "\n", text)
         text = re.sub(r"<[^>]+>", "", text)
-        text = re.sub(r"&nbsp;", " ", text)
-        text = re.sub(r"&#8217;", "'", text)
+        text = cls._decode_entities(text)
         return text
 
     @classmethod
@@ -197,9 +200,12 @@ class AnimalDataExtractor:
             line_stripped = line.strip()
             if not line_stripped:
                 continue
+            # Skip long lines — those are narrative paragraphs, not data fields
+            if len(line_stripped) > cls.MAX_FIELD_LINE_LENGTH:
+                continue
 
             for pattern, field in cls.FIELD_PATTERNS:
-                match = re.search(pattern, line_stripped, re.IGNORECASE)
+                match = re.match(pattern, line_stripped, re.IGNORECASE)
                 if match:
                     value = match.group(1).strip().rstrip(".")
                     if field not in result or not result[field]:
@@ -314,24 +320,6 @@ class AnimalDataExtractor:
                     continue
         return None
 
-    # Combined regex matching any animal field label (for HTML cleaning).
-    _COMBINED_LABEL_RE = re.compile(
-        r"(?:"
-        r"age\s*:"
-        r"|(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:"
-        r"|(?:race|crois[eé])\s*:"
-        r"|sexe\s*:"
-        r"|(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:"
-        r"|(?:vaccin(?:[eé])?|vaccination)\s*:"
-        r"|(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:"
-        r"|(?:poids)\s*:"
-        r"|(?:en\s+)?(?:famille\s+d['\u2019]?accueil|accueil)\s+(?:chez\s+)?"
-        r"|esp[eè]ce\s*:"
-        r"|(?:nom|pr[eé]nom)\s*:"
-        r")",
-        re.IGNORECASE,
-    )
-
     @staticmethod
     def _decode_entities(text):
         """Decode common HTML entities for matching."""
@@ -350,11 +338,11 @@ class AnimalDataExtractor:
         return text
 
     @classmethod
-    def _block_matches_label(cls, inner_html):
-        """Check if an HTML block's text content matches an animal field label."""
-        inner_text = re.sub(r"<[^>]+>", "", inner_html)
-        inner_text = cls._decode_entities(inner_text).strip()
-        return cls._COMBINED_LABEL_RE.search(inner_text) is not None
+    def _normalize_text(cls, text):
+        """Strip HTML tags, decode entities, normalize whitespace."""
+        text = re.sub(r"<[^>]+>", "", text)
+        text = cls._decode_entities(text)
+        return " ".join(text.split())
 
     # Pre-compiled pattern to split HTML into <p> blocks and other content.
     _P_BLOCK_RE = re.compile(r"(<p[^>]*>.+?</p>)", re.DOTALL | re.IGNORECASE)
@@ -363,25 +351,35 @@ class AnimalDataExtractor:
     _BR_SPLIT_RE = re.compile(r"(<br\s*/?>)", re.IGNORECASE)
 
     @classmethod
-    def _clean_content_html(cls, html_content):
-        """Remove HTML blocks that contain animal profile data.
+    def _clean_content_html(cls, html_content, matched_lines):
+        """Remove only the HTML blocks whose text matches extracted lines.
 
-        Single-pass approach: split into <p> blocks, check each once
-        against all field patterns combined.
+        Instead of pattern-matching (which is too aggressive and removes
+        narrative paragraphs containing keywords like 'vaccin' or 'accueil'),
+        this compares each <p> block's stripped text against the exact lines
+        that were actually extracted by _extract_from_text.
         """
+        if not matched_lines:
+            return html_content
+
+        # Build a set of normalized matched lines for fast lookup
+        lines_to_remove = set()
+        for line in matched_lines:
+            normalized = " ".join(line.split())
+            lines_to_remove.add(normalized.lower())
+
         # Pass 1: Remove matching <p>...</p> blocks
         parts = cls._P_BLOCK_RE.split(html_content)
         kept = []
         for part in parts:
             if cls._P_BLOCK_RE.fullmatch(part):
-                # This is a <p> block — check if it's animal data
-                if cls._block_matches_label(part):
-                    continue  # Drop it
+                block_text = cls._normalize_text(part)
+                if block_text.lower() in lines_to_remove:
+                    continue  # Drop — exact match
             kept.append(part)
         cleaned = "".join(kept)
 
         # Pass 2: Handle bare lines separated by <br>
-        # Split on <br>, check each text segment
         segments = cls._BR_SPLIT_RE.split(cleaned)
         kept2 = []
         skip_next_br = False
@@ -391,9 +389,8 @@ class AnimalDataExtractor:
                 continue
             skip_next_br = False
             if not cls._BR_SPLIT_RE.fullmatch(seg):
-                text = re.sub(r"<[^>]+>", "", seg)
-                text = cls._decode_entities(text).strip()
-                if text and cls._COMBINED_LABEL_RE.search(text):
+                seg_text = cls._normalize_text(seg)
+                if seg_text and seg_text.lower() in lines_to_remove:
                     skip_next_br = True
                     continue
             kept2.append(seg)
