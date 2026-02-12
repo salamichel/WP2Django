@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("blog", "0004_add_menuitem_linked_fk"),
+        ("blog", "0005_postgalleryimage"),
     ]
 
     operations = [
