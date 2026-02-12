@@ -7,7 +7,7 @@ to the corresponding Django model.
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, date
 
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -77,6 +77,267 @@ def _map_comment_status(wp_status):
         "trash": "trash",
     }
     return mapping.get(str(wp_status), "pending")
+
+
+class AnimalDataExtractor:
+    """Extract structured animal data from WordPress post content/excerpt.
+
+    Parses French-language animal profile fields commonly found in
+    animal protection association posts, e.g.:
+        Age : 3 mois
+        Race : croisé
+        Sexe : mâle
+        Né le : 29/10/2025
+        Poids : 9,6 kg
+        Identification électronique : 250269611651491
+        Vaccin : oui
+        Castré : non
+        En accueil chez Jacqueline.
+    """
+
+    # Patterns for field extraction (case-insensitive, French labels)
+    FIELD_PATTERNS = [
+        (r"(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
+        (r"(?:race|crois[eé])\s*:\s*(.+)", "breed"),
+        (r"sexe\s*:\s*(.+)", "sex"),
+        (r"(?:n[eé](?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
+        (r"(?:poids)\s*:\s*(.+)", "weight_kg"),
+        (r"(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:\s*(.+)", "identification"),
+        (r"(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
+        (r"(?:castr[eé]|st[eé]rilis[eé]|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
+        (r"(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)?(.+)", "foster_family"),
+        (r"[âa]ge\s*:\s*(.+)", "age_text"),
+        (r"esp[eè]ce\s*:\s*(.+)", "species"),
+    ]
+
+    # Species detection keywords
+    SPECIES_KEYWORDS = {
+        "chien": ["chien", "chienne", "chiot", "chiots", "canin"],
+        "chat": ["chat", "chatte", "chaton", "chatons", "félin", "felin"],
+        "rongeur": ["rongeur", "lapin", "hamster", "cochon d'inde", "cobaye", "furet", "rat", "souris"],
+    }
+
+    @classmethod
+    def extract(cls, content, excerpt="", meta=None, categories=None):
+        """Extract animal profile data from content, excerpt, and metadata.
+
+        Returns a dict of animal fields, or empty dict if no animal data found.
+        Also returns cleaned content with extracted fields removed.
+        """
+        result = {}
+        text = cls._strip_html(content)
+
+        # Try postmeta first (ACF or custom fields plugins)
+        if meta:
+            result.update(cls._extract_from_meta(meta))
+
+        # Then parse from text content
+        text_data, lines_to_remove = cls._extract_from_text(text)
+        for key, value in text_data.items():
+            if key not in result or not result[key]:
+                result[key] = value
+
+        if not result:
+            return {}, content
+
+        # Detect species from categories or content if not explicitly set
+        if "species" not in result or not result["species"]:
+            result["species"] = cls._detect_species(text, categories)
+
+        # Normalize extracted values
+        normalized = cls._normalize(result)
+
+        if not normalized:
+            return {}, content
+
+        # Clean the content: remove extracted lines
+        cleaned_content = cls._clean_content(content, lines_to_remove)
+
+        return normalized, cleaned_content
+
+    @classmethod
+    def _strip_html(cls, html):
+        """Strip HTML tags for text parsing."""
+        text = re.sub(r"<br\s*/?>", "\n", html or "")
+        text = re.sub(r"</p>\s*<p[^>]*>", "\n", text)
+        text = re.sub(r"<[^>]+>", "", text)
+        text = re.sub(r"&nbsp;", " ", text)
+        text = re.sub(r"&#8217;", "'", text)
+        return text
+
+    @classmethod
+    def _extract_from_meta(cls, meta):
+        """Try to extract animal data from WordPress postmeta (ACF etc.)."""
+        result = {}
+        meta_mappings = {
+            "animal_name": ["animal_name", "nom_animal", "pet_name", "name"],
+            "breed": ["race", "breed", "animal_breed"],
+            "sex": ["sexe", "sex", "animal_sex", "gender"],
+            "birth_date": ["date_naissance", "birth_date", "date_of_birth", "dob"],
+            "weight_kg": ["poids", "weight", "animal_weight"],
+            "identification": ["identification", "puce", "microchip", "chip_number"],
+            "species": ["espece", "species", "animal_type", "type_animal"],
+            "foster_family": ["famille_accueil", "foster_family", "foster"],
+        }
+        for field, meta_keys in meta_mappings.items():
+            for mk in meta_keys:
+                val = meta.get(mk, "")
+                if val and not val.startswith("_"):
+                    result[field] = str(val).strip()
+                    break
+        return result
+
+    @classmethod
+    def _extract_from_text(cls, text):
+        """Extract field values from free text using regex patterns."""
+        result = {}
+        lines_to_remove = []
+
+        for line in text.split("\n"):
+            line_stripped = line.strip()
+            if not line_stripped:
+                continue
+
+            for pattern, field in cls.FIELD_PATTERNS:
+                match = re.search(pattern, line_stripped, re.IGNORECASE)
+                if match:
+                    value = match.group(1).strip().rstrip(".")
+                    if field not in result or not result[field]:
+                        result[field] = value
+                    lines_to_remove.append(line_stripped)
+                    break
+
+        return result, lines_to_remove
+
+    @classmethod
+    def _detect_species(cls, text, categories=None):
+        """Detect species from categories or content keywords."""
+        # Check categories first
+        if categories:
+            cat_names = [c.lower() if isinstance(c, str) else c.name.lower() for c in categories]
+            for species, keywords in cls.SPECIES_KEYWORDS.items():
+                for kw in keywords:
+                    if any(kw in cn for cn in cat_names):
+                        return species
+
+        # Check content
+        text_lower = text.lower()
+        for species, keywords in cls.SPECIES_KEYWORDS.items():
+            for kw in keywords:
+                if kw in text_lower:
+                    return species
+
+        return ""
+
+    @classmethod
+    def _normalize(cls, raw):
+        """Normalize extracted raw values into model-compatible types."""
+        result = {}
+
+        if raw.get("animal_name"):
+            result["animal_name"] = raw["animal_name"][:255]
+
+        if raw.get("breed"):
+            result["breed"] = raw["breed"][:255]
+
+        if raw.get("identification"):
+            result["identification"] = raw["identification"][:255]
+
+        if raw.get("foster_family"):
+            val = raw["foster_family"].rstrip(".")
+            result["foster_family"] = val[:255]
+
+        # Species
+        species = raw.get("species", "")
+        if species:
+            species_lower = species.lower()
+            for key, keywords in cls.SPECIES_KEYWORDS.items():
+                if species_lower in keywords or species_lower == key:
+                    result["species"] = key
+                    break
+            else:
+                result["species"] = "autre"
+
+        # Sex (check femelle first since "male" is a substring of "femelle")
+        sex_val = raw.get("sex", "").lower().strip()
+        if any(w in sex_val for w in ("femelle",)):
+            result["sex"] = "femelle"
+        elif any(w in sex_val for w in ("mâle", "male")):
+            result["sex"] = "male"
+
+        # Birth date
+        birth_str = raw.get("birth_date", "")
+        if birth_str:
+            parsed = cls._parse_french_date(birth_str)
+            if parsed:
+                result["birth_date"] = parsed
+
+        # Weight
+        weight_str = raw.get("weight_kg", "")
+        if weight_str:
+            # Extract number, handle French comma decimal
+            match = re.search(r"([\d]+[,.]?\d*)", weight_str.replace(",", "."))
+            if match:
+                try:
+                    result["weight_kg"] = float(match.group(1))
+                except ValueError:
+                    pass
+
+        # Booleans
+        for field in ("is_vaccinated", "is_sterilized"):
+            val = raw.get(field, "").lower()
+            if val:
+                if any(w in val for w in ("oui", "yes", "fait", "ok")):
+                    result[field] = True
+                elif any(w in val for w in ("non", "no", "pas")):
+                    result[field] = False
+
+        # Need at least species or breed to be considered an animal profile
+        if not result.get("species") and not result.get("breed") and not result.get("sex"):
+            return {}
+
+        return result
+
+    @classmethod
+    def _parse_french_date(cls, text):
+        """Parse dates in French formats: dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy."""
+        for fmt in (r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})", r"(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})"):
+            match = re.search(fmt, text)
+            if match:
+                groups = match.groups()
+                try:
+                    if len(groups[0]) == 4:
+                        return date(int(groups[0]), int(groups[1]), int(groups[2]))
+                    else:
+                        return date(int(groups[2]), int(groups[1]), int(groups[0]))
+                except (ValueError, TypeError):
+                    continue
+        return None
+
+    @classmethod
+    def _clean_content(cls, html_content, lines_to_remove):
+        """Remove extracted data lines from the HTML content."""
+        if not lines_to_remove:
+            return html_content
+
+        cleaned = html_content
+        for line in lines_to_remove:
+            # Escape for regex
+            escaped = re.escape(line)
+            # Remove the line and any surrounding paragraph/br tags
+            cleaned = re.sub(
+                r"<p[^>]*>\s*" + escaped + r"\s*</p>",
+                "",
+                cleaned,
+            )
+            cleaned = re.sub(escaped + r"\s*<br\s*/?>", "", cleaned)
+            cleaned = re.sub(escaped, "", cleaned)
+
+        # Clean up empty paragraphs left behind
+        cleaned = re.sub(r"<p[^>]*>\s*</p>", "", cleaned)
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+
+        return cleaned.strip()
 
 
 class UserImporter:
@@ -352,23 +613,48 @@ class PostImporter:
         seo_title = meta.get("_yoast_wpseo_title", "") or meta.get("rank_math_title", "")
         seo_desc = meta.get("_yoast_wpseo_metadesc", "") or meta.get("rank_math_description", "")
 
+        # Resolve categories for species detection
+        ttids = rel_map.get(wp_id, [])
+        category_names = []
+        for ttid in ttids:
+            tax_info = tax_lookup.get(ttid, {})
+            tid = tax_info.get("term_id")
+            taxonomy = tax_info.get("taxonomy")
+            if taxonomy == "category" and tid in self.category_map:
+                category_names.append(self.category_map[tid].name)
+
+        # Extract animal profile data from content
+        animal_data, cleaned_content = AnimalDataExtractor.extract(
+            content, excerpt=excerpt, meta=meta, categories=category_names,
+        )
+
+        defaults = {
+            "title": title,
+            "slug": slug,
+            "content": cleaned_content if animal_data else content,
+            "excerpt": excerpt,
+            "status": _map_post_status(status),
+            "author": author,
+            "published_at": date,
+            "seo_title": seo_title or "",
+            "seo_description": seo_desc or "",
+        }
+
+        # Add animal fields if extracted
+        if animal_data:
+            defaults.update(animal_data)
+            # Use title as animal_name if not explicitly extracted
+            if "animal_name" not in animal_data:
+                defaults["animal_name"] = title
+            defaults["is_adoptable"] = True
+            logger.info("Extracted animal profile for post %d: %s", wp_id, title)
+
         post, _ = Post.objects.get_or_create(
             wp_post_id=wp_id,
-            defaults={
-                "title": title,
-                "slug": slug,
-                "content": content,
-                "excerpt": excerpt,
-                "status": _map_post_status(status),
-                "author": author,
-                "published_at": date,
-                "seo_title": seo_title or "",
-                "seo_description": seo_desc or "",
-            },
+            defaults=defaults,
         )
 
         # Set categories and tags
-        ttids = rel_map.get(wp_id, [])
         for ttid in ttids:
             tax_info = tax_lookup.get(ttid, {})
             tid = tax_info.get("term_id")

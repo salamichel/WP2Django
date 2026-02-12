@@ -142,6 +142,14 @@ class Command(BaseCommand):
         if media_dir:
             self._copy_media(media_dir)
 
+        # Count animal profiles
+        from blog.models import Post as PostModel
+        animal_count = PostModel.objects.exclude(species="").count()
+        if animal_count:
+            self.stdout.write(self.style.SUCCESS(
+                f"  -> {animal_count} fiche(s) animal auto-detectee(s)"
+            ))
+
         self.stdout.write(self.style.MIGRATE_HEADING("\n" + "=" * 60))
         self.stdout.write(self.style.SUCCESS("Import complete!"))
         self._print_summary(user_map, category_map, tag_map, post_map, page_map, attachment_map, comment_map)
