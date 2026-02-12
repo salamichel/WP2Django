@@ -121,7 +121,7 @@ class Command(BaseCommand):
 
         # Phase 6: Import menus and plugin data
         self.stdout.write("\n[6/7] Importing menus and plugin data...")
-        menu_importer = MenuImporter(parser)
+        menu_importer = MenuImporter(parser, post_map, page_map, category_map)
         menu_importer.run()
 
         if not skip_plugins:
@@ -141,6 +141,14 @@ class Command(BaseCommand):
         # Copy media files if directory provided
         if media_dir:
             self._copy_media(media_dir)
+
+        # Count animal profiles
+        from blog.models import Post as PostModel
+        animal_count = PostModel.objects.exclude(species="").count()
+        if animal_count:
+            self.stdout.write(self.style.SUCCESS(
+                f"  -> {animal_count} fiche(s) animal auto-detectee(s)"
+            ))
 
         self.stdout.write(self.style.MIGRATE_HEADING("\n" + "=" * 60))
         self.stdout.write(self.style.SUCCESS("Import complete!"))

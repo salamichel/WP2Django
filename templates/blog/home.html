@@ -56,34 +56,7 @@
         </div>
         <div class="post-grid">
             {% for post in posts %}
-            <article class="post-card" data-animate>
-                {% if post.featured_image and post.featured_image.file %}
-                <div class="post-card-image">
-                    <a href="{{ post.get_absolute_url }}">
-                        <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" loading="lazy">
-                    </a>
-                </div>
-                {% else %}
-                <div class="post-card-image post-card-image--placeholder">
-                    <a href="{{ post.get_absolute_url }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
-                    </a>
-                </div>
-                {% endif %}
-                <div class="post-card-body">
-                    <div class="post-meta">
-                        <time datetime="{{ post.published_at|date:'Y-m-d' }}">{{ post.published_at|date:"d F Y" }}</time>
-                        {% for cat in post.categories.all %}
-                            <a href="{{ cat.get_absolute_url }}" class="post-category">{{ cat.name }}</a>
-                        {% endfor %}
-                    </div>
-                    <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
-                    {% if post.excerpt %}
-                    <p>{{ post.excerpt|truncatewords:25 }}</p>
-                    {% endif %}
-                    <a href="{{ post.get_absolute_url }}" class="read-more">Lire la suite &rarr;</a>
-                </div>
-            </article>
+                {% include "includes/_post_card.html" %}
             {% empty %}
             <div class="empty-state">
                 <p>Aucun article pour le moment.</p>
