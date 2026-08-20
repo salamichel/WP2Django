@@ -113,6 +113,25 @@ class Post(models.Model):
     published_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     # Animal profile fields (all optional - only used for animal listings)
+    ADOPTION_STATUS_CHOICES = [
+        ("adoptable", "Adoptable"),
+        ("reserve", "Réservé"),
+        ("recherche_fa", "Recherche FA"),
+        ("adopte", "Adopté"),
+    ]
+
+    COMPATIBILITY_CHOICES = [
+        ("", "Inconnu / À tester"),
+        ("oui", "Oui"),
+        ("non", "Non"),
+    ]
+
+    HOUSING_CHOICES = [
+        ("indifferent", "Indifférent (Maison ou Appartement)"),
+        ("maison", "Maison obligatoire"),
+        ("appartement", "Appartement possible"),
+    ]
+
     animal_name = models.CharField("Nom de l'animal", max_length=255, blank=True, default="")
     species = models.CharField("Espece", max_length=20, choices=SPECIES_CHOICES, blank=True, default="")
     breed = models.CharField("Race", max_length=255, blank=True, default="")
@@ -123,6 +142,12 @@ class Post(models.Model):
     is_vaccinated = models.BooleanField("Vaccine", null=True, blank=True)
     is_sterilized = models.BooleanField("Sterilise/Castre", null=True, blank=True)
     is_adoptable = models.BooleanField("Adoptable", default=False)
+    adoption_status = models.CharField("Statut d'adoption", max_length=20, choices=ADOPTION_STATUS_CHOICES, default="adoptable")
+    ok_dogs = models.CharField("Ok Chiens", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")
+    ok_cats = models.CharField("Ok Chats", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")
+    ok_children = models.CharField("Ok Enfants", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")
+    housing_requirement = models.CharField("Type d'habitat requis", max_length=20, choices=HOUSING_CHOICES, default="indifferent")
+    is_emergency = models.BooleanField("Urgence / À la une", default=False)
     foster_family = models.CharField("Famille d'accueil", max_length=255, blank=True, default="")
 
     # SEO

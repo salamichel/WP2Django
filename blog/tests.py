@@ -377,3 +377,124 @@ INSERT INTO `wp_posts` VALUES (1, 'It\\'s a test');
             self.assertEqual(tables["wp_posts"]["rows"][0]["post_title"], "It's a test")
         finally:
             os.unlink(path)
+
+
+class AdoptionAndEmergencyFeaturesTest(TestCase):
+    def setUp(self):
+        from blog.models import Post
+        self.dog = Post.objects.create(
+            title="Max - Chien adorable",
+            slug="max-chien-adorable",
+            animal_name="Max",
+            species="chien",
+            sex="male",
+            weight_kg=15.5,
+            adoption_status="adoptable",
+            is_adoptable=True,
+            ok_dogs="oui",
+            ok_cats="non",
+            ok_children="oui",
+            housing_requirement="maison",
+            is_emergency=True,
+            status="published",
+        )
+        self.cat = Post.objects.create(
+            title="Bella - Chatte douce",
+            slug="bella-chatte-douce",
+            animal_name="Bella",
+            species="chat",
+            sex="femelle",
+            adoption_status="recherche_fa",
+            is_adoptable=False,
+            ok_dogs="non",
+            ok_cats="oui",
+            ok_children="oui",
+            housing_requirement="appartement",
+            is_emergency=False,
+            status="published",
+        )
+
+    def test_home_page_emergency_posts(self):
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("emergency_posts", resp.context)
+        emergency_slugs = [p.slug for p in resp.context["emergency_posts"]]
+        self.assertIn("max-chien-adorable", emergency_slugs)
+        self.assertIn("bella-chatte-douce", emergency_slugs)
+
+    def test_post_list_filtering(self):
+        # Filter dogs only
+        resp = self.client.get("/articles/?species=chien")
+        self.assertEqual(resp.status_code, 200)
+        posts = resp.context["posts"]
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].slug, "max-chien-adorable")
+
+        # Filter emergency only
+        resp = self.client.get("/articles/?emergency=1")
+        self.assertEqual(resp.status_code, 200)
+        posts = resp.context["posts"]
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].slug, "max-chien-adorable")
+
+        # Filter recherche_fa status
+        resp = self.client.get("/articles/?status=recherche_fa")
+        self.assertEqual(resp.status_code, 200)
+        posts = resp.context["posts"]
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].slug, "bella-chatte-douce")
+
+        # Filter search keyword q
+        resp = self.client.get("/articles/?q=adorable")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.context["posts"]), 1)
+        self.assertEqual(resp.context["posts"][0].animal_name, "Max")
+
+        # Filter combined
+        resp = self.client.get("/articles/?species=chat&status=recherche_fa&ok_cats=oui")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.context["posts"]), 1)
+        self.assertEqual(resp.context["posts"][0].slug, "bella-chatte-douce")
+
+    def test_post_list_ajax_response(self):
+        resp = self.client.get("/articles/?species=chien", HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "includes/_post_grid.html")
+        self.assertContains(resp, "Max")
+        self.assertNotContains(resp, "Bella")
+
+    def test_category_unified_filter(self):
+        Category.objects.get_or_create(name="Chiens", slug="chiens")
+        resp = self.client.get("/categorie/chiens/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "blog/post_list.html")
+        self.assertEqual(resp.context["filters"]["species"], "chien")
+        self.assertEqual(len(resp.context["posts"]), 1)
+        self.assertEqual(resp.context["posts"][0].slug, "max-chien-adorable")
+
+        # Test AJAX on category page
+        resp_ajax = self.client.get("/categorie/chiens/?q=adorable", HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(resp_ajax.status_code, 200)
+        self.assertTemplateUsed(resp_ajax, "includes/_post_grid.html")
+        self.assertContains(resp_ajax, "Max")
+
+    def test_category_alias_prefix(self):
+        Category.objects.get_or_create(name="Chiens", slug="chiens")
+        resp = self.client.get("/categorie/les-chiens/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context["filters"]["species"], "chien")
+
+    def test_contact_form_with_categories(self):
+        from contact.models import ContactMessage
+        resp = self.client.post("/contact/", {
+            "name": "Marie Dupont",
+            "email": "marie@example.com",
+            "phone": "0601020304",
+            "category": "adoption",
+            "animal_name": "Max",
+            "subject": "Candidature pour Max",
+            "message": "Bonjour, je souhaite adopter Max !",
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(ContactMessage.objects.filter(email="marie@example.com", category="adoption").exists())
+

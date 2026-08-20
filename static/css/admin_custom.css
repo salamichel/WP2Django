@@ -1,36 +1,36 @@
 /* ===========================
-   WP2Django - Custom Admin Theme
+   Rêves de Chiens - Custom Admin Theme
    Matches front-end animal shelter palette
    =========================== */
 
 :root {
     /* Override Django admin CSS variables */
-    --primary: #e8734a;
-    --accent: #d45a30;
+    --primary: #2191C0;
+    --accent: #176d91;
     --secondary: #5b8c5a;
     --primary-fg: #fff;
 
-    --header-color: #2d3436;
+    --header-color: #0f2d3d;
     --header-branding-color: var(--primary);
-    --header-bg: #2d3436;
+    --header-bg: #0f2d3d;
     --header-link-color: #fff;
 
     --breadcrumbs-fg: rgba(255, 255, 255, 0.85);
     --breadcrumbs-link-fg: #fff;
-    --breadcrumbs-bg: #3d4548;
+    --breadcrumbs-bg: #1e3a4b;
 
-    --link-fg: #e8734a;
-    --link-hover-color: #d45a30;
-    --link-selected-fg: #d45a30;
+    --link-fg: #2191C0;
+    --link-hover-color: #176d91;
+    --link-selected-fg: #176d91;
 
-    --hairline-color: #e9e5e0;
-    --border-color: #e9e5e0;
+    --hairline-color: #e2e8f0;
+    --border-color: #e2e8f0;
 
     --button-fg: #fff;
-    --button-bg: #e8734a;
-    --button-hover-bg: #d45a30;
-    --default-button-bg: #e8734a;
-    --default-button-hover-bg: #d45a30;
+    --button-bg: #2191C0;
+    --button-hover-bg: #176d91;
+    --default-button-bg: #2191C0;
+    --default-button-hover-bg: #176d91;
 
     --close-button-bg: #636e72;
     --close-button-hover-bg: #2d3436;
@@ -364,7 +364,7 @@ fieldset h2 {
     color: var(--body-fg);
 }
 
-/* Text inputs in forms */
+/* Text inputs and Select boxes in forms */
 input[type="text"],
 input[type="password"],
 input[type="email"],
@@ -378,6 +378,105 @@ select {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.9rem !important;
     transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box !important;
+}
+
+select {
+    padding: 8px 32px 8px 12px !important;
+    min-width: 200px;
+    max-width: 100%;
+    height: auto !important;
+    line-height: 1.5 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    background-position: right 10px center !important;
+}
+
+select option {
+    padding: 6px 10px !important;
+    font-size: 0.9rem !important;
+    white-space: normal !important;
+}
+
+/* Flexible Form Rows for Multi-field layouts */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #f0ece8;
+}
+
+.form-row > div,
+.form-row .fieldBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 220px;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+.form-row label {
+    font-weight: 600 !important;
+    font-size: 0.88rem;
+    color: var(--body-fg);
+    margin-bottom: 0 !important;
+    min-width: fit-content;
+    white-space: nowrap;
+}
+
+.form-row select,
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="url"],
+.form-row input[type="email"] {
+    flex: 1 1 auto;
+    min-width: 180px;
+    max-width: 100%;
+}
+
+/* Select2 / Autocomplete widget improvements */
+.select2-container {
+    width: 100% !important;
+    min-width: 240px !important;
+    max-width: 100% !important;
+}
+
+.select2-container--admin-autocomplete .select2-selection--single {
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 4px 8px !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--admin-autocomplete .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5 !important;
+    padding-right: 24px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    color: var(--body-fg) !important;
+}
+
+.select2-dropdown {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    min-width: 280px !important;
+    z-index: 1050 !important;
+}
+
+.select2-results__option {
+    padding: 8px 12px !important;
+    font-size: 0.9rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
 }
 
 input[type="text"]:focus,
@@ -388,7 +487,7 @@ input[type="number"]:focus,
 textarea:focus,
 select:focus {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(232, 115, 74, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(25, 130, 196, 0.15) !important;
     outline: none !important;
 }
 

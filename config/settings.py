@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "insecure-dev-key-change-me")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",") if h.strip()] + ["testserver"]
 
 # CSRF trusted origins (required when behind reverse proxy with HTTPS)
 _csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
@@ -125,9 +125,11 @@ CKEDITOR_5_UPLOAD_PATH = "ckeditor/"
 
 # Brevo (email)
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL", "contact@revesdechiens.fr")
+CONTACT_RECIPIENT_EMAIL = os.getenv("CONTACT_RECIPIENT_EMAIL", "contact@revesdechiens.fr")
 
 # Site settings
-SITE_NAME = os.getenv("SITE_NAME", "Mon Site")
+SITE_NAME = os.getenv("SITE_NAME", "Rêves de Chiens")
 SITE_URL = os.getenv("SITE_URL", "http://localhost")
 
 # Pagination

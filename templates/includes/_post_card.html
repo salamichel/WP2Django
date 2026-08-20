@@ -14,8 +14,16 @@
             {% endfor %}
         </div>
         {% endif %}
-        {% if post.is_adoptable %}
-        <span class="post-card-adoptable">Cherche famille</span>
+        {% if post.is_emergency %}
+        <span class="post-card-adoptable post-card-adoptable--emergency">🚨 Urgence</span>
+        {% elif post.adoption_status == "recherche_fa" %}
+        <span class="post-card-adoptable post-card-adoptable--fa">Recherche FA</span>
+        {% elif post.adoption_status == "reserve" %}
+        <span class="post-card-adoptable post-card-adoptable--reserved">Réservé</span>
+        {% elif post.adoption_status == "adopte" %}
+        <span class="post-card-adoptable post-card-adoptable--adopted">Adopté</span>
+        {% elif post.is_adoptable or post.adoption_status == "adoptable" %}
+        <span class="post-card-adoptable">Adoptable</span>
         {% endif %}
     </div>
     <div class="post-card-body">
@@ -42,8 +50,23 @@
             {% if post.age_display %}
             <span class="animal-chip animal-chip--age">{{ post.age_display }}</span>
             {% endif %}
-            {% if post.breed %}
-            <span class="animal-chip animal-chip--breed">{{ post.breed }}</span>
+            {% if post.ok_dogs == "oui" %}
+            <span class="animal-chip animal-chip--compat" title="Ok chiens">🐕 Ok chiens</span>
+            {% elif post.ok_dogs == "non" %}
+            <span class="animal-chip animal-chip--compat-no" title="Pas ok chiens">🐕 Non</span>
+            {% endif %}
+            {% if post.ok_cats == "oui" %}
+            <span class="animal-chip animal-chip--compat" title="Ok chats">🐈 Ok chats</span>
+            {% elif post.ok_cats == "non" %}
+            <span class="animal-chip animal-chip--compat-no" title="Pas ok chats">🐈 Non</span>
+            {% endif %}
+            {% if post.ok_children == "oui" %}
+            <span class="animal-chip animal-chip--compat" title="Ok enfants">👶 Ok enfants</span>
+            {% endif %}
+            {% if post.housing_requirement == "maison" %}
+            <span class="animal-chip animal-chip--housing" title="Maison requise">🏡 Maison</span>
+            {% elif post.housing_requirement == "appartement" %}
+            <span class="animal-chip animal-chip--housing" title="Appartement possible">🏢 Appart OK</span>
             {% endif %}
         </div>
         {% endif %}
@@ -62,15 +85,18 @@
         </div>
         {% endif %}
         <h3><a href="{{ post.get_absolute_url }}">{{ post.animal_name|default:post.title }}</a></h3>
+        {% if post.is_animal_profile and post.breed %}
+        <div class="animal-breed">{{ post.breed }}</div>
+        {% endif %}
         {% if post.excerpt %}
-        <p>{{ post.excerpt|truncatewords:30 }}</p>
+        <p>{{ post.excerpt|truncatewords:24 }}</p>
         {% endif %}
         <div class="post-card-footer">
-            <a href="{{ post.get_absolute_url }}" class="read-more">
+            <a href="{{ post.get_absolute_url }}" class="read-more" aria-label="Découvrir {{ post.animal_name|default:post.title }}">
                 {% if post.is_animal_profile %}
-                <span>Decouvrir {{ post.animal_name|default:"ce petit protege" }}</span>
+                <span>Découvrir {{ post.animal_name|default:"ce petit protégé" }}</span>
                 {% else %}
-                <span>Lire la suite</span>
+                <span>Lire l'article</span>
                 {% endif %}
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>

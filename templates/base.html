@@ -1,72 +1,337 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ site_name }} - Association de protection animale{% endblock %}">
+    <meta name="description"
+        content="{% block meta_description %}{{ site_name }} - Association de protection animale{% endblock %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
     {% block extra_head %}{% endblock %}
 </head>
+
 <body>
-    <!-- Top bar -->
+    <!-- Top announcement bar -->
     <div class="top-bar">
         <div class="container top-bar-inner">
-            <span class="top-bar-text">Adoptez, sauvez une vie.</span>
+            <div class="top-bar-badge">
+                <span class="pulse-dot"></span>
+                <span class="top-bar-text">Refuge solidaire 100% Familles d'Accueil &middot; Adoptez, sauvez une
+                    vie</span>
+            </div>
             <div class="top-bar-links">
-                <a href="{% url 'contact:contact' %}">Nous contacter</a>
-                <a href="{% url 'blog:search' %}">Rechercher</a>
+                <a href="{% url 'contact:contact' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    Nous contacter
+                </a>
+                <a href="{% url 'blog:search' %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    Rechercher
+                </a>
             </div>
         </div>
     </div>
 
-    <header class="site-header">
+    <!-- Main Navigation Header with Mega Menu -->
+    <header class="site-header" id="site-header">
         <div class="container">
             <div class="header-inner">
-                <a href="{% url 'blog:home' %}" class="site-logo">
-                    <span class="logo-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                <a href="{% url 'blog:home' %}" class="site-logo" aria-label="Retour à l'accueil">
+                    <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="site-logo-img">
+                    <span class="logo-text-group">
+                        <span class="logo-text-sub">Refuge Solidaire</span>
+                        <span class="logo-text-main">Rêves de Chiens</span>
                     </span>
-                    <span class="logo-text">{{ site_name }}</span>
                 </a>
-                <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
-                    <span></span><span></span><span></span>
+
+                <!-- Hamburger Button (Mobile) -->
+                <button class="menu-toggle" id="menu-toggle" aria-label="Ouvrir le menu de navigation"
+                    aria-expanded="false" aria-controls="main-nav">
+                    <span class="hamburger-box">
+                        <span class="hamburger-inner"></span>
+                    </span>
                 </button>
-                <nav class="main-nav" id="main-nav">
-                    {% if menus.main %}
-                        <ul class="nav-list">
-                        {% for item in menus.main.items.all %}
-                            {% if not item.parent %}
-                            <li class="nav-item{% if item.children.exists %} has-children{% endif %}">
-                                <a href="{{ item.get_url }}">{{ item.title }}</a>
-                                {% if item.children.exists %}
-                                <ul class="sub-menu">
-                                    {% for child in item.children.all %}
-                                    <li><a href="{{ child.get_url }}">{{ child.title }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <ul class="nav-list">
-                            <li class="nav-item"><a href="{% url 'blog:home' %}">Accueil</a></li>
-                            <li class="nav-item"><a href="{% url 'blog:post_list' %}">Nos animaux</a></li>
-                            <li class="nav-item"><a href="{% url 'contact:contact' %}">Contact</a></li>
-                        </ul>
-                    {% endif %}
-                    <a href="{% url 'contact:contact' %}" class="btn btn-nav">Adopter</a>
+
+                <!-- Navigation Links & Mega Menu -->
+                <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+                    <div class="nav-drawer-header">
+                        <span class="nav-drawer-title">Navigation</span>
+                        <button type="button" class="nav-drawer-close" id="nav-drawer-close"
+                            aria-label="Fermer le menu">&times;</button>
+                    </div>
+
+                    <ul class="nav-list">
+                        <!-- 1. Accueil -->
+                        <li class="nav-item">
+                            <a href="{% url 'blog:home' %}"
+                                class="nav-link{% if request.path == '/' %} active{% endif %}">Accueil</a>
+                        </li>
+
+                        <!-- 2. Mega Menu : Nos Animaux -->
+                        <li class="nav-item has-megamenu">
+                            <a href="{% url 'blog:post_list' %}"
+                                class="nav-link{% if '/articles/' in request.path %} active{% endif %}"
+                                aria-haspopup="true" aria-expanded="false">
+                                <span>Nos Protégés</span>
+                                <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </a>
+
+                            <!-- Mega Menu Dropdown Container -->
+                            <div class="megamenu-dropdown" role="region" aria-label="Sous-menu Nos Protégés">
+                                <div class="megamenu-grid">
+                                    <!-- Column 1: Par Espèce & Statut -->
+                                    <div class="megamenu-col">
+                                        <div class="megamenu-col-header">
+                                            <span class="megamenu-col-badge">Adoption</span>
+                                            <h4 class="megamenu-col-title">Par Espèce & Urgences</h4>
+                                        </div>
+                                        <ul class="megamenu-links">
+                                            <li>
+                                                <a href="{% url 'blog:category' slug='chiens' %}" class="megamenu-item">
+                                                    <span class="megamenu-item-icon megamenu-item-icon--dog">🐕</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Les Chiens à
+                                                            l'adoption</strong>
+                                                        <span class="megamenu-item-desc">Chiots, adultes et séniors en
+                                                            FA</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'blog:category' slug='chats' %}" class="megamenu-item">
+                                                    <span class="megamenu-item-icon megamenu-item-icon--cat">🐈</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Les Chats & Chatons</strong>
+                                                        <span class="megamenu-item-desc">Félins affectueux à
+                                                            adopter</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'blog:category' slug='rongeurs' %}"
+                                                    class="megamenu-item">
+                                                    <span
+                                                        class="megamenu-item-icon megamenu-item-icon--rabbit">🐹</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Les Rongeurs</strong>
+                                                        <span class="megamenu-item-desc">Lapins, cochons d'Inde et
+                                                            petits animaux</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'blog:category' slug='urgences' %}"
+                                                    class="megamenu-item megamenu-item--emergency">
+                                                    <span class="megamenu-item-icon megamenu-item-icon--alert">🚨</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Urgences & Recherche
+                                                            FA</strong>
+                                                        <span class="megamenu-item-desc">Animaux ayant besoin d'aide
+                                                            immédiate</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Column 2: Démarches & Guides -->
+                                    <div class="megamenu-col">
+                                        <div class="megamenu-col-header">
+                                            <span class="megamenu-col-badge megamenu-col-badge--green">Démarches</span>
+                                            <h4 class="megamenu-col-title">Guide d'Adoption</h4>
+                                        </div>
+                                        <ul class="megamenu-links">
+                                            <li>
+                                                <a href="/conditions-adoption/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">📋</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Conditions
+                                                            d'adoption</strong>
+                                                        <span class="megamenu-item-desc">Démarches, contrat et
+                                                            tarifs</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/familles-accueil/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">🏡</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Devenir Famille
+                                                            d'Accueil</strong>
+                                                        <span class="megamenu-item-desc">Frais vétérinaires 100% pris en
+                                                            charge</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/conseils-adoption/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">💡</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Conseils avant
+                                                            d'adopter</strong>
+                                                        <span class="megamenu-item-desc">Checklist & préparation du
+                                                            foyer</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'blog:post_list' %}?status=adopte"
+                                                    class="megamenu-item">
+                                                    <span class="megamenu-item-icon">❤️</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Les Heureux Adoptés</strong>
+                                                        <span class="megamenu-item-desc">Nouvelles et photos de nos
+                                                            protégés</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Column 3: Featured Rescue Card -->
+                                    <div class="megamenu-col megamenu-col--featured">
+                                        <div class="megamenu-featured-card">
+                                            <div class="megamenu-featured-badge">🐾 Sauvez une vie</div>
+                                            <h5 class="megamenu-featured-title">Adopter, c'est sauver deux vies</h5>
+                                            <p class="megamenu-featured-text">Celle de votre futur compagnon, et celle
+                                                qui prendra sa place en Famille d'Accueil.</p>
+                                            <a href="{% url 'blog:post_list' %}"
+                                                class="btn btn-sm btn-primary megamenu-featured-btn">
+                                                Voir tous nos protégés &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- 3. Mega Menu : Agir & Soutenir -->
+                        <li class="nav-item has-megamenu">
+                            <a href="/dons-parrainages/" class="nav-link" aria-haspopup="true" aria-expanded="false">
+                                <span>Agir & Soutenir</span>
+                                <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </a>
+
+                            <!-- Mega Menu Dropdown Agir -->
+                            <div class="megamenu-dropdown megamenu-dropdown--compact" role="region"
+                                aria-label="Sous-menu Agir & Soutenir">
+                                <div class="megamenu-grid megamenu-grid--2cols">
+                                    <div class="megamenu-col">
+                                        <div class="megamenu-col-header">
+                                            <span class="megamenu-col-badge">Solidarité</span>
+                                            <h4 class="megamenu-col-title">Comment nous aider ?</h4>
+                                        </div>
+                                        <ul class="megamenu-links">
+                                            <li>
+                                                <a href="/dons-parrainages/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">🪙</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Dons & Parrainages</strong>
+                                                        <span class="megamenu-item-desc">Déductibles d'impôt à
+                                                            66%</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/familles-accueil/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">🏡</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Devenir Famille
+                                                            d'Accueil</strong>
+                                                        <span class="megamenu-item-desc">Offrez un foyer temporaire
+                                                            bénévole</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="megamenu-col">
+                                        <div class="megamenu-col-header">
+                                            <span class="megamenu-col-badge megamenu-col-badge--orange">Urgences</span>
+                                            <h4 class="megamenu-col-title">Sauvetages & Contact</h4>
+                                        </div>
+                                        <ul class="megamenu-links">
+                                            <li>
+                                                <a href="/conditions-abandon/" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">⚠️</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Animal trouvé ou
+                                                            abandon</strong>
+                                                        <span class="megamenu-item-desc">Procédure légale et prise en
+                                                            charge</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'contact:contact' %}" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">✉️</span>
+                                                    <div class="megamenu-item-content">
+                                                        <strong class="megamenu-item-title">Formulaire de
+                                                            contact</strong>
+                                                        <span class="megamenu-item-desc">Écrivez directement à nos
+                                                            bénévoles</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- 4. L'Association -->
+                        <li class="nav-item">
+                            <a href="/a-propos/" class="nav-link">L'Association</a>
+                        </li>
+
+                        <!-- 5. Contact -->
+                        <li class="nav-item">
+                            <a href="{% url 'contact:contact' %}"
+                                class="nav-link{% if '/contact/' in request.path %} active{% endif %}">Contact</a>
+                        </li>
+                    </ul>
+
+                    <!-- Prominent Header CTA Action -->
+                    <div class="nav-actions">
+                        <a href="{% url 'blog:post_list' %}" class="btn btn-nav">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path
+                                    d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z" />
+                            </svg>
+                            Adopter un protégé
+                        </a>
+                    </div>
                 </nav>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Drawer Overlay -->
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
 
     <main class="site-main">
         {% if messages %}
@@ -84,8 +349,14 @@
 
         {% block page_content %}
         <div class="site-layout">
-            <button class="sidebar-toggle" aria-label="Menu lateral" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <button class="sidebar-toggle" aria-label="Ouvrir le menu latéral" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+                <span>Guides & Navigation</span>
             </button>
             <aside class="sidebar" id="sidebar">
                 {% include "includes/sidebar.html" %}
@@ -99,39 +370,63 @@
 
     <footer class="site-footer">
         <div class="footer-wave">
-            <svg viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z" fill="currentColor"/></svg>
+            <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+                <path d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z" fill="currentColor" />
+            </svg>
         </div>
         <div class="container">
             <div class="footer-inner">
                 <div class="footer-col footer-about">
-                    <h3>
-                        <span class="footer-logo-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
-                        </span>
-                        {{ site_name }}
-                    </h3>
-                    <p>Association de protection animale. Nous sauvons, soignons et trouvons des familles pour les chiens et chats abandonnes.</p>
+                    <div class="footer-logo-wrap">
+                        <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="footer-logo-img">
+                        <h3 class="footer-logo-title">Rêves de Chiens</h3>
+                    </div>
+                    <p>Association de protection animale (loi 1901). Nous sauvons, soignons et replaçons chiens, chats
+                        et rongeurs en Familles d'Accueil bénévoles.</p>
+                    <p style="font-size:0.82rem;color:#b2bec3;margin-top:0.5rem;">RNA : W751000000 &middot; 100%
+                        Bénévoles</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" target="_blank" rel="noopener" title="Facebook">FB</a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener" title="Instagram">IN</a>
+                    </div>
                 </div>
                 <div class="footer-col">
                     <h3>Navigation</h3>
                     <ul>
                         <li><a href="{% url 'blog:home' %}">Accueil</a></li>
-                        <li><a href="{% url 'blog:post_list' %}">Articles</a></li>
+                        <li><a href="{% url 'blog:post_list' %}">À l'adoption</a></li>
+                        <li><a href="/a-propos/">L'association</a></li>
+                        <li><a href="{% url 'blog:post_list' %}?status=adopte">Les Heureux Adoptés</a></li>
+                        <li><a href="/familles-accueil/">Devenir FA</a></li>
+                        <li><a href="/dons-parrainages/">Dons & Soutiens</a></li>
                         <li><a href="{% url 'contact:contact' %}">Contact</a></li>
-                        <li><a href="{% url 'blog:search' %}">Recherche</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h3>Categories</h3>
+                    <h3>Adoptions & Infos</h3>
                     <ul>
-                    {% for cat in all_categories %}
-                        <li><a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a></li>
-                    {% endfor %}
+                        <li><a href="/conditions-adoption/">Conditions d'adoption</a></li>
+                        <li><a href="/familles-accueil/">Devenir Famille d'Accueil</a></li>
+                        <li><a href="/conditions-abandon/">Conditions d'abandon</a></li>
+                        <li><a href="/dons-parrainages/">Dons & Parrainages</a></li>
+                        <li><a href="/mentions-legales/">Mentions légales</a></li>
                     </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contactez-nous</h3>
+                    <address>
+                        Association Rêves de Chiens<br>
+                        Île-de-France & environs<br>
+                        <a href="mailto:contact@revesdechiens.fr">contact@revesdechiens.fr</a><br>
+                        <a href="tel:+33123456789">01 23 45 67 89</a>
+                    </address>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; {% now "Y" %} {{ site_name }}. Tous droits reserves.</p>
+                <p>&copy; {% now "Y" %} {{ site_name }}. Association reconnue d'intérêt général &middot; <a
+                        href="/mentions-legales/" style="color:#b2bec3;text-decoration:underline;">Mentions légales</a>
+                    &middot; Réalisation : <a href="https://moka-web.net" target="_blank" rel="noopener"
+                        class="footer-moka-link">Moka-Web</a></p>
             </div>
         </div>
     </footer>
@@ -139,4 +434,5 @@
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

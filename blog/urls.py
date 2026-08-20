@@ -12,5 +12,6 @@ urlpatterns = [
     path("archives/<int:year>/", views.archive_year, name="archive_year"),
     path("archives/<int:year>/<int:month>/", views.archive_month, name="archive_month"),
     path("recherche/", views.search, name="search"),
+    path("pages/<slug:slug>/", views.page_detail, name="page_detail_alias"),
     path("<slug:slug>/", views.page_detail, name="page_detail"),
 ]

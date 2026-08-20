@@ -3,20 +3,115 @@
 {% block title %}{{ site_name }} - Protection animale{% endblock %}
 
 {% block page_content %}
-<!-- Hero -->
-<section class="hero">
+<!-- Modern Split Hero -->
+<section class="hero-split">
     <div class="container">
-        <div class="hero-content">
-            <span class="hero-badge">Association de protection animale</span>
-            <h1>Chaque animal merite<br>une <em>seconde chance</em></h1>
-            <p class="hero-subtitle">Nous sauvons, soignons et trouvons des familles aimantes pour les chiens et chats abandonnes ou maltraites.</p>
-            <div class="hero-actions">
-                <a href="{% url 'blog:post_list' %}" class="btn btn-lg">Voir nos articles</a>
-                <a href="{% url 'contact:contact' %}" class="btn btn-outline btn-lg">Nous contacter</a>
+        <div class="hero-split-grid">
+            <!-- Left: Value Prop & CTAs -->
+            <div class="hero-split-text">
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    <span>Association de protection animale &middot; Reconnue d'intérêt général</span>
+                </div>
+                
+                <h1 class="hero-title">
+                    Chaque animal mérite une <span class="hero-title-highlight">seconde chance</span>
+                </h1>
+                
+                <p class="hero-desc">
+                    Nous sauvons, soignons et accueillons en <strong>Familles d'Accueil bénévoles</strong> des chiens, chats et rongeurs en attente de leur foyer pour la vie.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-lg btn-primary hero-btn-main">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                        <span>Découvrir nos protégés</span>
+                    </a>
+                    <a href="/familles-accueil/" class="btn btn-lg btn-outline hero-btn-secondary">
+                        <span>Devenir Famille d'Accueil</span>
+                    </a>
+                </div>
+
+                <!-- Trust Micro-Bar -->
+                <div class="hero-trust-bar">
+                    <div class="hero-trust-item">
+                        <span class="hero-trust-icon">🏡</span>
+                        <span>100% Familles d'Accueil</span>
+                    </div>
+                    <div class="hero-trust-divider">&middot;</div>
+                    <div class="hero-trust-item">
+                        <span class="hero-trust-icon">🩺</span>
+                        <span>Soins & Suivi vétérinaire</span>
+                    </div>
+                    <div class="hero-trust-divider">&middot;</div>
+                    <div class="hero-trust-item">
+                        <span class="hero-trust-icon">❤️</span>
+                        <span>Zéro euthanasie</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Visual Showcase -->
+            <div class="hero-split-visual">
+                <div class="hero-visual-frame">
+                    <img src="/static/img/banner_hero.jpg" alt="Chiens et chats du refuge Rêves de Chiens" class="hero-main-img" loading="eager">
+                    
+                    <!-- Floating Glass Card (Quick Species Selector) -->
+                    <div class="hero-floating-glass">
+                        <span class="hero-floating-label">Adopter par espèce :</span>
+                        <div class="hero-quick-species-grid">
+                            <a href="{% url 'blog:category' slug='chiens' %}" class="hero-species-btn">
+                                <span class="species-emoji">🐕</span>
+                                <span>Chiens</span>
+                            </a>
+                            <a href="{% url 'blog:category' slug='chats' %}" class="hero-species-btn">
+                                <span class="species-emoji">🐈</span>
+                                <span>Chats</span>
+                            </a>
+                            <a href="{% url 'blog:category' slug='rongeurs' %}" class="hero-species-btn">
+                                <span class="species-emoji">🐹</span>
+                                <span>Rongeurs</span>
+                            </a>
+                            <a href="{% url 'blog:category' slug='urgences' %}" class="hero-species-btn hero-species-btn--urgent">
+                                <span class="species-emoji">🚨</span>
+                                <span>Urgences</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Floating Badge Corner -->
+                    <div class="hero-floating-badge">
+                        <span class="badge-icon">✨</span>
+                        <div class="badge-text">
+                            <strong>Sauvez une vie</strong>
+                            <small>Adoptez éthique</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+{% if emergency_posts %}
+<!-- Urgences / Recherche FA -->
+<section class="section section--emergency">
+    <div class="container">
+        <div class="section-header section-header--emergency">
+            <div class="emergency-title-group">
+                <span class="emergency-badge">🚨 Priorité</span>
+                <h2>Urgences & Recherche de Familles d'Accueil</h2>
+            </div>
+            <a href="{% url 'blog:category' slug='urgences' %}" class="section-link">Voir toutes les urgences &rarr;</a>
+        </div>
+        <div class="post-grid">
+            {% for post in emergency_posts %}
+            {% include "includes/_post_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <!-- Stats -->
 <section class="stats-section">
@@ -24,25 +119,143 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z" />
+                    </svg>
                 </span>
                 <span class="stat-number">{{ posts|length }}</span>
-                <span class="stat-label">Publications recentes</span>
+                <span class="stat-label">Protégés & actualités</span>
             </div>
             <div class="stat-card">
                 <span class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
                 </span>
                 <span class="stat-number">365j</span>
-                <span class="stat-label">A vos cotes</span>
+                <span class="stat-label">À vos côtés</span>
             </div>
             <div class="stat-card">
                 <span class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
                 </span>
                 <span class="stat-number">100%</span>
-                <span class="stat-label">Benevoles</span>
+                <span class="stat-label">Bénévoles</span>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- 6 Quick Action Cards (Modernized Post-its) -->
+<section class="section section--quick-actions">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="hero-badge">Actions rapides</span>
+            <h2>Comment agir avec le refuge ?</h2>
+            <p class="section-subtitle">Chaque geste compte : découvrez comment participer à nos côtés selon vos
+                souhaits.</p>
+        </div>
+
+        <div class="quick-actions-grid">
+            <a href="/familles-accueil/" class="quick-action-card quick-action-card--fa">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                </div>
+                <h3>Devenir Famille d'Accueil</h3>
+                <p>Ouvrez votre foyer temporairement à un protégé. Frais vétérinaires 100% pris en charge par
+                    l'association.</p>
+                <span class="quick-action-link">En savoir plus &rarr;</span>
+            </a>
+
+            <a href="/conseils-adoption/" class="quick-action-card quick-action-card--advice">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                </div>
+                <h3>Conseils avant d'adopter</h3>
+                <p>Temps, budget, préparation du foyer : la checklist essentielle pour réussir l'adoption de votre
+                    compagnon.</p>
+                <span class="quick-action-link">Découvrir nos conseils &rarr;</span>
+            </a>
+
+            <a href="/dons-parrainages/" class="quick-action-card quick-action-card--help">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                </div>
+                <h3>Comment nous aider ?</h3>
+                <p>Dons en ligne (66% déductibles), parrainages, Teaming (1€/mois) ou dons matériels pour soigner nos
+                    animaux.</p>
+                <span class="quick-action-link">Soutenir nos actions &rarr;</span>
+            </a>
+
+            <a href="/conditions-abandon/" class="quick-action-card quick-action-card--lost">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </div>
+                <h3>Animal trouvé ou perdu ?</h3>
+                <p>Les démarches officielles à suivre (ICAD, vétérinaire) et les conditions de prise en charge du
+                    refuge.</p>
+                <span class="quick-action-link">Consulter la procédure &rarr;</span>
+            </a>
+
+            <a href="{% url 'blog:category' slug='urgences' %}" class="quick-action-card quick-action-card--emergency">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                </div>
+                <h3>Les Urgences</h3>
+                <p>Nos protégés ayant besoin d'une famille d'accueil en urgence ou de soins lourds immédiats.</p>
+                <span class="quick-action-link">Voir les urgences &rarr;</span>
+            </a>
+
+            <a href="{% url 'blog:post_list' %}" class="quick-action-card quick-action-card--news">
+                <div class="quick-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+                        <path d="M18 14h-8" />
+                        <path d="M15 18h-5" />
+                        <path d="M10 6h8v4h-8V6Z" />
+                    </svg>
+                </div>
+                <h3>Actualités & Sauvetages</h3>
+                <p>Suivez les dernières adoptions, les sauvetages réussis et les événements du refuge.</p>
+                <span class="quick-action-link">Lire les actualités &rarr;</span>
+            </a>
         </div>
     </div>
 </section>
@@ -51,12 +264,12 @@
 <section class="section">
     <div class="container">
         <div class="section-header">
-            <h2>Derniers articles</h2>
+            <h2>À l'adoption & Actualités</h2>
             <a href="{% url 'blog:post_list' %}" class="section-link">Tout voir &rarr;</a>
         </div>
         <div class="post-grid">
             {% for post in posts %}
-                {% include "includes/_post_card.html" %}
+            {% include "includes/_post_card.html" %}
             {% empty %}
             <div class="empty-state">
                 <p>Aucun article pour le moment.</p>
@@ -66,13 +279,50 @@
     </div>
 </section>
 
+<!-- Section Solidaire: Teaming (1€/mois) & Instagram -->
+<section class="section section--solidarity">
+    <div class="container">
+        <div class="solidarity-grid">
+            <!-- Teaming Card -->
+            <div class="solidarity-card solidarity-card--teaming">
+                <div class="solidarity-badge">🪙 1€ / mois</div>
+                <h3>Les petites rivières font les grands fleuves</h3>
+                <p>Avec le groupe <strong>Teaming Rêves de Chiens</strong>, donnez seulement 1 euro par mois pour aider
+                    à financer les opérations, vaccins et sauvetages urgents.</p>
+                <div class="solidarity-action">
+                    <a href="https://www.teaming.net" target="_blank" rel="noopener"
+                        class="btn btn-primary btn-lg">Rejoindre notre Teaming</a>
+                    <span class="solidarity-subtext">Sans engagement &middot; Prélèvement 1€ automatique</span>
+                </div>
+            </div>
+
+            <!-- Instagram Card -->
+            <div class="solidarity-card solidarity-card--instagram">
+                <div class="solidarity-badge solidarity-badge--insta">📸 Instagram</div>
+                <h3>Suivez le quotidien de nos protégés</h3>
+                <p>Retrouvez en direct nos chiens et chats en famille d'accueil, les vidéos de leurs progrès et les
+                    nouvelles des adoptés sur <strong>@refuge_reves_de_chiens</strong>.</p>
+                <div class="solidarity-action">
+                    <a href="https://www.instagram.com/refuge_reves_de_chiens/" target="_blank" rel="noopener"
+                        class="btn btn-outline btn-lg">S'abonner sur Instagram</a>
+                    <span class="solidarity-subtext">+ de photos, vidéos et stories chaque jour</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-section">
     <div class="container">
         <div class="cta-card">
-            <h2>Vous souhaitez adopter ?</h2>
-            <p>Chaque adoption sauve deux vies : celle de l'animal adopte et celle qui prendra sa place au refuge.</p>
-            <a href="{% url 'contact:contact' %}" class="btn btn-lg btn-white">Contactez-nous</a>
+            <h2>Vous souhaitez offrir un foyer chaleureux ?</h2>
+            <p>Chaque adoption sauve deux vies : celle de l'animal adopté et celle qui prendra sa place en famille
+                d'accueil.</p>
+            <div class="cta-actions">
+                <a href="{% url 'blog:post_list' %}" class="btn btn-lg btn-white">Découvrir nos protégés</a>
+                <a href="{% url 'contact:contact' %}" class="btn btn-lg btn-outline-white">Nous contacter</a>
+            </div>
         </div>
     </div>
 </section>

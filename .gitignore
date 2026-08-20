@@ -28,8 +28,9 @@ venv/
 *.swo
 *~
 
-# Docker
+# Docker & Local Data Persistence
 docker-compose.override.yml
+data/
 
 # Media uploads
 media/uploads/

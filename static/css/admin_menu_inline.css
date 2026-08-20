@@ -30,40 +30,41 @@
 
 /* Make fieldBoxes sit in a row (grid) */
 #menuitem_set-group .inline-related .fieldBox {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 #menuitem_set-group .inline-related .form-row {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    gap: 16px;
+    align-items: center;
     flex-wrap: wrap;
 }
 #menuitem_set-group .inline-related .form-row > div,
 #menuitem_set-group .inline-related .form-row > .fieldBox {
-    flex: 1;
-    min-width: 150px;
+    flex: 1 1 220px;
+    min-width: 200px;
 }
 /* Position field: narrower */
 #menuitem_set-group .inline-related .form-row > .field-position {
-    flex: 0 0 70px;
-    min-width: 70px;
+    flex: 0 0 80px;
+    min-width: 80px;
 }
 
 /* Labels smaller */
 #menuitem_set-group .inline-related label {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: #555;
-    margin-bottom: 2px;
+    color: #475569;
+    margin-bottom: 4px;
     display: block;
 }
 
-/* Inputs full width */
+/* Inputs and Selects full width */
 #menuitem_set-group .inline-related input[type="text"],
 #menuitem_set-group .inline-related input[type="number"],
 #menuitem_set-group .inline-related input[type="url"],
 #menuitem_set-group .inline-related select {
     width: 100%;
+    min-width: 180px;
     box-sizing: border-box;
 }
 

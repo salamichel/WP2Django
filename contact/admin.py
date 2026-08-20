@@ -5,12 +5,26 @@ from contact.models import ContactMessage
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ("name", "email", "subject", "created_at", "read_badge")
-    list_filter = ("is_read", "created_at")
-    search_fields = ("name", "email", "subject", "message")
-    readonly_fields = ("name", "email", "subject", "message", "created_at")
+    list_display = ("name", "category_badge", "animal_name", "email", "phone", "created_at", "read_badge")
+    list_filter = ("category", "is_read", "created_at")
+    search_fields = ("name", "email", "phone", "animal_name", "subject", "message")
+    readonly_fields = ("category", "animal_name", "name", "email", "phone", "subject", "message", "created_at")
     list_per_page = 25
     actions = ["mark_read", "mark_unread"]
+
+    def category_badge(self, obj):
+        colors = {
+            "adoption": "#27ae60",
+            "abandon": "#e67e22",
+            "fa": "#2980b9",
+            "autre": "#7f8c8d",
+        }
+        color = colors.get(obj.category, "#7f8c8d")
+        return format_html(
+            '<span style="padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;color:#fff;background:{}">{}</span>',
+            color, obj.get_category_display()
+        )
+    category_badge.short_description = "Motif"
 
     def read_badge(self, obj):
         if obj.is_read:

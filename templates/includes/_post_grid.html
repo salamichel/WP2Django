@@ -1,0 +1,81 @@
+<!-- Dynamic Post Grid & Pagination Partial -->
+<div id="ajax-post-grid-container" class="ajax-results-container">
+    <div class="results-meta-bar">
+        <div class="results-count" id="results-count" data-count="{{ total_count }}">
+            <span class="results-count-icon">🐾</span>
+            <span class="results-count-text">
+                {% if total_count == 0 %}
+                    <strong>Aucun résultat</strong> pour cette recherche
+                {% elif total_count == 1 %}
+                    <strong>1 compagnon / article</strong> trouvé
+                {% else %}
+                    <strong>{{ total_count }} compagnons & articles</strong> trouvés
+                {% endif %}
+            </span>
+        </div>
+        <div class="results-loading-indicator" id="results-loader" aria-hidden="true">
+            <span class="loader-spinner"></span>
+            <span class="loader-text">Mise à jour...</span>
+        </div>
+    </div>
+
+    <div class="post-grid" id="post-grid">
+        {% for post in posts %}
+            {% include "includes/_post_card.html" %}
+        {% empty %}
+        <div class="empty-state empty-state--animals" data-animate>
+            <div class="empty-state-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 15s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+            </div>
+            <h3>Aucun protégé ne correspond à vos critères</h3>
+            <p>Essayez d'élargir vos filtres ou de réinitialiser la recherche pour découvrir tous nos animaux.</p>
+            <button type="button" class="btn btn-primary btn-reset-filters" id="btn-empty-reset">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                    <path d="M8 16H3v5"/>
+                </svg>
+                Réinitialiser tous les filtres
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if posts.has_other_pages %}
+    <nav class="pagination" id="ajax-pagination" aria-label="Navigation des pages">
+        {% if posts.has_previous %}
+        <a href="?page={{ posts.previous_page_number }}" class="btn btn-outline btn-pagination" data-page="{{ posts.previous_page_number }}" rel="prev">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Précédent
+        </a>
+        {% else %}
+        <span class="btn btn-outline btn-pagination disabled" aria-disabled="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Précédent
+        </span>
+        {% endif %}
+
+        <div class="pagination-pages">
+            <span class="page-info">Page <strong>{{ posts.number }}</strong> sur <strong>{{ posts.paginator.num_pages }}</strong></span>
+        </div>
+
+        {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}" class="btn btn-outline btn-pagination" data-page="{{ posts.next_page_number }}" rel="next">
+            Suivant
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        {% else %}
+        <span class="btn btn-outline btn-pagination disabled" aria-disabled="true">
+            Suivant
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>

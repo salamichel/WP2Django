@@ -78,9 +78,9 @@ class CommentInline(admin.TabularInline):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("title", "status_badge", "author", "category_list", "published_at")
-    list_filter = ("status", "categories", "published_at")
-    search_fields = ("title", "content")
+    list_display = ("title", "species_badge", "adoption_badge", "status_badge", "author", "published_at")
+    list_filter = ("status", "species", "adoption_status", "is_emergency", "categories", "published_at")
+    search_fields = ("title", "animal_name", "content")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("categories", "tags")
     date_hierarchy = "published_at"
@@ -88,12 +88,14 @@ class PostAdmin(admin.ModelAdmin):
     list_per_page = 25
     fieldsets = (
         (None, {"fields": ("title", "slug", "content", "excerpt", "status", "author")}),
-        ("Fiche animal", {
+        ("Fiche animal & Adoption", {
             "fields": (
                 ("animal_name", "species", "breed"),
                 ("sex", "birth_date", "weight_kg"),
-                ("is_vaccinated", "is_sterilized", "is_adoptable"),
-                ("identification", "foster_family"),
+                ("adoption_status", "is_adoptable", "is_emergency"),
+                ("ok_dogs", "ok_cats", "ok_children"),
+                ("housing_requirement", "foster_family"),
+                ("is_vaccinated", "is_sterilized", "identification"),
             ),
             "classes": ("collapse",),
             "description": "Remplir uniquement pour les fiches animaux. Laisser vide pour les articles classiques.",
@@ -102,6 +104,36 @@ class PostAdmin(admin.ModelAdmin):
         ("Publication", {"fields": ("published_at",)}),
         ("SEO", {"fields": ("seo_title", "seo_description"), "classes": ("collapse",)}),
     )
+
+    def species_badge(self, obj):
+        if not obj.species:
+            return "-"
+        colors = {"chien": "#e8734a", "chat": "#5b8c5a", "rongeur": "#f39c12", "autre": "#7f8c8d"}
+        color = colors.get(obj.species, "#7f8c8d")
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600">{}</span>',
+            color, obj.get_species_display()
+        )
+    species_badge.short_description = "Espèce"
+
+    def adoption_badge(self, obj):
+        if not obj.species:
+            return "-"
+        colors = {
+            "adoptable": "#27ae60",
+            "reserve": "#e67e22",
+            "recherche_fa": "#e74c3c",
+            "adopte": "#95a5a6",
+        }
+        color = colors.get(obj.adoption_status, "#7f8c8d")
+        label = obj.get_adoption_status_display()
+        if obj.is_emergency:
+            label += " 🚨"
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600">{}</span>',
+            color, label
+        )
+    adoption_badge.short_description = "Adoption"
 
     def get_urls(self):
         custom = [
