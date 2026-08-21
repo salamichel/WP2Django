@@ -318,6 +318,26 @@ class AnimalDataExtractorTest(TestCase):
         self.assertEqual(data3["ok_dogs"], "oui")
         self.assertEqual(data3["ok_cats"], "non")
 
+    def test_narrative_compatibility_phrasing(self):
+        # User reported case: ": Vadim est ok chats et ok chien."
+        content = "<p>: Vadim est ok chats et ok chien. Il est très joueur.</p>"
+        data, _ = AnimalDataExtractor.extract(content, categories=["Chiens"], title="Vadim")
+        self.assertEqual(data["ok_cats"], "oui")
+        self.assertEqual(data["ok_dogs"], "oui")
+
+        # Negative narrative case
+        content2 = "<p>Lola est adorable mais pas ok chats, ne s'entend pas avec les chiens non plus.</p>"
+        data2, _ = AnimalDataExtractor.extract(content2, categories=["Chiens"], title="Lola")
+        self.assertEqual(data2["ok_cats"], "non")
+        self.assertEqual(data2["ok_dogs"], "non")
+
+        # Children narrative
+        content3 = "<p>Rex adore les enfants et toute la famille. Ok chats et chiens.</p>"
+        data3, _ = AnimalDataExtractor.extract(content3, categories=["Chiens"], title="Rex")
+        self.assertEqual(data3["ok_children"], "oui")
+        self.assertEqual(data3["ok_cats"], "oui")
+        self.assertEqual(data3["ok_dogs"], "oui")
+
     def test_urgency_excluded_if_adopted_or_deceased(self):
         # 1. Urgent title but adopted
         content = "<p>Race : Berger</p><p>Sexe : mâle</p>"

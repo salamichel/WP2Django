@@ -167,6 +167,13 @@ class AnimalDataExtractor:
         if "species" not in result or not result["species"]:
             result["species"] = cls._detect_species(f"{title} {text}", categories)
 
+        # Fallback: extract compatibilities from narrative phrasing in free text
+        # (e.g. "Vadim est ok chats et ok chien", "Sociable avec les enfants", etc.)
+        narrative_compatibilities = cls._extract_narrative_compatibilities(f"{title} {text}")
+        for key, val in narrative_compatibilities.items():
+            if key not in result or not result[key]:
+                result[key] = val
+
         # Normalize extracted values
         normalized = cls._normalize(result)
 
@@ -290,6 +297,52 @@ class AnimalDataExtractor:
                     break
 
         return result, lines_to_remove
+
+    @classmethod
+    def _extract_narrative_compatibilities(cls, text):
+        """Extract dog/cat/children compatibilities from unstructured narrative sentences.
+
+        Handles natural language phrasing like:
+        - "Vadim est ok chats et ok chien."
+        - "Ok chat et ok chiens"
+        - "Sociable chats et chiens"
+        - "Pas ok chats"
+        - "Ne s'entend pas avec les chiens"
+        """
+        result = {}
+        t = text.lower()
+
+        # --- OK DOGS (Chiens / Congénères) ---
+        if re.search(r"\b(?:pas\s+ok|non\s+ok|pas\s+d'entente|ne\s+s'entend\s+pas|sans|[eé]viter|d[eé]conseill[eé]|craint)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|de\s+|d')?(?:chiens?|chiennes?|cong[eé]n[eè]res?|toutous?)\b", t) or re.search(r"\b(?:chiens?|cong[eé]n[eè]res?)\s*:\s*(?:non|pas|eviter|[eé]viter|non\s+ok)\b", t):
+            result["ok_dogs"] = "non"
+        elif re.search(r"\b(?:ok|sociable|s'entend\s+(?:tr[eè]s\s+)?bien|entente\s+bonne|aime|adore)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|d')?(?:chiens?|chiennes?|cong[eé]n[eè]res?|toutous?)\b", t) or re.search(r"\b(?:chiens?|chiennes?|cong[eé]n[eè]res?)\s*:\s*(?:oui|ok|bonne|tr[eè]s\s+bien|tres\s+bien)\b", t):
+            result["ok_dogs"] = "oui"
+
+        # --- OK CATS (Chats / Félins) ---
+        if re.search(r"\b(?:pas\s+ok|non\s+ok|pas\s+d'entente|ne\s+s'entend\s+pas|sans|[eé]viter|course|chasse|d[eé]conseill[eé]|craint)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|de\s+|d')?(?:chats?|chattes?|f[eé]lins?|minous?|matous?)\b", t) or re.search(r"\b(?:chats?|f[eé]lins?)\s*:\s*(?:non|pas|eviter|[eé]viter|non\s+ok)\b", t):
+            result["ok_cats"] = "non"
+        elif re.search(r"\b(?:ok|sociable|s'entend\s+(?:tr[eè]s\s+)?bien|entente\s+bonne|aime|adore)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|d')?(?:chats?|chattes?|f[eé]lins?|minous?|matous?)\b", t) or re.search(r"\bentente\s+f[eé]line\b", t) or re.search(r"\b(?:chats?|f[eé]lins?)\s*:\s*(?:oui|ok|bonne|tr[eè]s\s+bien|tres\s+bien)\b", t):
+            result["ok_cats"] = "oui"
+
+        # --- OK CHILDREN (Enfants) ---
+        if re.search(r"\b(?:pas\s+ok|non\s+ok|pas\s+d'entente|ne\s+s'entend\s+pas|sans|[eé]viter|d[eé]conseill[eé]|craint)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|de\s+|d')?(?:enfants?|ados?|adolescents?|petits)\b", t) or re.search(r"\benfants?\s+(?:en\s+bas\s+[âa]ge\s+)?(?:[eé]vit[eé]s?|d[eé]conseill[eé]s?)\b", t) or re.search(r"\benfants?\s*:\s*(?:non|pas|eviter|[eé]viter|non\s+ok)\b", t):
+            result["ok_children"] = "non"
+        elif re.search(r"\b(?:ok|sociable|doux|s'entend\s+(?:tr[eè]s\s+)?bien|adore|aime)\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|d')?(?:enfants?|ados?|adolescents?)\b", t) or re.search(r"\benfants?\s*:\s*(?:oui|ok|bonne|tr[eè]s\s+bien|tres\s+bien|sociable)\b", t):
+            result["ok_children"] = "oui"
+
+        # Combined patterns
+        if re.search(r"\bok\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|d')?(?:chats?|f[eé]lins?)\s+(?:et|&|/)\s+(?:les\s+|des\s+|d')?(?:chiens?|cong[eé]n[eè]res?)\b", t):
+            if "ok_cats" not in result:
+                result["ok_cats"] = "oui"
+            if "ok_dogs" not in result:
+                result["ok_dogs"] = "oui"
+        if re.search(r"\bok\s+(?:(?:avec|pour)\s+)?(?:les\s+|des\s+|d')?(?:chiens?|cong[eé]n[eè]res?)\s+(?:et|&|/)\s+(?:les\s+|des\s+|d')?(?:chats?|f[eé]lins?)\b", t):
+            if "ok_dogs" not in result:
+                result["ok_dogs"] = "oui"
+            if "ok_cats" not in result:
+                result["ok_cats"] = "oui"
+
+        return result
 
     @classmethod
     def _detect_species(cls, text, categories=None):
