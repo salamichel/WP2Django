@@ -135,7 +135,63 @@ def page_detail(request, slug):
     return render(request, "blog/page_detail.html", {"page": page})
 
 
+def _get_adoption_years():
+    """Retrieve distinct adoption years from Post.adoption_date and Category slugs."""
+    import re
+    from django.db.models.functions import ExtractYear
+    years = set(
+        Post.objects.filter(status="published", adoption_date__isnull=False)
+        .annotate(year=ExtractYear("adoption_date"))
+        .values_list("year", flat=True)
+    )
+    for cat in Category.objects.filter(slug__regex=r"^les-adoptes-\d{4}$"):
+        match = re.search(r"(\d{4})", cat.slug)
+        if match:
+            years.add(int(match.group(1)))
+
+    return sorted([int(y) for y in years if y], reverse=True)
+
+
+def adoptions_by_year(request, year):
+    """Display adopted animals for a specific year, e.g. /categories/les-adoptes/2026/."""
+    from django.db.models import Q
+    year = int(year)
+
+    category = Category.objects.filter(slug__in=[f"les-adoptes-{year}", f"adoptes-{year}"]).first()
+    if not category:
+        parent_cat, _ = Category.objects.get_or_create(slug="les-adoptes", defaults={"name": "Les Adoptés"})
+        category, _ = Category.objects.get_or_create(
+            slug=f"les-adoptes-{year}",
+            defaults={"name": f"Les Adoptés {year}", "parent": parent_cat}
+        )
+
+    queryset = Post.objects.filter(status="published").filter(
+        Q(adoption_date__year=year) | Q(categories=category) | Q(categories__slug=f"les-adoptes-{year}")
+    ).distinct().select_related("author", "featured_image").prefetch_related("categories", "tags")
+
+    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    posts = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "blog/category.html", {
+        "category": category,
+        "posts": posts,
+        "total_count": queryset.count(),
+        "adoption_years": _get_adoption_years(),
+        "current_adoption_year": year,
+        "is_adoption_archive": True,
+        "page_title": f"Les Adoptés {year}",
+    })
+
+
 def category_detail(request, slug):
+    import re
+    from django.db.models import Q
+
+    # Check for yearly adoption category URL (e.g. les-adoptes-2026)
+    match_year = re.match(r"^(?:les-)?adoptes-(\d{4})$", slug)
+    if match_year:
+        return adoptions_by_year(request, int(match_year.group(1)))
+
     possible_slugs = [slug]
     if slug.startswith("les-"):
         possible_slugs.append(slug[4:])
@@ -171,6 +227,22 @@ def category_detail(request, slug):
             page_title="Urgences & Recherche FA",
             category=category,
         )
+    elif canonical_slug in ["adoptes", "adopte"]:
+        # All adopted animals with year navigation
+        queryset = Post.objects.filter(status="published").filter(
+            Q(categories=category) | Q(adoption_status="adopte") | Q(categories__slug__startswith="les-adoptes")
+        ).distinct().select_related("author", "featured_image").prefetch_related("categories", "tags")
+        paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+        posts = paginator.get_page(request.GET.get("page"))
+        return render(request, "blog/category.html", {
+            "category": category,
+            "posts": posts,
+            "total_count": queryset.count(),
+            "adoption_years": _get_adoption_years(),
+            "current_adoption_year": None,
+            "is_adoption_archive": True,
+            "page_title": "Tous les adoptés",
+        })
     else:
         # Standard non-animal categories (news, press)
         queryset = Post.objects.filter(

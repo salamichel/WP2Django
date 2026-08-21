@@ -23,6 +23,10 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
+        import re
+        match_year = re.match(r"^(?:les-)?adoptes-(\d{4})$", self.slug)
+        if match_year:
+            return reverse("blog:adoptions_by_year", kwargs={"year": int(match_year.group(1))})
         return reverse("blog:category", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
@@ -143,6 +147,7 @@ class Post(models.Model):
     is_sterilized = models.BooleanField("Sterilise/Castre", null=True, blank=True)
     is_adoptable = models.BooleanField("Adoptable", default=False)
     adoption_status = models.CharField("Statut d'adoption", max_length=20, choices=ADOPTION_STATUS_CHOICES, default="adoptable")
+    adoption_date = models.DateField("Date d'adoption", null=True, blank=True, help_text="Date d'adoption définitive")
     ok_dogs = models.CharField("Ok Chiens", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")
     ok_cats = models.CharField("Ok Chats", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")
     ok_children = models.CharField("Ok Enfants", max_length=10, choices=COMPATIBILITY_CHOICES, blank=True, default="")

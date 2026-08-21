@@ -355,6 +355,60 @@ class AnimalDataExtractorTest(TestCase):
         self.assertFalse(data_deceased["is_adoptable"])
         self.assertFalse(data_deceased["is_emergency"])
 
+    def test_extract_adoption_date_formats(self):
+        # 1. Standard format dd/mm/yyyy
+        content1 = "<p>Sexe : mâle<br>Race : Epagneul<br>Adoption définitive le 07/03/2026</p>"
+        data1, _ = AnimalDataExtractor.extract(content1, title="Snoopy")
+        self.assertEqual(data1.get("adoption_date"), date(2026, 3, 7))
+        self.assertEqual(data1["adoption_status"], "adopte")
+        self.assertFalse(data1["is_emergency"])
+
+        # 2. Adopté le dd/mm/yyyy
+        content2 = "<p>Adopté le 12/05/2025. Bonne route dans ta nouvelle maison !</p>"
+        data2, _ = AnimalDataExtractor.extract(content2, title="Felix (Chat)")
+        self.assertEqual(data2.get("adoption_date"), date(2025, 5, 12))
+        self.assertEqual(data2["adoption_status"], "adopte")
+
+        # 3. French text date (15 janvier 2024)
+        content3 = "<p>Adoptée le 15 janvier 2024 par une formidable famille.</p>"
+        data3, _ = AnimalDataExtractor.extract(content3, title="Maya (Chienne)")
+        self.assertEqual(data3.get("adoption_date"), date(2024, 1, 15))
+
+        # 4. Structured field: "Date d'adoption : 04/08/2023"
+        content4 = "<p>Date d'adoption : 04/08/2023<br>Sexe : femelle</p>"
+        data4, _ = AnimalDataExtractor.extract(content4, title="Luna")
+        self.assertEqual(data4.get("adoption_date"), date(2023, 8, 4))
+
+    def test_adoption_date_clears_urgency(self):
+        # Even with [URGENT] in title, adoption date must strictly clear urgency
+        content = "<p>Adoption définitive le 07/03/2026. Sexe : mâle</p>"
+        data, _ = AnimalDataExtractor.extract(content, categories=["Urgences"], title="[URGENT] Titou")
+        self.assertEqual(data["adoption_status"], "adopte")
+        self.assertEqual(data.get("adoption_date"), date(2026, 3, 7))
+        self.assertFalse(data["is_emergency"])
+        self.assertFalse(data["is_adoptable"])
+
+    def test_adoptions_by_year_view(self):
+        from blog.models import Post
+        post = Post.objects.create(
+            title="Bella",
+            slug="bella-adoptee-2026",
+            status="published",
+            species="chien",
+            adoption_status="adopte",
+            adoption_date=date(2026, 3, 7),
+        )
+        response = self.client.get("/categories/les-adoptes/2026/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bella")
+        self.assertContains(response, "2026")
+
+        # Global page
+        response_all = self.client.get("/categories/les-adoptes/")
+        self.assertEqual(response_all.status_code, 200)
+        self.assertContains(response_all, "Bella")
+
+
 
 class ImageOptimizerTest(TestCase):
     def test_image_resizing(self):

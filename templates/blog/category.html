@@ -6,11 +6,20 @@
 <div class="container">
     <div class="page-header">
         <span class="page-header-badge">Categorie</span>
-        <h1>{{ category.name }}</h1>
+        <h1>{{ page_title|default:category.name }}</h1>
         {% if category.description %}
         <p class="page-header-sub">{{ category.description }}</p>
         {% endif %}
     </div>
+
+    {% if is_adoption_archive and adoption_years %}
+    <div class="adoption-year-nav" style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;margin:0 auto 2.5rem;max-width:800px;">
+        <a href="{% url 'blog:category' slug='les-adoptes' %}" class="btn {% if not current_adoption_year %}btn-primary{% else %}btn-outline{% endif %}" style="padding:0.45rem 1.25rem;font-size:0.92rem;border-radius:9999px;">Tous les adoptés</a>
+        {% for y in adoption_years %}
+        <a href="{% url 'blog:adoptions_by_year' year=y %}" class="btn {% if current_adoption_year == y %}btn-primary{% else %}btn-outline{% endif %}" style="padding:0.45rem 1.25rem;font-size:0.92rem;border-radius:9999px;">{{ y }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="post-grid">
         {% for post in posts %}

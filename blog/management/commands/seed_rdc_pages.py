@@ -251,66 +251,10 @@ class Command(BaseCommand):
                 <p>Les informations recueillies via les formulaires de contact et d'adoption sont enregistrées dans un fichier informatisé sécurisé pour le traitement des candidatures. Elles ne sont jamais cédées, louées ni vendues à des tiers. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données.</p>
                 """
             },
-            {
-                "title": "Que sont-ils devenus ? (Les Adoptés)",
-                "slug": "les-adoptes",
-                "seo_title": "Que sont-ils devenus ? Les animaux adoptés de Rêves de Chiens",
-                "seo_description": "Découvrez les nouvelles et photos de tous les chiens, chats et rongeurs adoptés grâce à l'association depuis 2011.",
-                "content": """
-                <div class="cms-page-hero">
-                    <p class="lead">Depuis plus de 15 ans, grâce à votre soutien et au dévouement de nos familles d'accueil, des centaines d'animaux ont trouvé le bonheur dans un foyer pour la vie. Retrouvez ici leurs nouvelles et leurs visages épanouis !</p>
-                </div>
-
-                <div class="adoptees-year-selector" style="background:#f0f8fc;padding:1.25rem;border-radius:12px;border:1px solid #b8dfef;margin:2rem 0;">
-                    <h3 style="margin-top:0;color:#2191C0;font-size:1.1rem;">🗓 Historique des Adoptions par Année :</h3>
-                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">
-                        <a href="#annee-2026" class="btn btn-sm btn-primary">2026</a>
-                        <a href="#annee-2025" class="btn btn-sm btn-outline">2025</a>
-                        <a href="#annee-2024" class="btn btn-sm btn-outline">2024</a>
-                        <a href="#annee-2023" class="btn btn-sm btn-outline">2023</a>
-                        <a href="#annee-2022" class="btn btn-sm btn-outline">2022</a>
-                        <a href="#annee-2021" class="btn btn-sm btn-outline">2021</a>
-                        <a href="#annee-2020" class="btn btn-sm btn-outline">2020</a>
-                        <a href="#annee-2019" class="btn btn-sm btn-outline">2019</a>
-                        <a href="#annee-2018" class="btn btn-sm btn-outline">2018</a>
-                        <a href="#annee-2017" class="btn btn-sm btn-outline">2017</a>
-                        <a href="#annee-2016" class="btn btn-sm btn-outline">2016</a>
-                        <a href="#annee-2015" class="btn btn-sm btn-outline">2015</a>
-                        <a href="#annee-2014" class="btn btn-sm btn-outline">2014</a>
-                        <a href="#annee-2013" class="btn btn-sm btn-outline">2013</a>
-                        <a href="#annee-2012" class="btn btn-sm btn-outline">2012</a>
-                        <a href="#annee-2011" class="btn btn-sm btn-outline">2011</a>
-                    </div>
-                </div>
-
-                <div id="annee-2026" style="margin-top:2.5rem;">
-                    <h2 style="color:#2191C0;border-bottom:2px solid #e2e8f0;padding-bottom:0.5rem;">🎉 Les Heureux Adoptés de 2026</h2>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:1.5rem;margin-top:1.5rem;">
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-                            <h3 style="margin-top:0;color:#1e293b;">Verdi (Chat)</h3>
-                            <p style="color:#64748b;font-size:0.9rem;"><em>Adopté en février 2026</em></p>
-                            <p>Verdi passe désormais ses journées à ronronner sur son coussin au soleil dans sa nouvelle famille bienveillante.</p>
-                        </div>
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-                            <h3 style="margin-top:0;color:#1e293b;">Locky (Chien)</h3>
-                            <p style="color:#64748b;font-size:0.9rem;"><em>Adopté en janvier 2026</em></p>
-                            <p>Après plusieurs mois en FA, Locky a trouvé sa famille idéale avec un grand jardin et de longues balades en forêt.</p>
-                        </div>
-                        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-                            <h3 style="margin-top:0;color:#1e293b;">Ulysse (Chiot)</h3>
-                            <p style="color:#64748b;font-size:0.9rem;"><em>Adopté en janvier 2026</em></p>
-                            <p>Ulysse grandit entouré d'amour et de jeux. Un sauvetage réussi grâce à la réactivité de nos bénévoles.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align:center;margin-top:3rem;padding:2rem;background:#f8fafc;border-radius:12px;">
-                    <h3>Vous avez adopté un animal chez Rêves de Chiens ?</h3>
-                    <p>Envoyez-nous de ses nouvelles et des photos sur <a href="mailto:contact@revesdechiens.fr">contact@revesdechiens.fr</a> ou sur notre page <a href="https://www.instagram.com/refuge_reves_de_chiens/" target="_blank" rel="noopener">Instagram</a> !</p>
-                </div>
-                """
-            },
         ]
+
+        # Clean up any obsolete static page for les-adoptes
+        Page.objects.filter(slug="les-adoptes").delete()
 
         created_pages = {}
         for pdata in pages_data:
@@ -331,6 +275,10 @@ class Command(BaseCommand):
         # Setup Menus
         self.stdout.write("Setting up Navigation Menus...")
 
+        # Ensure Categories exist for dynamic menu links
+        from blog.models import Category
+        les_adoptes_cat, _ = Category.objects.get_or_create(slug="les-adoptes", defaults={"name": "Les Adoptés"})
+
         # 1. Main Header Menu
         main_menu, _ = Menu.objects.get_or_create(slug="main", defaults={"name": "Menu Principal"})
         main_menu.items.all().delete()
@@ -339,7 +287,7 @@ class Command(BaseCommand):
         MenuItem.objects.create(menu=main_menu, title="L'association", linked_page=created_pages.get("a-propos"), position=3)
         MenuItem.objects.create(menu=main_menu, title="Conditions d'adoption", linked_page=created_pages.get("conditions-adoption"), position=4)
         MenuItem.objects.create(menu=main_menu, title="Familles d'Accueil", linked_page=created_pages.get("familles-accueil"), position=5)
-        MenuItem.objects.create(menu=main_menu, title="Les Adoptés", linked_page=created_pages.get("les-adoptes"), position=6)
+        MenuItem.objects.create(menu=main_menu, title="Les Adoptés", linked_category=les_adoptes_cat, position=6)
         MenuItem.objects.create(menu=main_menu, title="Dons & Parrainages", linked_page=created_pages.get("dons-parrainages"), position=7)
         MenuItem.objects.create(menu=main_menu, title="Contact", url="/contact/", position=8)
 
@@ -347,12 +295,12 @@ class Command(BaseCommand):
         adoptions_menu, _ = Menu.objects.get_or_create(slug="adoptions", defaults={"name": "Adopter un animal"})
         adoptions_menu.items.all().delete()
         MenuItem.objects.create(menu=adoptions_menu, title="Tous nos protégés", url="/articles/", position=1)
-        MenuItem.objects.create(menu=adoptions_menu, title="Nos chiens", url="/categorie/chiens/", position=2)
-        MenuItem.objects.create(menu=adoptions_menu, title="Nos chats", url="/categorie/chats/", position=3)
-        MenuItem.objects.create(menu=adoptions_menu, title="🚨 Recherche FA urgente", url="/categorie/urgences/", position=4)
+        MenuItem.objects.create(menu=adoptions_menu, title="Nos chiens", url="/categories/chiens/", position=2)
+        MenuItem.objects.create(menu=adoptions_menu, title="Nos chats", url="/categories/chats/", position=3)
+        MenuItem.objects.create(menu=adoptions_menu, title="🚨 Recherche FA urgente", url="/categories/urgences/", position=4)
         MenuItem.objects.create(menu=adoptions_menu, title="Conditions d'adoption", linked_page=created_pages.get("conditions-adoption"), position=5)
         MenuItem.objects.create(menu=adoptions_menu, title="Conseils d'accueil", linked_page=created_pages.get("conseils-adoption"), position=6)
-        MenuItem.objects.create(menu=adoptions_menu, title="Que sont-ils devenus ? (Adoptés)", linked_page=created_pages.get("les-adoptes"), position=7)
+        MenuItem.objects.create(menu=adoptions_menu, title="Que sont-ils devenus ? (Adoptés)", linked_category=les_adoptes_cat, position=7)
 
         # 3. Plus d'infos Sidebar Menu
         plus_infos_menu, _ = Menu.objects.get_or_create(slug="plus_infos", defaults={"name": "En savoir plus"})
@@ -361,7 +309,7 @@ class Command(BaseCommand):
         MenuItem.objects.create(menu=plus_infos_menu, title="Devenir Famille d'Accueil", linked_page=created_pages.get("familles-accueil"), position=2)
         MenuItem.objects.create(menu=plus_infos_menu, title="Conditions d'abandon & prise en charge", linked_page=created_pages.get("conditions-abandon"), position=3)
         MenuItem.objects.create(menu=plus_infos_menu, title="Faire un don / Parrainer", linked_page=created_pages.get("dons-parrainages"), position=4)
-        MenuItem.objects.create(menu=plus_infos_menu, title="Que sont-ils devenus ?", linked_page=created_pages.get("les-adoptes"), position=5)
+        MenuItem.objects.create(menu=plus_infos_menu, title="Que sont-ils devenus ?", linked_category=les_adoptes_cat, position=5)
         MenuItem.objects.create(menu=plus_infos_menu, title="Mentions légales & Transparence", linked_page=created_pages.get("mentions-legales"), position=6)
 
         # 4. Footer Menu
@@ -370,7 +318,7 @@ class Command(BaseCommand):
         MenuItem.objects.create(menu=footer_menu, title="Accueil", url="/", position=1)
         MenuItem.objects.create(menu=footer_menu, title="À l'adoption", url="/articles/", position=2)
         MenuItem.objects.create(menu=footer_menu, title="L'association", linked_page=created_pages.get("a-propos"), position=3)
-        MenuItem.objects.create(menu=footer_menu, title="Les Adoptés", linked_page=created_pages.get("les-adoptes"), position=4)
+        MenuItem.objects.create(menu=footer_menu, title="Les Adoptés", linked_category=les_adoptes_cat, position=4)
         MenuItem.objects.create(menu=footer_menu, title="Devenir FA", linked_page=created_pages.get("familles-accueil"), position=5)
         MenuItem.objects.create(menu=footer_menu, title="Dons & Soutiens", linked_page=created_pages.get("dons-parrainages"), position=6)
         MenuItem.objects.create(menu=footer_menu, title="Mentions légales", linked_page=created_pages.get("mentions-legales"), position=7)

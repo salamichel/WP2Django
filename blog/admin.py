@@ -79,7 +79,7 @@ class CommentInline(admin.TabularInline):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ("title", "species_badge", "adoption_badge", "status_badge", "author", "published_at")
-    list_filter = ("status", "species", "adoption_status", "is_emergency", "categories", "published_at")
+    list_filter = ("status", "species", "adoption_status", "adoption_date", "is_emergency", "categories", "published_at")
     search_fields = ("title", "animal_name", "content")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("categories", "tags")
@@ -92,7 +92,8 @@ class PostAdmin(admin.ModelAdmin):
             "fields": (
                 ("animal_name", "species", "breed"),
                 ("sex", "birth_date", "weight_kg"),
-                ("adoption_status", "is_adoptable", "is_emergency"),
+                ("adoption_status", "adoption_date"),
+                ("is_adoptable", "is_emergency"),
                 ("ok_dogs", "ok_cats", "ok_children"),
                 ("housing_requirement", "foster_family"),
                 ("is_vaccinated", "is_sterilized", "identification"),
@@ -123,11 +124,13 @@ class PostAdmin(admin.ModelAdmin):
             "adoptable": "#27ae60",
             "reserve": "#e67e22",
             "recherche_fa": "#e74c3c",
-            "adopte": "#95a5a6",
+            "adopte": "#2b9348",
         }
         color = colors.get(obj.adoption_status, "#7f8c8d")
         label = obj.get_adoption_status_display()
-        if obj.is_emergency:
+        if obj.adoption_status == "adopte" and obj.adoption_date:
+            label += f" ({obj.adoption_date.strftime('%d/%m/%Y')})"
+        elif obj.is_emergency:
             label += " 🚨"
         return format_html(
             '<span style="background:{};color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600">{}</span>',

@@ -16,7 +16,10 @@ class CategoryModelTest(TestCase):
 
     def test_get_absolute_url(self):
         cat = Category.objects.create(name="Tech", slug="tech")
-        self.assertEqual(cat.get_absolute_url(), "/categorie/tech/")
+        self.assertEqual(cat.get_absolute_url(), "/categories/tech/")
+
+        cat_adoptes_2026 = Category.objects.create(name="Les Adoptés 2026", slug="les-adoptes-2026")
+        self.assertEqual(cat_adoptes_2026.get_absolute_url(), "/categories/les-adoptes/2026/")
 
     def test_parent_relationship(self):
         parent = Category.objects.create(name="Parent", slug="parent")

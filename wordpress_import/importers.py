@@ -128,6 +128,7 @@ class AnimalDataExtractor:
         (r"^\s*(?:entente\s+(?:avec\s+(?:les\s+)?)?chats?|ok\s+chats?|entente\s+f[eé]line|chats?)\s*:\s*(.+)", "ok_cats"),
         (r"^\s*(?:entente\s+(?:avec\s+(?:les\s+)?)?enfants?|ok\s+enfants?|enfants?)\s*:\s*(.+)", "ok_children"),
         (r"^\s*(?:habitat|logement|environnement|maison/appartement)\s*:\s*(.+)", "housing_requirement"),
+        (r"^\s*(?:adoption\s+d[eé]finitive(?:\s+le)?|adopt[eé]e?(?:\s+le)?|date\s+d'adoption)\s*:\s*(.+)", "adoption_date"),
         (r"^\s*(?:statut|situation)\s*:\s*(.+)", "adoption_status"),
         (r"^\s*[âa]ge\s*:\s*(.+)", "age_text"),
         (r"^\s*esp[eè]ce\s*:\s*(.+)", "species"),
@@ -174,6 +175,12 @@ class AnimalDataExtractor:
             if key not in result or not result[key]:
                 result[key] = val
 
+        # Extract adoption date from narrative phrasing if not explicitly in structured fields
+        if "adoption_date" not in result or not result["adoption_date"]:
+            extracted_adopt_date = cls._extract_adoption_date(f"{title} {text}")
+            if extracted_adopt_date:
+                result["adoption_date"] = extracted_adopt_date
+
         # Normalize extracted values
         normalized = cls._normalize(result)
 
@@ -190,11 +197,12 @@ class AnimalDataExtractor:
             or any(any(w in c for w in ("quitté", "quitte", "quittés", "quittes", "hommage", "hommages", "deces", "décès", "étoile", "etoile")) for c in cat_lower)
         )
 
-        # 2. Detect adopted animals
+        # 2. Detect adopted animals (including presence of adoption_date)
         is_adopted = (
             any(w in title_lower for w in ("[adopté]", "[adopte]", "(adopté)", "(adopte)", "adopté", "adoptée", "adopte", "adoptés", "adoptes"))
             or any(any(w in c for w in ("adopté", "adopte", "adoptés", "adoptes", "les adoptés", "les adoptes")) for c in cat_lower)
             or normalized.get("adoption_status") == "adopte"
+            or bool(normalized.get("adoption_date"))
         )
 
         # 3. Detect reserved animals
@@ -461,17 +469,46 @@ class AnimalDataExtractor:
             elif any(w in status_val for w in ("adoptable", "disponible", "a adopter")):
                 result["adoption_status"] = "adoptable"
 
-        # Need at least species or breed to be considered an animal profile
-        if not result.get("species") and not result.get("breed") and not result.get("sex"):
+        # Adoption date
+        adopt_date_str = raw.get("adoption_date")
+        if isinstance(adopt_date_str, date):
+            result["adoption_date"] = adopt_date_str
+        elif isinstance(adopt_date_str, str) and adopt_date_str:
+            parsed = cls._parse_french_date(adopt_date_str)
+            if parsed:
+                result["adoption_date"] = parsed
+
+        # Need at least species, breed, sex, or adoption_date to be considered an animal profile
+        if not result.get("species") and not result.get("breed") and not result.get("sex") and not result.get("adoption_date"):
             return {}
 
         return result
 
+    FRENCH_MONTHS = {
+        "janvier": 1, "janv": 1,
+        "fevrier": 2, "février": 2, "fevr": 2, "févr": 2,
+        "mars": 3,
+        "avril": 4, "avr": 4,
+        "mai": 5,
+        "juin": 6,
+        "juillet": 7, "juil": 7,
+        "aout": 8, "août": 8,
+        "septembre": 9, "sept": 9,
+        "octobre": 10, "oct": 10,
+        "novembre": 11, "nov": 11,
+        "decembre": 12, "décembre": 12, "dec": 12, "déc": 12,
+    }
+
     @classmethod
     def _parse_french_date(cls, text):
-        """Parse dates in French formats: dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy."""
+        """Parse dates in French formats: dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy, or 'dd mois yyyy'."""
+        if not text:
+            return None
+        text_clean = str(text).strip()
+
+        # 1. Numeric formats: dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy, yyyy-mm-dd
         for fmt in (r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})", r"(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})"):
-            match = re.search(fmt, text)
+            match = re.search(fmt, text_clean)
             if match:
                 groups = match.groups()
                 try:
@@ -481,6 +518,57 @@ class AnimalDataExtractor:
                         return date(int(groups[2]), int(groups[1]), int(groups[0]))
                 except (ValueError, TypeError):
                     continue
+
+        # 2. Text formats: '07 mars 2026', '1er mai 2025', '15 janvier 2024'
+        text_lower = text_clean.lower()
+        match_text = re.search(r"(\d{1,2}|1er)\s+([a-zA-Zéû]+)\s+(\d{4})", text_lower)
+        if match_text:
+            day_str, month_str, year_str = match_text.groups()
+            day = 1 if day_str == "1er" else int(day_str)
+            month = cls.FRENCH_MONTHS.get(month_str)
+            if month:
+                try:
+                    return date(int(year_str), month, day)
+                except (ValueError, TypeError):
+                    pass
+
+        # 3. Text format with month and year: 'en mars 2026'
+        match_month_year = re.search(r"\b([a-zA-Zéû]+)\s+(\d{4})\b", text_lower)
+        if match_month_year:
+            month_str, year_str = match_month_year.groups()
+            month = cls.FRENCH_MONTHS.get(month_str)
+            if month:
+                try:
+                    return date(int(year_str), month, 1)
+                except (ValueError, TypeError):
+                    pass
+
+        return None
+
+    @classmethod
+    def _extract_adoption_date(cls, text):
+        """Extract adoption date from narrative or structured phrasing in text/title.
+        Examples:
+        - 'Adoption définitive le 07/03/2026'
+        - 'Adopté le 12/05/2025'
+        - 'Adoptée le 15 janvier 2024'
+        - 'Adopté en mars 2026'
+        - 'Date d'adoption : 04/08/2023'
+        - 'En famille pour la vie depuis le 10/02/2025'
+        """
+        patterns = [
+            r"adoption\s+d[eé]finitive\s+(?:le\s+)?([^\n.,<]+)",
+            r"adopt[eé]e?(?:\s*\([eé]\))?\s+(?:le\s+|en\s+)([^\n.,<]+)",
+            r"date\s+d'adoption\s*:\s*([^\n.,<]+)",
+            r"en\s+famille\s+pour\s+la\s+vie\s+(?:depuis\s+(?:le\s+)?)?([^\n.,<]+)",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                candidate = match.group(1).strip()
+                parsed = cls._parse_french_date(candidate)
+                if parsed:
+                    return parsed
         return None
 
     @staticmethod
@@ -936,6 +1024,20 @@ class PostImporter:
 
             if post.adoption_status == "adopte":
                 auto_tags.append(("Adopté", "adopte"))
+                if post.adoption_date:
+                    year_val = post.adoption_date.year
+                    auto_tags.append((f"Adopté {year_val}", f"adoptes-{year_val}"))
+
+                    # Ensure parent and yearly category exist and are linked
+                    parent_cat, _ = Category.objects.get_or_create(
+                        slug="les-adoptes",
+                        defaults={"name": "Les Adoptés"}
+                    )
+                    year_cat, _ = Category.objects.get_or_create(
+                        slug=f"les-adoptes-{year_val}",
+                        defaults={"name": f"Les Adoptés {year_val}", "parent": parent_cat}
+                    )
+                    post.categories.add(year_cat)
             elif post.adoption_status == "recherche_fa" and not is_post_deceased:
                 auto_tags.append(("Recherche FA", "recherche-fa"))
 
