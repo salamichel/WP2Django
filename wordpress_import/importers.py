@@ -116,17 +116,17 @@ class AnimalDataExtractor:
     # All anchored to start of line (^\s*) to avoid matching inside narrative text.
     FIELD_PATTERNS = [
         (r"^\s*(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
-        (r"^\s*(?:race|crois[eé])\s*:\s*(.+)", "breed"),
+        (r"^\s*(?:race|crois[eé]|croisement|type)\s*:\s*(.+)", "breed"),
         (r"^\s*sexe\s*:\s*(.+)", "sex"),
         (r"^\s*(?:n[eé]e?(?:\(e\))?\s+le|date\s+de\s+naissance)\s*:\s*(.+)", "birth_date"),
         (r"^\s*(?:poids)\s*:\s*(.+)", "weight_kg"),
-        (r"^\s*(?:identification\s+[eé]lectronique|puce|identifi[eé])\s*:\s*(.+)", "identification"),
+        (r"^\s*(?:identification\s+[eé]lectronique|puce|identifi[eé]|tatouage)\s*:\s*(.+)", "identification"),
         (r"^\s*(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
         (r"^\s*(?:castr[eé]e?|st[eé]rilis[eé]e?|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
         (r"^\s*(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)(.+)", "foster_family"),
-        (r"^\s*(?:entente\s+chiens?|ok\s+chiens?|chiens?)\s*:\s*(.+)", "ok_dogs"),
-        (r"^\s*(?:entente\s+chats?|ok\s+chats?|chats?)\s*:\s*(.+)", "ok_cats"),
-        (r"^\s*(?:entente\s+enfants?|ok\s+enfants?|enfants?)\s*:\s*(.+)", "ok_children"),
+        (r"^\s*(?:entente\s+(?:avec\s+(?:les\s+)?)?chiens?|ok\s+chiens?|entente\s+cong[eé]n[eè]res?|cong[eé]n[eè]res?|chiens?)\s*:\s*(.+)", "ok_dogs"),
+        (r"^\s*(?:entente\s+(?:avec\s+(?:les\s+)?)?chats?|ok\s+chats?|entente\s+f[eé]line|chats?)\s*:\s*(.+)", "ok_cats"),
+        (r"^\s*(?:entente\s+(?:avec\s+(?:les\s+)?)?enfants?|ok\s+enfants?|enfants?)\s*:\s*(.+)", "ok_children"),
         (r"^\s*(?:habitat|logement|environnement|maison/appartement)\s*:\s*(.+)", "housing_requirement"),
         (r"^\s*(?:statut|situation)\s*:\s*(.+)", "adoption_status"),
         (r"^\s*[âa]ge\s*:\s*(.+)", "age_text"),
@@ -138,9 +138,9 @@ class AnimalDataExtractor:
 
     # Species detection keywords
     SPECIES_KEYWORDS = {
-        "chien": ["chien", "chienne", "chiot", "chiots", "canin"],
-        "chat": ["chat", "chatte", "chaton", "chatons", "félin", "felin"],
-        "rongeur": ["rongeur", "lapin", "hamster", "cochon d'inde", "cobaye", "furet", "rat", "souris"],
+        "chien": ["chien", "chienne", "chiens", "chiennes", "chiot", "chiots", "canin", "canine"],
+        "chat": ["chat", "chatte", "chats", "chattes", "chaton", "chatons", "félin", "felin", "féline"],
+        "rongeur": ["rongeur", "rongeurs", "lapin", "lapins", "hamster", "cochon d'inde", "cobaye", "furet", "rat", "souris"],
     }
 
     @classmethod
@@ -173,34 +173,51 @@ class AnimalDataExtractor:
         if not normalized:
             return {}, content
 
-        # Multi-source resolution for adoption status and emergency
+        # Multi-source resolution for adoption status, deceased status, and emergency
         title_lower = (title or "").lower()
         cat_lower = [c.lower() if isinstance(c, str) else getattr(c, "name", "").lower() for c in (categories or [])]
 
+        # 1. Detect deceased animals ("Ils nous ont quittés", "Hommages", etc.)
+        is_deceased = (
+            any(w in title_lower for w in ("nous ont quitté", "nous ont quittes", "quittés", "quittes", "hommage", "hommages", "décédé", "decede", "décédée", "decedee", "étoile", "etoile", "repose en paix", "rip"))
+            or any(any(w in c for w in ("quitté", "quitte", "quittés", "quittes", "hommage", "hommages", "deces", "décès", "étoile", "etoile")) for c in cat_lower)
+        )
+
+        # 2. Detect adopted animals
         is_adopted = (
-            any(w in title_lower for w in ("[adopté]", "[adopte]", "(adopté)", "(adopte)", "adopté", "adoptée", "adopte", "adoptés"))
-            or any(any(w in c for w in ("adopté", "adopte", "adoptés", "adoptes", "les adoptés")) for c in cat_lower)
+            any(w in title_lower for w in ("[adopté]", "[adopte]", "(adopté)", "(adopte)", "adopté", "adoptée", "adopte", "adoptés", "adoptes"))
+            or any(any(w in c for w in ("adopté", "adopte", "adoptés", "adoptes", "les adoptés", "les adoptes")) for c in cat_lower)
             or normalized.get("adoption_status") == "adopte"
         )
 
+        # 3. Detect reserved animals
         is_reserved = (
             any(w in title_lower for w in ("[réservé]", "[reserve]", "(réservé)", "réservé", "reserve", "réservée", "reservee"))
             or any("réservé" in c or "reserve" in c for c in cat_lower)
             or normalized.get("adoption_status") == "reserve"
         )
 
+        # 4. Detect emergency / foster search
         is_emergency = (
             any(w in title_lower for w in ("[urgent]", "urgent", "urgence", "urgences", "recherche fa", "sos"))
             or any("urgence" in c or "recherche fa" in c for c in cat_lower)
             or normalized.get("adoption_status") == "recherche_fa"
         )
 
-        if is_adopted:
+        # Apply strict priority rules: Deceased > Adopted > Reserved > Emergency > Adoptable
+        if is_deceased:
+            normalized["is_adoptable"] = False
+            normalized["is_emergency"] = False
+            if "adoption_status" not in normalized or normalized["adoption_status"] != "adopte":
+                normalized["adoption_status"] = "autre"
+        elif is_adopted:
             normalized["adoption_status"] = "adopte"
             normalized["is_adoptable"] = False
+            normalized["is_emergency"] = False
         elif is_reserved:
             normalized["adoption_status"] = "reserve"
             normalized["is_adoptable"] = True
+            normalized["is_emergency"] = False
         elif is_emergency:
             normalized["adoption_status"] = "recherche_fa"
             normalized["is_adoptable"] = True
@@ -208,9 +225,7 @@ class AnimalDataExtractor:
         else:
             normalized["adoption_status"] = normalized.get("adoption_status") or "adoptable"
             normalized["is_adoptable"] = True
-
-        if is_emergency:
-            normalized["is_emergency"] = True
+            normalized["is_emergency"] = False
 
         # Clean the content: remove only the specific lines that were extracted
         cleaned_content = cls._clean_content_html(content, matched_lines)
@@ -857,12 +872,20 @@ class PostImporter:
                 auto_tags.append(("Vacciné", "vaccine"))
             if post.is_sterilized:
                 auto_tags.append(("Stérilisé", "sterilise"))
-            if post.is_emergency:
+
+            # Urgence tag is strictly excluded if adopted or deceased
+            is_post_deceased = (
+                any(w in (post.title or "").lower() for w in ("nous ont quitté", "quittés", "quittes", "hommage", "hommages", "décédé", "decede", "étoile", "etoile"))
+                or any(any(w in c.name.lower() for w in ("quitté", "quitte", "hommage", "décès", "deces", "étoile")) for c in post.categories.all())
+            )
+            if post.is_emergency and post.adoption_status != "adopte" and not is_post_deceased:
                 auto_tags.append(("Urgence", "urgence"))
+
             if post.adoption_status == "adopte":
                 auto_tags.append(("Adopté", "adopte"))
-            if post.adoption_status == "recherche_fa":
+            elif post.adoption_status == "recherche_fa" and not is_post_deceased:
                 auto_tags.append(("Recherche FA", "recherche-fa"))
+
             if post.breed and len(post.breed) < 50:
                 auto_tags.append((post.breed.capitalize(), _safe_slug(post.breed)))
 

@@ -288,6 +288,53 @@ class AnimalDataExtractorTest(TestCase):
         self.assertTrue(data["is_adoptable"])
         self.assertTrue(data.get("is_emergency"))
 
+    def test_singular_compatibility_patterns(self):
+        content = (
+            "<p>Chien : oui</p>"
+            "<p>Chat : non</p>"
+            "<p>Enfant : sociable</p>"
+        )
+        data, _ = AnimalDataExtractor.extract(content, categories=["Chiens"])
+        self.assertEqual(data["ok_dogs"], "oui")
+        self.assertEqual(data["ok_cats"], "non")
+        self.assertEqual(data["ok_children"], "oui")
+
+        content2 = (
+            "<p>Ok chien : oui</p>"
+            "<p>Ok chat : pas du tout</p>"
+            "<p>Ok enfant : oui</p>"
+        )
+        data2, _ = AnimalDataExtractor.extract(content2, categories=["Chiens"])
+        self.assertEqual(data2["ok_dogs"], "oui")
+        self.assertEqual(data2["ok_cats"], "non")
+        self.assertEqual(data2["ok_children"], "oui")
+
+        content3 = (
+            "<p>Entente chien : oui</p>"
+            "<p>Entente avec les chats : non</p>"
+            "<p>Entente congénères : oui</p>"
+        )
+        data3, _ = AnimalDataExtractor.extract(content3, categories=["Chiens"])
+        self.assertEqual(data3["ok_dogs"], "oui")
+        self.assertEqual(data3["ok_cats"], "non")
+
+    def test_urgency_excluded_if_adopted_or_deceased(self):
+        # 1. Urgent title but adopted
+        content = "<p>Race : Berger</p><p>Sexe : mâle</p>"
+        data_adopted, _ = AnimalDataExtractor.extract(
+            content, categories=["Urgences", "Adoptés"], title="[URGENT] Max [Adopté]"
+        )
+        self.assertEqual(data_adopted["adoption_status"], "adopte")
+        self.assertFalse(data_adopted["is_adoptable"])
+        self.assertFalse(data_adopted["is_emergency"])
+
+        # 2. Urgent in title but deceased ("Ils nous ont quittés")
+        data_deceased, _ = AnimalDataExtractor.extract(
+            content, categories=["Ils nous ont quittés"], title="SOS Hommage à Rex (nous ont quitté)"
+        )
+        self.assertFalse(data_deceased["is_adoptable"])
+        self.assertFalse(data_deceased["is_emergency"])
+
 
 class ImageOptimizerTest(TestCase):
     def test_image_resizing(self):
