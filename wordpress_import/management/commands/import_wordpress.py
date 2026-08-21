@@ -220,17 +220,27 @@ class Command(BaseCommand):
 
         count = 0
         resized_count = 0
+        error_count = 0
         for root, dirs, files in os.walk(source_dir):
             for filename in files:
                 src_path = os.path.join(root, filename)
                 rel_path = os.path.relpath(src_path, source_dir)
                 dst_path = os.path.join(dest, rel_path)
-                was_resized = optimize_and_copy_image(src_path, dst_path, max_dim=1600, quality=85)
-                if was_resized:
-                    resized_count += 1
-                count += 1
+                try:
+                    was_resized = optimize_and_copy_image(src_path, dst_path, max_dim=1600, quality=85)
+                    if was_resized:
+                        resized_count += 1
+                    count += 1
+                except Exception as exc:
+                    error_count += 1
+                    logger.warning("Error processing %s: %s", src_path, exc)
 
-        self.stdout.write(self.style.SUCCESS(f"  -> Copied {count} media files ({resized_count} resized to max 1600px)"))
+        summary_msg = f"  -> Processed {count} media files ({resized_count} resized to max 1600px"
+        if error_count > 0:
+            summary_msg += f", {error_count} skipped due to errors)"
+        else:
+            summary_msg += ")"
+        self.stdout.write(self.style.SUCCESS(summary_msg))
 
     def _print_summary(self, user_map, category_map, tag_map, post_map, page_map, attachment_map, comment_map):
         """Print final import summary."""

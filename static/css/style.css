@@ -3045,25 +3045,291 @@ textarea {
     color: var(--color-text-muted);
 }
 
-.post-featured-image {
-    margin-bottom: 2.5rem;
-    border-radius: var(--radius-lg, 16px);
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    background: #f1f5f9;
+/* ==========================================================================
+   Featured Hero Presentation Image (Centered with Lightbox Zoom)
+   ========================================================================== */
+.post-featured-image-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    margin: 0 auto 2.5rem;
     text-align: center;
 }
 
-.post-featured-image img {
+.post-featured-image {
+    position: relative;
+    display: block;
     width: 100%;
-    max-height: 480px;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.09);
+    background: #f1f5f9;
+    cursor: zoom-in;
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.post-featured-image:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.14);
+}
+
+.featured-img-main {
+    width: 100%;
+    max-height: 520px;
     object-fit: cover;
     object-position: center;
     display: block;
     margin: 0 auto;
+    transition: transform 0.45s ease;
+}
+
+.post-featured-image:hover .featured-img-main {
+    transform: scale(1.02);
+}
+
+.featured-image-zoom-badge {
+    position: absolute;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.95rem;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.post-featured-image:hover .featured-image-zoom-badge {
+    background: var(--color-primary);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(224, 86, 36, 0.4);
+}
+
+/* ==========================================================================
+   Interactive Animal Photo Gallery Section
+   ========================================================================== */
+.post-gallery-section {
+    margin: 3rem 0;
+    padding: 2.25rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.gallery-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.gallery-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.gallery-pill-badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-primary);
+    background: #fff7ed;
+    padding: 4px 12px;
+    border-radius: 9999px;
+}
+
+.gallery-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.gallery-count-badge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 9999px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.15rem;
+}
+
+.gallery-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    text-decoration: none;
+    color: inherit;
+    cursor: zoom-in;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-primary);
+    box-shadow: 0 12px 28px rgba(224, 86, 36, 0.16);
+}
+
+.gallery-card-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.gallery-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-card:hover .gallery-card-img {
+    transform: scale(1.08);
+}
+
+.gallery-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.25s ease;
+}
+
+.gallery-card:hover .gallery-card-overlay {
+    opacity: 1;
+}
+
+.gallery-zoom-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(0.8);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-card:hover .gallery-zoom-icon {
+    transform: scale(1);
+}
+
+.gallery-card-caption {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #475569;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Custom Lightbox Enhancements */
+.glightbox-clean .gslide-title {
+    font-family: var(--font-display) !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+}
+
+.glightbox-clean .gslide-desc {
+    color: #cbd5e1 !important;
+}
+
+.glightbox-clean .gnext,
+.glightbox-clean .gprev,
+.glightbox-clean .gclose {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-radius: 50% !important;
+    transition: all 0.2s ease !important;
+}
+
+.glightbox-clean .gnext:hover,
+.glightbox-clean .gprev:hover,
+.glightbox-clean .gclose:hover {
+    background: var(--color-primary) !important;
+    transform: scale(1.1) !important;
+}
+
+@media (max-width: 768px) {
+    .featured-img-main {
+        max-height: 380px;
+    }
+
+    .post-featured-image {
+        border-radius: 18px;
+    }
+
+    .post-gallery-section {
+        padding: 1.25rem 1rem;
+        border-radius: 18px;
+        margin: 2rem 0;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+    }
+
+    .gallery-card {
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .featured-img-main {
+        max-height: 290px;
+    }
+
+    .gallery-title {
+        font-size: 1.15rem;
+    }
 }
 
 .animal-profile-card {
