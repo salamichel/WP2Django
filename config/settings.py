@@ -115,9 +115,19 @@ CKEDITOR_5_CONFIGS = {
             "bold", "italic", "underline", "strikethrough", "|",
             "link", "blockQuote", "code", "codeBlock", "|",
             "bulletedList", "numberedList", "todoList", "|",
-            "insertImage", "mediaEmbed", "|",
+            "insertImage", "mediaEmbed", "sourceEditing", "|",
             "undo", "redo",
         ],
+        "htmlSupport": {
+            "allow": [
+                {
+                    "name": "/.*/",
+                    "attributes": True,
+                    "classes": True,
+                    "styles": True,
+                }
+            ]
+        },
     },
 }
 CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"

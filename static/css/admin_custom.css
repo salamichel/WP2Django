@@ -4,51 +4,58 @@
    =========================== */
 
 :root {
-    /* Override Django admin CSS variables */
-    --primary: #2191C0;
-    --accent: #176d91;
-    --secondary: #5b8c5a;
-    --primary-fg: #fff;
+    /* Override Django admin CSS variables - 100% matched with front-end style.css */
+    --primary: #1982c4;
+    --primary-dark: #126396;
+    --primary-light: #e8f4fb;
+    --accent: #f77f00;
+    --secondary: #2b9348;
+    --emergency: #d90429;
+    --primary-fg: #ffffff;
 
-    --header-color: #0f2d3d;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: "SF Mono", "Fira Code", monospace;
+
+    --header-color: #0f172a;
     --header-branding-color: var(--primary);
-    --header-bg: #0f2d3d;
-    --header-link-color: #fff;
+    --header-bg: #0f172a;
+    --header-link-color: #ffffff;
 
     --breadcrumbs-fg: rgba(255, 255, 255, 0.85);
-    --breadcrumbs-link-fg: #fff;
-    --breadcrumbs-bg: #1e3a4b;
+    --breadcrumbs-link-fg: #ffffff;
+    --breadcrumbs-bg: #1e293b;
 
-    --link-fg: #2191C0;
-    --link-hover-color: #176d91;
-    --link-selected-fg: #176d91;
+    --link-fg: #1982c4;
+    --link-hover-color: #126396;
+    --link-selected-fg: #126396;
 
     --hairline-color: #e2e8f0;
     --border-color: #e2e8f0;
 
-    --button-fg: #fff;
-    --button-bg: #2191C0;
-    --button-hover-bg: #176d91;
-    --default-button-bg: #2191C0;
-    --default-button-hover-bg: #176d91;
+    --button-fg: #ffffff;
+    --button-bg: #1982c4;
+    --button-hover-bg: #126396;
+    --default-button-bg: #1982c4;
+    --default-button-hover-bg: #126396;
 
-    --close-button-bg: #636e72;
-    --close-button-hover-bg: #2d3436;
+    --close-button-bg: #64748b;
+    --close-button-hover-bg: #1e293b;
 
-    --object-tools-fg: #e8734a;
-    --object-tools-bg: #fdf0ec;
-    --object-tools-hover-bg: #e8734a;
+    --object-tools-fg: #1982c4;
+    --object-tools-bg: #e8f4fb;
+    --object-tools-hover-bg: #1982c4;
 
-    --body-bg: #faf9f7;
-    --body-fg: #2d3436;
-    --body-quiet-color: #636e72;
-    --body-loud-color: #2d3436;
+    --body-bg: #f8fafc;
+    --body-fg: #1e293b;
+    --body-quiet-color: #64748b;
+    --body-loud-color: #0f172a;
 
-    --darkened-bg: #f5f3f0;
-    --selected-bg: #fdf0ec;
-    --selected-row: #fdf0ec;
+    --darkened-bg: #f1f5f9;
+    --selected-bg: #e8f4fb;
+    --selected-row: #e8f4fb;
 
-    --error-fg: #dc2626;
+    --error-fg: #d90429;
     --message-success-bg: #ecfdf5;
     --message-warning-bg: #fffbeb;
     --message-error-bg: #fef2f2;
@@ -56,7 +63,9 @@
 
 /* --- Global --- */
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-family: var(--font-sans) !important;
+    background-color: var(--body-bg) !important;
+    color: var(--body-fg) !important;
 }
 
 /* --- Header --- */
@@ -984,3 +993,345 @@ select:focus {
         margin-bottom: 4px;
     }
 }
+
+/* ==========================================================================
+   WYSIWYG CKEditor 5 Content & Typography Matching Front-End 100%
+   ========================================================================== */
+
+/* CKEditor 5 Container in Django Admin */
+.django_ckeditor_5 {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.ck.ck-editor {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden;
+    border: 1.5px solid #cbd5e1 !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.ck.ck-editor:focus-within {
+    border-color: #1982c4 !important;
+    box-shadow: 0 0 0 3px rgba(25, 130, 196, 0.15), 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.ck.ck-toolbar {
+    background: #f8fafc !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 14px 14px 0 0 !important;
+    padding: 10px 14px !important;
+    gap: 4px !important;
+}
+
+.ck.ck-toolbar .ck-button {
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+    color: #334155 !important;
+}
+
+.ck.ck-toolbar .ck-button:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+.ck.ck-toolbar .ck-button.ck-on {
+    background: #e8f4fb !important;
+    color: #1982c4 !important;
+    font-weight: 700 !important;
+}
+
+.ck.ck-editor__main > .ck-editor__editable {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 0 0 14px 14px !important;
+    min-height: 420px !important;
+    padding: 2.25rem 2.5rem !important;
+    box-sizing: border-box !important;
+}
+
+/* --- Content Typography Inside WYSIWYG Editor (.ck-content) --- */
+.ck-content {
+    font-family: var(--font-sans) !important;
+    font-size: 1.05rem !important;
+    line-height: 1.85 !important;
+    color: #1e293b !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Headings with Playfair Display (identical to Front-End) */
+.ck-content h1,
+.ck-content h2,
+.ck-content h3,
+.ck-content h4,
+.ck-content h5,
+.ck-content h6 {
+    font-family: var(--font-display) !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em;
+}
+
+.ck-content h1 {
+    font-size: 2.25rem !important;
+    margin: 2.25rem 0 1.25rem !important;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+}
+
+.ck-content h2 {
+    font-size: 1.75rem !important;
+    margin: 2rem 0 1rem !important;
+    position: relative;
+}
+
+.ck-content h3 {
+    font-size: 1.35rem !important;
+    margin: 1.5rem 0 0.75rem !important;
+}
+
+.ck-content h4 {
+    font-size: 1.15rem !important;
+    margin: 1.25rem 0 0.5rem !important;
+}
+
+/* Paragraphs & Text */
+.ck-content p {
+    font-size: 1.05rem !important;
+    line-height: 1.85 !important;
+    color: #334155 !important;
+    margin-bottom: 1.35rem !important;
+}
+
+.ck-content strong,
+.ck-content b {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.ck-content em,
+.ck-content i {
+    font-style: italic !important;
+}
+
+.ck-content a {
+    color: #1982c4 !important;
+    text-decoration: underline !important;
+    font-weight: 600 !important;
+}
+
+.ck-content a:hover {
+    color: #126396 !important;
+}
+
+/* Lists */
+.ck-content ul,
+.ck-content ol {
+    margin: 1rem 0 1.5rem 2rem !important;
+    padding: 0 !important;
+    line-height: 1.75 !important;
+}
+
+.ck-content li {
+    margin-bottom: 0.5rem !important;
+    color: #334155 !important;
+}
+
+.ck-content ul {
+    list-style-type: disc !important;
+}
+
+.ck-content ol {
+    list-style-type: decimal !important;
+}
+
+/* Blockquotes with animal shelter accent */
+.ck-content blockquote {
+    border-left: 4px solid #1982c4 !important;
+    background: #f8fafc !important;
+    padding: 1.25rem 1.75rem !important;
+    margin: 1.75rem 0 !important;
+    border-radius: 0 12px 12px 0 !important;
+    font-style: italic !important;
+    font-size: 1.05rem !important;
+    color: #475569 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Images & Media in WYSIWYG */
+.ck-content img,
+.ck-content figure img,
+.ck-content .image img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+    margin: 1.25rem auto !important;
+    display: block !important;
+}
+
+.ck-content figure {
+    margin: 1.5rem auto !important;
+    text-align: center !important;
+}
+
+.ck-content figcaption {
+    font-size: 0.88rem !important;
+    color: #64748b !important;
+    margin-top: 0.6rem !important;
+    font-style: italic !important;
+}
+
+/* Tables in WYSIWYG */
+.ck-content table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1.5rem 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 0.95rem !important;
+}
+
+.ck-content table th {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    padding: 0.85rem 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+    text-align: left !important;
+}
+
+.ck-content table td {
+    padding: 0.85rem 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+}
+
+.ck-content table tr:nth-child(even) td {
+    background: #fafbfc !important;
+}
+
+/* Code & Code Blocks in WYSIWYG */
+.ck-content code {
+    background: #f1f5f9 !important;
+    color: #d90429 !important;
+    padding: 0.2rem 0.45rem !important;
+    border-radius: 6px !important;
+    font-family: var(--font-mono, monospace) !important;
+    font-size: 0.9em !important;
+}
+
+.ck-content pre {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    padding: 1.25rem 1.5rem !important;
+    border-radius: 12px !important;
+    overflow-x: auto !important;
+    margin: 1.5rem 0 !important;
+}
+
+.ck-content pre code {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+}
+
+/* Horizontal Rule */
+.ck-content hr {
+    border: none !important;
+    border-top: 2px solid #e2e8f0 !important;
+    margin: 2rem 0 !important;
+}
+
+/* Front-End Buttons inside WYSIWYG */
+.ck-content .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.75rem 1.75rem !important;
+    background: var(--primary, #1982c4) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--primary, #1982c4) !important;
+    border-radius: 9999px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    font-family: var(--font-sans) !important;
+    box-shadow: 0 4px 14px rgba(25, 130, 196, 0.25) !important;
+    transition: all 0.2s ease !important;
+    margin: 0.5rem 0 !important;
+}
+
+.ck-content .btn:hover {
+    background: var(--primary-dark, #126396) !important;
+    border-color: var(--primary-dark, #126396) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 18px rgba(25, 130, 196, 0.35) !important;
+}
+
+.ck-content .btn-primary {
+    background: var(--primary, #1982c4) !important;
+    border-color: var(--primary, #1982c4) !important;
+    color: #ffffff !important;
+}
+
+.ck-content .btn-outline {
+    background: transparent !important;
+    color: var(--primary, #1982c4) !important;
+    border-color: var(--primary, #1982c4) !important;
+    box-shadow: none !important;
+}
+
+.ck-content .btn-outline:hover {
+    background: var(--primary, #1982c4) !important;
+    color: #ffffff !important;
+}
+
+.ck-content .btn-lg {
+    padding: 0.9rem 2.2rem !important;
+    font-size: 1.05rem !important;
+}
+
+.ck-content .btn-sm {
+    padding: 0.4rem 1rem !important;
+    font-size: 0.85rem !important;
+}
+
+/* Front-End Lead Paragraphs */
+.ck-content .lead {
+    font-size: 1.15rem !important;
+    color: #334155 !important;
+    line-height: 1.75 !important;
+    margin-bottom: 1.75rem !important;
+    font-weight: 500 !important;
+}
+
+/* Front-End Cards, Grids & Donation Boxes inside WYSIWYG */
+.ck-content .donation-options,
+.ck-content .grid-2,
+.ck-content .grid-3 {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem !important;
+    margin: 2rem 0 !important;
+}
+
+/* Ensure inline styles (borders, colors, paddings, backgrounds) on custom divs render accurately */
+.ck-content div {
+    box-sizing: border-box;
+}
+
+.ck-content div[style*="text-align: center"],
+.ck-content div[style*="text-align:center"] {
+    text-align: center !important;
+}
+
