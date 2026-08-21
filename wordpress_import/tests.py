@@ -1,3 +1,4 @@
+import os
 from datetime import date
 
 from django.test import TestCase
@@ -258,3 +259,54 @@ class AnimalDataExtractorTest(TestCase):
         data, cleaned = AnimalDataExtractor.extract(content, meta=meta)
         self.assertEqual(data["breed"], "berger allemand")
         self.assertEqual(data["species"], "chien")
+
+    def test_extract_compatibilities_and_status(self):
+        content = (
+            "<p>Race : Berger Australien</p>"
+            "<p>Sexe : Mâle</p>"
+            "<p>Entente chiens : oui</p>"
+            "<p>Entente chats : non</p>"
+            "<p>Entente enfants : oui</p>"
+            "<p>Logement : Maison avec jardin</p>"
+        )
+        data, _ = AnimalDataExtractor.extract(
+            content, categories=["Chiens"], title="[ADOPTÉ] Max"
+        )
+        self.assertEqual(data["ok_dogs"], "oui")
+        self.assertEqual(data["ok_cats"], "non")
+        self.assertEqual(data["ok_children"], "oui")
+        self.assertEqual(data["housing_requirement"], "maison")
+        self.assertEqual(data["adoption_status"], "adopte")
+        self.assertFalse(data["is_adoptable"])
+
+    def test_extract_urgency_status(self):
+        content = "<p>Race : Européen</p><p>Sexe : femelle</p>"
+        data, _ = AnimalDataExtractor.extract(
+            content, categories=["Urgences"], title="SOS Bella recherche FA"
+        )
+        self.assertEqual(data["adoption_status"], "recherche_fa")
+        self.assertTrue(data["is_adoptable"])
+        self.assertTrue(data.get("is_emergency"))
+
+
+class ImageOptimizerTest(TestCase):
+    def test_image_resizing(self):
+        import tempfile
+        from PIL import Image
+        from wordpress_import.image_optimizer import optimize_and_copy_image
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src_path = os.path.join(tmpdir, "large.jpg")
+            dst_path = os.path.join(tmpdir, "out", "optimized.jpg")
+
+            # Create a 2400x1800 image
+            img = Image.new("RGB", (2400, 1800), color="blue")
+            img.save(src_path, "JPEG")
+
+            resized = optimize_and_copy_image(src_path, dst_path, max_dim=1600)
+            self.assertTrue(resized)
+            self.assertTrue(os.path.exists(dst_path))
+
+            with Image.open(dst_path) as out_img:
+                self.assertEqual(out_img.size, (1600, 1200))
+

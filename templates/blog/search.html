@@ -4,34 +4,60 @@
 
 {% block content %}
 <div class="container">
-    <div class="page-header">
-        <h1>Recherche</h1>
+    <div class="search-page-header">
+        <span class="section-badge">Moteur de recherche</span>
+        <h1 class="search-page-title">Que recherchez-vous ?</h1>
+        <p class="search-page-desc">Recherchez parmi tous nos protégés, conseils et articles d'actualité.</p>
     </div>
 
-    <form action="{% url 'blog:search' %}" method="get" class="search-form-large">
+    <form action="{% url 'blog:search' %}" method="get" class="search-form-large" role="search">
         <div class="search-input-wrap">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" name="q" value="{{ query }}" placeholder="Rechercher un article, un animal..." class="form-input search-input" autofocus inputmode="search" enterkeyhint="search">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" name="q" value="{{ query }}" placeholder="Nom d'animal, race, mot-clé..." class="search-input" autofocus enterkeyhint="search" aria-label="Rechercher">
         </div>
-        <button type="submit" class="btn">Rechercher</button>
+        <button type="submit" class="btn btn-primary search-submit-btn">
+            <span>Rechercher</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
     </form>
 
     {% if query %}
-    <p class="search-info">{{ posts.paginator.count }} resultat{{ posts.paginator.count|pluralize }} pour &laquo; <strong>{{ query }}</strong> &raquo;</p>
+        <div class="search-results-meta">
+            <h2 class="search-results-title">
+                {{ posts.paginator.count }} résultat{{ posts.paginator.count|pluralize }} pour &laquo; <span class="search-highlight">{{ query }}</span> &raquo;
+            </h2>
+            <a href="{% url 'blog:search' %}" class="search-reset-link">Réinitialiser</a>
+        </div>
 
-    <div class="post-grid">
-        {% for post in posts %}
-            {% include "includes/_post_card.html" %}
-        {% endfor %}
-    </div>
+        {% if posts %}
+        <div class="post-grid">
+            {% for post in posts %}
+                {% include "includes/_post_card.html" %}
+            {% endfor %}
+        </div>
 
-    {% if posts.has_other_pages %}
-    <nav class="pagination">
-        {% if posts.has_previous %}<a href="?q={{ query }}&page={{ posts.previous_page_number }}" class="btn btn-outline">&laquo;</a>{% endif %}
-        <span class="page-info">Page {{ posts.number }} / {{ posts.paginator.num_pages }}</span>
-        {% if posts.has_next %}<a href="?q={{ query }}&page={{ posts.next_page_number }}" class="btn btn-outline">&raquo;</a>{% endif %}
-    </nav>
-    {% endif %}
+        {% if posts.has_other_pages %}
+        <nav class="pagination" aria-label="Pagination des résultats de recherche">
+            {% if posts.has_previous %}<a href="?q={{ query }}&page={{ posts.previous_page_number }}" class="btn btn-outline">&laquo; Précédent</a>{% endif %}
+            <span class="page-info">Page {{ posts.number }} sur {{ posts.paginator.num_pages }}</span>
+            {% if posts.has_next %}<a href="?q={{ query }}&page={{ posts.next_page_number }}" class="btn btn-outline">Suivant &raquo;</a>{% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state search-empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <h3>Aucun résultat trouvé</h3>
+            <p>Nous n'avons trouvé aucun contenu correspondant à « <strong>{{ query }}</strong> ».</p>
+            <div class="empty-state-suggestions">
+                <span>Suggestions rapides :</span>
+                <a href="{% url 'blog:category' slug='chiens' %}" class="pill-suggestion">🐕 Les Chiens</a>
+                <a href="{% url 'blog:category' slug='chats' %}" class="pill-suggestion">🐈 Les Chats</a>
+                <a href="{% url 'blog:category' slug='rongeurs' %}" class="pill-suggestion">🐹 Les Rongeurs</a>
+                <a href="{% url 'blog:category' slug='urgences' %}" class="pill-suggestion">🚨 Les Urgences</a>
+            </div>
+        </div>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}

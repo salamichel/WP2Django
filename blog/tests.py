@@ -190,7 +190,8 @@ class ViewTests(TestCase):
     def test_search_empty(self):
         resp = self.client.get("/recherche/?q=nonexistent")
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "0 resultat")
+        self.assertContains(resp, "0 résultat")
+        self.assertContains(resp, "Aucun résultat trouvé")
 
     def test_archive_year(self):
         year = self.post.published_at.year

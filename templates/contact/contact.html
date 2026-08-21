@@ -1,65 +1,128 @@
 {% extends "base.html" %}
 
-{% block title %}Contact - {{ site_name }}{% endblock %}
+{% block title %}Contact & Renseignements - {{ site_name }}{% endblock %}
+{% block meta_description %}Contactez l'association refuge Rêves de Chiens pour une adoption, une candidature de famille d'accueil, un sauvetage ou un renseignement.{% endblock %}
 
 {% block page_content %}
-<div class="container">
-    <div class="contact-layout">
-        <div class="contact-info">
-            <span class="hero-badge">Association Rêves de Chiens</span>
-            <h1>Écrivez-nous</h1>
-            <p>Vous souhaitez <strong>adopter</strong>, <strong>devenir Famille d'Accueil</strong>, faire une <strong>demande de prise en charge</strong> ou poser une question ? Notre équipe 100% bénévole vous répond rapidement.</p>
+<div class="container container--contact">
+    <div class="contact-page-header">
+        <span class="contact-badge">🐾 Refuge Solidaire</span>
+        <h1 class="contact-title">Contactez notre équipe</h1>
+        <p class="contact-subtitle">Une question sur une adoption, une prise en charge ou notre association ? Nos bénévoles vous répondent avec bienveillance.</p>
+    </div>
 
-            <div class="contact-details">
-                <div class="contact-detail">
-                    <span class="contact-detail-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    </span>
-                    <div>
-                        <strong>Téléphone & Permanence</strong>
-                        <p><a href="tel:+33123456789">01 23 45 67 89</a> (bénévoles)</p>
-                    </div>
-                </div>
-
-                <div class="contact-detail">
-                    <span class="contact-detail-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </span>
-                    <div>
-                        <strong>Par email</strong>
-                        <p><a href="mailto:contact@revesdechiens.fr">contact@revesdechiens.fr</a></p>
-                    </div>
-                </div>
-
-                <div class="contact-detail">
-                    <span class="contact-detail-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                    </span>
-                    <div>
-                        <strong>Réseaux sociaux</strong>
-                        <p>Suivez nos sauvetages sur <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> et <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>.</p>
-                    </div>
-                </div>
+    <!-- Quick Contact Cards (Mobile & Desktop) -->
+    <div class="contact-quick-cards">
+        <a href="tel:+33123456789" class="contact-quick-card">
+            <div class="quick-card-icon quick-card-icon--phone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
+            <div class="quick-card-text">
+                <span class="quick-card-label">Permanence téléphonique</span>
+                <strong>01 23 45 67 89</strong>
+            </div>
+        </a>
 
-            <div class="contact-notice">
-                <p>💡 <em>Dès l'envoi de votre message pour une adoption, un abandon ou une candidature FA, vous recevrez automatiquement par email un questionnaire détaillé pour compléter votre demande.</em></p>
+        <a href="mailto:contact@revesdechiens.fr" class="contact-quick-card">
+            <div class="quick-card-icon quick-card-icon--mail">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="quick-card-text">
+                <span class="quick-card-label">Email direct</span>
+                <strong>contact@revesdechiens.fr</strong>
+            </div>
+        </a>
+
+        <div class="contact-quick-card contact-quick-card--social">
+            <div class="quick-card-icon quick-card-icon--social">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </div>
+            <div class="quick-card-text">
+                <span class="quick-card-label">Réseaux sociaux</span>
+                <div class="quick-card-links">
+                    <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> &middot; <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+                </div>
             </div>
         </div>
+    </div>
 
+    <!-- Main Contact Form Card -->
+    <div class="contact-card-wrapper">
         <div class="contact-form-card">
-            <form method="post" class="contact-form">
+            <div class="form-card-header">
+                <h2 class="form-card-title">Formulaire de contact en ligne</h2>
+                <p class="form-card-sub">Remplissez les champs ci-dessous pour nous envoyer votre message.</p>
+            </div>
+
+            <form method="post" class="contact-form" novalidate>
                 {% csrf_token %}
-                {% for field in form %}
-                <div class="form-group form-group--{{ field.name }}">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                    <span class="form-error">{{ field.errors.0 }}</span>
-                    {% endif %}
+
+                <!-- Motif de contact -->
+                <div class="form-group form-group--full">
+                    <label for="id_category" class="form-field-label">Motif de votre démarche <span class="required-star">*</span></label>
+                    <div class="form-select-wrap">
+                        {{ form.category }}
+                    </div>
+                    {% if form.category.errors %}<span class="form-error">{{ form.category.errors.0 }}</span>{% endif %}
                 </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-lg btn-full btn-primary">Envoyer ma demande</button>
+
+                <!-- Animal concerné (si applicable) -->
+                <div class="form-group form-group--full">
+                    <label for="id_animal_name" class="form-field-label">Nom de l'animal concerné <small class="form-optional">(optionnel)</small></label>
+                    {{ form.animal_name }}
+                    {% if form.animal_name.errors %}<span class="form-error">{{ form.animal_name.errors.0 }}</span>{% endif %}
+                </div>
+
+                <!-- Grille Coordonnées : Nom & Email -->
+                <div class="form-grid-2cols">
+                    <div class="form-group">
+                        <label for="id_name" class="form-field-label">Votre nom complet <span class="required-star">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<span class="form-error">{{ form.name.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email" class="form-field-label">Adresse email <span class="required-star">*</span></label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Grille Téléphone & Sujet -->
+                <div class="form-grid-2cols">
+                    <div class="form-group">
+                        <label for="id_phone" class="form-field-label">Numéro de téléphone <small class="form-optional">(optionnel)</small></label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<span class="form-error">{{ form.phone.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_subject" class="form-field-label">Sujet du message <small class="form-optional">(optionnel)</small></label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}<span class="form-error">{{ form.subject.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Message -->
+                <div class="form-group form-group--full">
+                    <label for="id_message" class="form-field-label">Votre message <span class="required-star">*</span></label>
+                    {{ form.message }}
+                    {% if form.message.errors %}<span class="form-error">{{ form.message.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="form-notice-box">
+                    <div class="notice-icon">💡</div>
+                    <div class="notice-text">
+                        <strong>Délai de réponse :</strong> Nos bénévoles vous répondent généralement sous 24h à 48h. Pour les adoptions et candidatures FA, un questionnaire détaillé vous sera également adressé.
+                    </div>
+                </div>
+
+                <div class="form-submit-wrapper">
+                    <button type="submit" class="btn btn-primary btn-submit-contact">
+                        <span>Envoyer mon message</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

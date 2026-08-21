@@ -68,14 +68,8 @@
                     </span>
                 </button>
 
-                <!-- Navigation Links & Mega Menu -->
-                <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
-                    <div class="nav-drawer-header">
-                        <span class="nav-drawer-title">Navigation</span>
-                        <button type="button" class="nav-drawer-close" id="nav-drawer-close"
-                            aria-label="Fermer le menu">&times;</button>
-                    </div>
-
+                <!-- Navigation Links & Mega Menu (Desktop Only) -->
+                <nav class="main-nav desktop-nav" id="main-nav" aria-label="Navigation principale">
                     <ul class="nav-list">
                         <!-- 1. Accueil -->
                         <li class="nav-item">
@@ -330,9 +324,6 @@
         </div>
     </header>
 
-    <!-- Mobile Drawer Overlay -->
-    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
-
     <main class="site-main">
         {% if messages %}
         <div class="container">
@@ -430,6 +421,181 @@
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Navigation Drawer (Independent from Header) -->
+    <div class="mobile-drawer-root" id="mobile-drawer-root" aria-hidden="true">
+        <div class="drawer-backdrop" id="drawer-backdrop"></div>
+        <div class="drawer-panel" id="drawer-panel">
+            <div class="drawer-header">
+                <div class="drawer-logo">
+                    <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="drawer-logo-img">
+                    <div class="drawer-logo-text">
+                        <span class="drawer-logo-sub">Refuge Solidaire</span>
+                        <strong class="drawer-logo-main">Rêves de Chiens</strong>
+                    </div>
+                </div>
+                <button type="button" class="drawer-close" id="drawer-close" aria-label="Fermer le menu">&times;</button>
+            </div>
+
+            <div class="drawer-body">
+                <!-- Search Quick Box in Mobile Drawer -->
+                <form action="{% url 'blog:search' %}" method="get" class="drawer-search-form" role="search">
+                    <input type="search" name="q" placeholder="Rechercher un protégé..." class="drawer-search-input" aria-label="Rechercher">
+                    <button type="submit" class="drawer-search-btn" aria-label="Lancer la recherche">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                </form>
+
+                <ul class="drawer-nav-list">
+                    <li><a href="{% url 'blog:home' %}" class="drawer-nav-link{% if request.path == '/' %} active{% endif %}"><span class="drawer-icon">🏠</span> Accueil</a></li>
+
+                    <!-- Accordion Nos Protégés -->
+                    <li class="drawer-accordion open">
+                        <button type="button" class="drawer-accordion-btn" aria-expanded="true">
+                            <span><span class="drawer-icon">🐾</span> Nos Protégés</span>
+                            <svg class="drawer-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="drawer-accordion-content">
+                            <a href="{% url 'blog:post_list' %}" class="drawer-sub-link">🐾 Tous nos protégés</a>
+                            <a href="{% url 'blog:category' slug='chiens' %}" class="drawer-sub-link">🐕 Les Chiens</a>
+                            <a href="{% url 'blog:category' slug='chats' %}" class="drawer-sub-link">🐈 Les Chats</a>
+                            <a href="{% url 'blog:category' slug='rongeurs' %}" class="drawer-sub-link">🐹 Les Rongeurs</a>
+                            <a href="{% url 'blog:category' slug='urgences' %}" class="drawer-sub-link drawer-sub-link--urgent">🚨 Urgences SOS</a>
+                        </div>
+                    </li>
+
+                    <!-- Accordion Agir & Soutenir -->
+                    <li class="drawer-accordion">
+                        <button type="button" class="drawer-accordion-btn" aria-expanded="false">
+                            <span><span class="drawer-icon">❤️</span> Agir & Soutenir</span>
+                            <svg class="drawer-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="drawer-accordion-content">
+                            <a href="/dons-parrainages/" class="drawer-sub-link">🪙 Dons & Parrainages</a>
+                            <a href="/familles-accueil/" class="drawer-sub-link">🏡 Devenir Famille d'Accueil</a>
+                            <a href="/conditions-adoption/" class="drawer-sub-link">📋 Conditions d'adoption</a>
+                            <a href="/conseils-adoption/" class="drawer-sub-link">💡 Conseils avant d'adopter</a>
+                            <a href="/conditions-abandon/" class="drawer-sub-link">⚠️ Animal trouvé ou abandon</a>
+                        </div>
+                    </li>
+
+                    <li><a href="/a-propos/" class="drawer-nav-link"><span class="drawer-icon">ℹ️</span> L'Association</a></li>
+                    <li><a href="{% url 'contact:contact' %}" class="drawer-nav-link{% if '/contact/' in request.path %} active{% endif %}"><span class="drawer-icon">✉️</span> Contact</a></li>
+                </ul>
+
+                <div class="drawer-footer-cta">
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-primary btn-block">
+                        <span>Adopter un animal</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar (Fixed 100% viewport) -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Navigation mobile rapide">
+        <a href="{% url 'blog:home' %}" class="mobile-nav-item{% if request.path == '/' %} active{% endif %}">
+            <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="mobile-nav-label">Accueil</span>
+        </a>
+        <a href="{% url 'blog:post_list' %}" class="mobile-nav-item{% if '/articles/' in request.path %} active{% endif %}">
+            <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+            <span class="mobile-nav-label">Protégés</span>
+        </a>
+
+        <!-- FAB Central (Floating Action Button) -->
+        <div class="mobile-fab-wrap">
+            <button type="button" class="mobile-fab-btn" id="mobile-species-fab" aria-label="Choisir une espèce à adopter" aria-expanded="false" aria-controls="mobile-species-sheet">
+                <span class="fab-pulse-ring"></span>
+                <span class="fab-paw-icon">🐾</span>
+                <span class="fab-close-icon">&times;</span>
+            </button>
+        </div>
+
+        <a href="/dons-parrainages/" class="mobile-nav-item{% if '/dons-parrainages/' in request.path %} active{% endif %}">
+            <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v2m0 8v2"/></svg>
+            <span class="mobile-nav-label">Dons</span>
+        </a>
+
+        <!-- Mobile Bottom Menu Trigger (Toggles Drawer) -->
+        <button type="button" class="mobile-nav-item mobile-nav-item--btn" id="mobile-bottom-menu-btn" aria-label="Ouvrir le menu complet">
+            <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span class="mobile-nav-label">Menu</span>
+        </button>
+    </nav>
+
+    <!-- Mobile Species Action Sheet (Triggered by FAB) -->
+    <div class="mobile-species-sheet" id="mobile-species-sheet" aria-hidden="true">
+        <div class="species-sheet-backdrop" id="species-sheet-backdrop"></div>
+        <div class="species-sheet-panel">
+            <div class="sheet-drag-handle"></div>
+            <div class="species-sheet-header">
+                <div>
+                    <span class="species-sheet-pill">🐾 Adoptions</span>
+                    <h3 class="species-sheet-title">Quel compagnon cherchez-vous ?</h3>
+                </div>
+                <button type="button" class="species-sheet-close" id="species-sheet-close" aria-label="Fermer la sélection">&times;</button>
+            </div>
+
+            <div class="species-sheet-cards">
+                <a href="{% url 'blog:category' slug='chiens' %}" class="species-sheet-card species-sheet-card--dogs">
+                    <div class="species-card-icon-box">🐕</div>
+                    <div class="species-card-body">
+                        <div class="species-card-title-row">
+                            <strong>Les Chiens</strong>
+                            <span class="species-card-tag">En FA</span>
+                        </div>
+                        <p class="species-card-sub">Chiots, adultes & séniors prêts à aimer</p>
+                    </div>
+                    <svg class="species-card-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+
+                <a href="{% url 'blog:category' slug='chats' %}" class="species-sheet-card species-sheet-card--cats">
+                    <div class="species-card-icon-box">🐈</div>
+                    <div class="species-card-body">
+                        <div class="species-card-title-row">
+                            <strong>Les Chats</strong>
+                            <span class="species-card-tag">En FA</span>
+                        </div>
+                        <p class="species-card-sub">Chatons & chats câlins sociabilisés</p>
+                    </div>
+                    <svg class="species-card-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+
+                <a href="{% url 'blog:category' slug='rongeurs' %}" class="species-sheet-card species-sheet-card--rodents">
+                    <div class="species-card-icon-box">🐹</div>
+                    <div class="species-card-body">
+                        <div class="species-card-title-row">
+                            <strong>Les Rongeurs</strong>
+                            <span class="species-card-tag">Petits</span>
+                        </div>
+                        <p class="species-card-sub">Lapins, cochons d'Inde & boules de poils</p>
+                    </div>
+                    <svg class="species-card-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+
+                <a href="{% url 'blog:category' slug='urgences' %}" class="species-sheet-card species-sheet-card--urgency">
+                    <div class="species-card-icon-box">🚨</div>
+                    <div class="species-card-body">
+                        <div class="species-card-title-row">
+                            <strong class="urgent-text">Les Urgences SOS</strong>
+                            <span class="species-card-tag species-card-tag--urgent">Urgent</span>
+                        </div>
+                        <p class="species-card-sub">Sauvetages & recherche urgente de FA</p>
+                    </div>
+                    <svg class="species-card-chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+
+            <div class="species-sheet-actions">
+                <a href="{% url 'blog:post_list' %}" class="btn-sheet-all">
+                    <span>Voir tout le catalogue (Tous nos protégés)</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

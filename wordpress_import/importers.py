@@ -112,6 +112,7 @@ class AnimalDataExtractor:
     """
 
     # Patterns for field extraction (case-insensitive, French labels).
+    # Patterns for field extraction (case-insensitive, French labels).
     # All anchored to start of line (^\s*) to avoid matching inside narrative text.
     FIELD_PATTERNS = [
         (r"^\s*(?:nom|pr[eé]nom)\s*:\s*(.+)", "animal_name"),
@@ -123,6 +124,11 @@ class AnimalDataExtractor:
         (r"^\s*(?:vaccin(?:[eé])?|vaccination)\s*:\s*(.+)", "is_vaccinated"),
         (r"^\s*(?:castr[eé]e?|st[eé]rilis[eé]e?|castration|st[eé]rilisation)\s*:\s*(.+)", "is_sterilized"),
         (r"^\s*(?:en\s+)?(?:famille\s+d'?accueil|accueil)\s+(?:chez\s+)(.+)", "foster_family"),
+        (r"^\s*(?:entente\s+chiens?|ok\s+chiens?|chiens?)\s*:\s*(.+)", "ok_dogs"),
+        (r"^\s*(?:entente\s+chats?|ok\s+chats?|chats?)\s*:\s*(.+)", "ok_cats"),
+        (r"^\s*(?:entente\s+enfants?|ok\s+enfants?|enfants?)\s*:\s*(.+)", "ok_children"),
+        (r"^\s*(?:habitat|logement|environnement|maison/appartement)\s*:\s*(.+)", "housing_requirement"),
+        (r"^\s*(?:statut|situation)\s*:\s*(.+)", "adoption_status"),
         (r"^\s*[âa]ge\s*:\s*(.+)", "age_text"),
         (r"^\s*esp[eè]ce\s*:\s*(.+)", "species"),
     ]
@@ -138,7 +144,7 @@ class AnimalDataExtractor:
     }
 
     @classmethod
-    def extract(cls, content, excerpt="", meta=None, categories=None):
+    def extract(cls, content, excerpt="", meta=None, categories=None, title=""):
         """Extract animal profile data from content, excerpt, and metadata.
 
         Returns a dict of animal fields, or empty dict if no animal data found.
@@ -157,18 +163,54 @@ class AnimalDataExtractor:
             if key not in result or not result[key]:
                 result[key] = value
 
-        if not result:
-            return {}, content
-
-        # Detect species from categories or content if not explicitly set
+        # Detect species from categories, title, or content if not explicitly set
         if "species" not in result or not result["species"]:
-            result["species"] = cls._detect_species(text, categories)
+            result["species"] = cls._detect_species(f"{title} {text}", categories)
 
         # Normalize extracted values
         normalized = cls._normalize(result)
 
         if not normalized:
             return {}, content
+
+        # Multi-source resolution for adoption status and emergency
+        title_lower = (title or "").lower()
+        cat_lower = [c.lower() if isinstance(c, str) else getattr(c, "name", "").lower() for c in (categories or [])]
+
+        is_adopted = (
+            any(w in title_lower for w in ("[adopté]", "[adopte]", "(adopté)", "(adopte)", "adopté", "adoptée", "adopte", "adoptés"))
+            or any(any(w in c for w in ("adopté", "adopte", "adoptés", "adoptes", "les adoptés")) for c in cat_lower)
+            or normalized.get("adoption_status") == "adopte"
+        )
+
+        is_reserved = (
+            any(w in title_lower for w in ("[réservé]", "[reserve]", "(réservé)", "réservé", "reserve", "réservée", "reservee"))
+            or any("réservé" in c or "reserve" in c for c in cat_lower)
+            or normalized.get("adoption_status") == "reserve"
+        )
+
+        is_emergency = (
+            any(w in title_lower for w in ("[urgent]", "urgent", "urgence", "urgences", "recherche fa", "sos"))
+            or any("urgence" in c or "recherche fa" in c for c in cat_lower)
+            or normalized.get("adoption_status") == "recherche_fa"
+        )
+
+        if is_adopted:
+            normalized["adoption_status"] = "adopte"
+            normalized["is_adoptable"] = False
+        elif is_reserved:
+            normalized["adoption_status"] = "reserve"
+            normalized["is_adoptable"] = True
+        elif is_emergency:
+            normalized["adoption_status"] = "recherche_fa"
+            normalized["is_adoptable"] = True
+            normalized["is_emergency"] = True
+        else:
+            normalized["adoption_status"] = normalized.get("adoption_status") or "adoptable"
+            normalized["is_adoptable"] = True
+
+        if is_emergency:
+            normalized["is_emergency"] = True
 
         # Clean the content: remove only the specific lines that were extracted
         cleaned_content = cls._clean_content_html(content, matched_lines)
@@ -316,6 +358,40 @@ class AnimalDataExtractor:
                     result[field] = True
                 elif any(w in val for w in ("non", "no", "pas")):
                     result[field] = False
+
+        # Compatibilities (ok_dogs, ok_cats, ok_children)
+        for field in ("ok_dogs", "ok_cats", "ok_children"):
+            val = raw.get(field, "").lower().strip()
+            if val:
+                if any(w in val for w in ("oui", "yes", "ok", "bonne", "très bien", "tres bien", "sociable")):
+                    result[field] = "oui"
+                elif any(w in val for w in ("non", "no", "pas", "éviter", "eviter", "crainte", "peur")):
+                    result[field] = "non"
+                else:
+                    result[field] = ""
+
+        # Housing requirement
+        housing_val = raw.get("housing_requirement", "").lower().strip()
+        if housing_val:
+            if "maison" in housing_val and "appartement" not in housing_val:
+                result["housing_requirement"] = "maison"
+            elif "appartement" in housing_val:
+                result["housing_requirement"] = "appartement"
+            else:
+                result["housing_requirement"] = "indifferent"
+
+        # Adoption status
+        status_val = raw.get("adoption_status", "").lower().strip()
+        if status_val:
+            if any(w in status_val for w in ("adopte", "adopté", "adoptée", "adoptes")):
+                result["adoption_status"] = "adopte"
+            elif any(w in status_val for w in ("reserve", "réservé", "réservée")):
+                result["adoption_status"] = "reserve"
+            elif any(w in status_val for w in ("recherche", "fa", "urgence", "urgent")):
+                result["adoption_status"] = "recherche_fa"
+                result["is_emergency"] = True
+            elif any(w in status_val for w in ("adoptable", "disponible", "a adopter")):
+                result["adoption_status"] = "adoptable"
 
         # Need at least species or breed to be considered an animal profile
         if not result.get("species") and not result.get("breed") and not result.get("sex"):
@@ -720,7 +796,7 @@ class PostImporter:
 
         # Extract animal profile data from content
         animal_data, cleaned_content = AnimalDataExtractor.extract(
-            content, excerpt=excerpt, meta=meta, categories=category_names,
+            content, excerpt=excerpt, meta=meta, categories=category_names, title=title,
         )
 
         defaults = {
@@ -738,10 +814,10 @@ class PostImporter:
         # Add animal fields if extracted
         if animal_data:
             defaults.update(animal_data)
-            # Use title as animal_name if not explicitly extracted
-            if "animal_name" not in animal_data:
-                defaults["animal_name"] = title
-            defaults["is_adoptable"] = True
+            # Use cleaned title as animal_name if not explicitly extracted
+            if "animal_name" not in animal_data or not animal_data["animal_name"]:
+                title_clean = re.sub(r"^\[.*?\]\s*|\(.*?\)\s*", "", title).strip()
+                defaults["animal_name"] = title_clean or title
             logger.info("Extracted animal profile for post %d: %s", wp_id, title)
 
         post, _ = Post.objects.get_or_create(
@@ -758,6 +834,42 @@ class PostImporter:
                 post.categories.add(self.category_map[tid])
             elif taxonomy == "post_tag" and tid in self.tag_map:
                 post.tags.add(self.tag_map[tid])
+
+        # Automatic tags for animal profiles
+        if animal_data:
+            auto_tags = []
+            if post.ok_dogs == "oui":
+                auto_tags.append(("Ok chiens", "ok-chiens"))
+            elif post.ok_dogs == "non":
+                auto_tags.append(("Pas ok chiens", "pas-ok-chiens"))
+
+            if post.ok_cats == "oui":
+                auto_tags.append(("Ok chats", "ok-chats"))
+            elif post.ok_cats == "non":
+                auto_tags.append(("Pas ok chats", "pas-ok-chats"))
+
+            if post.ok_children == "oui":
+                auto_tags.append(("Ok enfants", "ok-enfants"))
+            elif post.ok_children == "non":
+                auto_tags.append(("Pas ok enfants", "pas-ok-enfants"))
+
+            if post.is_vaccinated:
+                auto_tags.append(("Vacciné", "vaccine"))
+            if post.is_sterilized:
+                auto_tags.append(("Stérilisé", "sterilise"))
+            if post.is_emergency:
+                auto_tags.append(("Urgence", "urgence"))
+            if post.adoption_status == "adopte":
+                auto_tags.append(("Adopté", "adopte"))
+            if post.adoption_status == "recherche_fa":
+                auto_tags.append(("Recherche FA", "recherche-fa"))
+            if post.breed and len(post.breed) < 50:
+                auto_tags.append((post.breed.capitalize(), _safe_slug(post.breed)))
+
+            for tag_name, tag_slug in auto_tags:
+                if tag_slug:
+                    tag_obj, _ = Tag.objects.get_or_create(slug=tag_slug, defaults={"name": tag_name})
+                    post.tags.add(tag_obj)
 
         self.post_map[wp_id] = post
 
@@ -883,13 +995,22 @@ class MenuImporter:
         for tid in nav_menu_term_ids:
             data = term_lookup.get(tid, {})
             if data.get("name"):
-                menu, _ = Menu.objects.get_or_create(
-                    wp_term_id=tid,
-                    defaults={
-                        "name": data["name"],
-                        "slug": data.get("slug", "") or _safe_slug(data["name"]),
-                    },
-                )
+                slug_val = data.get("slug", "") or _safe_slug(data["name"])
+                # Look up by wp_term_id or slug to avoid unique constraint violations
+                menu = Menu.objects.filter(wp_term_id=tid).first()
+                if not menu:
+                    menu = Menu.objects.filter(slug=slug_val).first()
+
+                if menu:
+                    menu.name = data["name"]
+                    menu.wp_term_id = tid
+                    menu.save(update_fields=["name", "wp_term_id"])
+                else:
+                    menu = Menu.objects.create(
+                        name=data["name"],
+                        slug=slug_val,
+                        wp_term_id=tid,
+                    )
                 menu_map[tid] = menu
 
         # Build postmeta lookup for nav menu items

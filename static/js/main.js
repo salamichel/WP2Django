@@ -5,6 +5,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     initNavigation();
+    initMobileBottomNav();
     initSidebar();
     initScrollAnimations();
     initAlerts();
@@ -17,92 +18,190 @@ document.addEventListener("DOMContentLoaded", function () {
    ========================================================================== */
 function initNavigation() {
     const toggle = document.getElementById("menu-toggle");
-    const nav = document.getElementById("main-nav");
-    const overlay = document.getElementById("nav-overlay");
-    const closeBtn = document.getElementById("nav-drawer-close");
+    const bottomMenuBtn = document.getElementById("mobile-bottom-menu-btn");
+    const drawer = document.getElementById("mobile-drawer-root");
+    const backdrop = document.getElementById("drawer-backdrop");
+    const closeBtn = document.getElementById("drawer-close");
+    const sheet = document.getElementById("mobile-species-sheet");
+    const fabBtn = document.getElementById("mobile-species-fab");
 
-    if (!toggle || !nav) return;
+    function openDrawer() {
+        // Close species sheet if open
+        if (sheet && sheet.classList.contains("active")) {
+            sheet.classList.remove("active");
+            sheet.setAttribute("aria-hidden", "true");
+            if (fabBtn) {
+                fabBtn.classList.remove("is-active");
+                fabBtn.setAttribute("aria-expanded", "false");
+            }
+        }
 
-    function openNav() {
-        toggle.setAttribute("aria-expanded", "true");
-        toggle.classList.add("is-active");
-        nav.classList.add("open");
-        if (overlay) overlay.classList.add("active");
+        if (toggle) {
+            toggle.setAttribute("aria-expanded", "true");
+            toggle.classList.add("is-active");
+        }
+        if (bottomMenuBtn) {
+            bottomMenuBtn.classList.add("active");
+        }
+        if (drawer) {
+            drawer.classList.add("open");
+            drawer.setAttribute("aria-hidden", "false");
+        }
         document.body.classList.add("no-scroll");
     }
 
-    function closeNav() {
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.classList.remove("is-active");
-        nav.classList.remove("open");
-        if (overlay) overlay.classList.remove("active");
+    function closeDrawer() {
+        if (toggle) {
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.classList.remove("is-active");
+        }
+        if (bottomMenuBtn) {
+            bottomMenuBtn.classList.remove("active");
+        }
+        if (drawer) {
+            drawer.classList.remove("open");
+            drawer.setAttribute("aria-hidden", "true");
+        }
         document.body.classList.remove("no-scroll");
     }
 
-    toggle.addEventListener("click", function () {
-        const isOpen = nav.classList.contains("open");
-        if (isOpen) {
-            closeNav();
-        } else {
-            openNav();
-        }
-    });
+    if (toggle) {
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (drawer && drawer.classList.contains("open")) {
+                closeDrawer();
+            } else {
+                openDrawer();
+            }
+        });
+    }
 
-    if (closeBtn) closeBtn.addEventListener("click", closeNav);
-    if (overlay) overlay.addEventListener("click", closeNav);
+    if (bottomMenuBtn) {
+        bottomMenuBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (drawer && drawer.classList.contains("open")) {
+                closeDrawer();
+            } else {
+                openDrawer();
+            }
+        });
+    }
+
+    if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+    if (backdrop) backdrop.addEventListener("click", closeDrawer);
 
     // Close on Escape key
     document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && nav.classList.contains("open")) {
-            closeNav();
+        if (e.key === "Escape" && drawer && drawer.classList.contains("open")) {
+            closeDrawer();
         }
     });
 
-    // Mobile accordion for submenus & megamenu
-    const expandableNavItems = nav.querySelectorAll(".nav-item.has-children, .nav-item.has-megamenu");
-    expandableNavItems.forEach(function (item) {
-        const link = item.querySelector(".nav-link");
-        if (link) {
-            link.addEventListener("click", function (e) {
-                if (window.innerWidth <= 968) {
-                    const hasDropdown = item.querySelector(".sub-menu, .megamenu-dropdown");
-                    if (hasDropdown) {
-                        const isExpanded = item.classList.contains("expanded");
-                        if (!isExpanded) {
-                            e.preventDefault();
-                            // Close siblings
-                            expandableNavItems.forEach(other => {
-                                if (other !== item) other.classList.remove("expanded");
-                            });
-                            item.classList.add("expanded");
-                        } else if (e.target.closest(".dropdown-chevron")) {
-                            e.preventDefault();
-                            item.classList.remove("expanded");
-                        }
-                    }
+    // Drawer accordions
+    if (drawer) {
+        const accordions = drawer.querySelectorAll(".drawer-accordion");
+        accordions.forEach(function (acc) {
+            const btn = acc.querySelector(".drawer-accordion-btn");
+            if (btn) {
+                btn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    acc.classList.toggle("open");
+                    const isOpen = acc.classList.contains("open");
+                    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                });
+            }
+        });
+    }
+
+    // Desktop hover intent for megamenu
+    const desktopNav = document.querySelector(".desktop-nav");
+    if (desktopNav) {
+        const expandableItems = desktopNav.querySelectorAll(".nav-item.has-children, .nav-item.has-megamenu");
+        expandableItems.forEach(function (item) {
+            let closeTimeout = null;
+            item.addEventListener("mouseenter", function () {
+                if (window.innerWidth > 968) {
+                    if (closeTimeout) clearTimeout(closeTimeout);
+                    expandableItems.forEach(other => {
+                        if (other !== item) other.classList.remove("is-open");
+                    });
+                    item.classList.add("is-open");
                 }
             });
+
+            item.addEventListener("mouseleave", function () {
+                if (window.innerWidth > 968) {
+                    closeTimeout = setTimeout(function () {
+                        item.classList.remove("is-open");
+                    }, 200);
+                }
+            });
+        });
+    }
+}
+
+/* ==========================================================================
+   1b. Mobile Bottom Navigation & Species FAB Action Sheet
+   ========================================================================== */
+function initMobileBottomNav() {
+    const fabBtn = document.getElementById("mobile-species-fab");
+    const sheet = document.getElementById("mobile-species-sheet");
+    const backdrop = document.getElementById("species-sheet-backdrop");
+    const closeBtn = document.getElementById("species-sheet-close");
+    const dragHandle = document.querySelector(".sheet-drag-handle");
+    const drawer = document.getElementById("mobile-drawer-root");
+    const toggle = document.getElementById("menu-toggle");
+    const bottomMenuBtn = document.getElementById("mobile-bottom-menu-btn");
+
+    if (!fabBtn || !sheet) return;
+
+    function openSheet() {
+        // Close nav drawer if open
+        if (drawer && drawer.classList.contains("open")) {
+            drawer.classList.remove("open");
+            drawer.setAttribute("aria-hidden", "true");
+            if (toggle) {
+                toggle.setAttribute("aria-expanded", "false");
+                toggle.classList.remove("is-active");
+            }
+            if (bottomMenuBtn) bottomMenuBtn.classList.remove("active");
         }
 
-        // Desktop hover intent with comfort timeout
-        let closeTimeout = null;
-        item.addEventListener("mouseenter", function () {
-            if (window.innerWidth > 968) {
-                if (closeTimeout) clearTimeout(closeTimeout);
-                expandableNavItems.forEach(other => {
-                    if (other !== item) other.classList.remove("is-open");
-                });
-                item.classList.add("is-open");
-            }
-        });
+        sheet.classList.add("active");
+        sheet.setAttribute("aria-hidden", "false");
+        fabBtn.classList.add("is-active");
+        fabBtn.setAttribute("aria-expanded", "true");
+        document.body.classList.add("no-scroll");
+    }
 
-        item.addEventListener("mouseleave", function () {
-            if (window.innerWidth > 968) {
-                closeTimeout = setTimeout(function () {
-                    item.classList.remove("is-open");
-                }, 200); // 200ms grace period
-            }
-        });
+    function closeSheet() {
+        sheet.classList.remove("active");
+        sheet.setAttribute("aria-hidden", "true");
+        fabBtn.classList.remove("is-active");
+        fabBtn.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("no-scroll");
+    }
+
+    fabBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (sheet.classList.contains("active")) {
+            closeSheet();
+        } else {
+            openSheet();
+        }
+    });
+
+    if (closeBtn) closeBtn.addEventListener("click", closeSheet);
+    if (backdrop) backdrop.addEventListener("click", closeSheet);
+    if (dragHandle) dragHandle.addEventListener("click", closeSheet);
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && sheet.classList.contains("active")) {
+            closeSheet();
+        }
     });
 }
 

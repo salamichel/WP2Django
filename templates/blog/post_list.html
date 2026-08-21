@@ -10,50 +10,50 @@
             <h1>{% if page_title %}{{ page_title }}{% else %}Nos protégés & Actualités{% endif %}</h1>
             <p class="page-header-sub">{% if category and category.description %}{{ category.description }}{% else %}Trouvez votre futur compagnon et découvrez la vie de notre association.{% endif %}</p>
         </div>
-    </div>
-
-    <!-- Live Multi-Filter Card -->
+      <!-- Live Multi-Filter Card -->
     <div class="adoption-filter-wrapper" id="live-filter-wrapper">
-        <!-- Quick Species Tabs (Segmented Control) -->
-        <div class="species-tabs-bar" role="tablist" aria-label="Filtrer par espèce">
-            <button type="button" class="species-tab{% if not filters.species %} active{% endif %}" data-species="" role="tab" aria-selected="{% if not filters.species %}true{% else %}false{% endif %}">
-                <span class="species-tab-icon">🐾</span>
-                <span class="species-tab-label">Tous</span>
-            </button>
-            <button type="button" class="species-tab{% if filters.species == 'chien' %} active{% endif %}" data-species="chien" role="tab" aria-selected="{% if filters.species == 'chien' %}true{% else %}false{% endif %}">
-                <span class="species-tab-icon">🐕</span>
-                <span class="species-tab-label">Chiens</span>
-            </button>
-            <button type="button" class="species-tab{% if filters.species == 'chat' %} active{% endif %}" data-species="chat" role="tab" aria-selected="{% if filters.species == 'chat' %}true{% else %}false{% endif %}">
-                <span class="species-tab-icon">🐈</span>
-                <span class="species-tab-label">Chats</span>
-            </button>
-            <button type="button" class="species-tab{% if filters.species == 'rongeur' %} active{% endif %}" data-species="rongeur" role="tab" aria-selected="{% if filters.species == 'rongeur' %}true{% else %}false{% endif %}">
-                <span class="species-tab-icon">🐹</span>
-                <span class="species-tab-label">Rongeurs</span>
-            </button>
-        </div>
-
-        <form id="live-filter-form" method="get" action="" class="adoption-filters-form" role="search">
+        <form id="live-filter-form" method="get" action="{% url 'blog:post_list' %}" class="adoption-filters-form" role="search">
             <!-- Hidden input for species tab -->
             <input type="hidden" name="species" id="filter-species-input" value="{{ filters.species|default:'' }}">
 
-            <!-- Search and Primary Dropdowns Row -->
-            <div class="filter-main-row">
-                <!-- Text Search input with clear button -->
+            <!-- Tier 1: Unified Top Search & Species Segmented Control -->
+            <div class="filter-top-bar">
+                <!-- Text Search Input with Left Icon & Clear Button -->
                 <div class="filter-search-box">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <circle cx="11" cy="11" r="8"/>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
-                    <input type="text" name="q" id="filter-q-input" class="filter-search-input" placeholder="Rechercher par nom, race, mot-clé..." value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search">
+                    <input type="text" name="q" id="filter-q-input" class="filter-search-input" placeholder="Rechercher un protégé (nom, race, mot-clé...)" value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Recherche">
                     <button type="button" class="search-clear-btn{% if not filters.q %} hidden{% endif %}" id="search-clear-btn" aria-label="Effacer la recherche">&times;</button>
                 </div>
 
-                <!-- Select Filters -->
-                <div class="filter-select-group">
-                    <div class="filter-select-field">
-                        <label for="id_status" class="filter-label">Statut</label>
+                <!-- Quick Species Tabs (Segmented Control) -->
+                <div class="species-tabs-bar" role="tablist" aria-label="Filtrer par espèce">
+                    <button type="button" class="species-tab{% if not filters.species %} active{% endif %}" data-species="" role="tab" aria-selected="{% if not filters.species %}true{% else %}false{% endif %}">
+                        <span class="species-tab-icon">🐾</span>
+                        <span class="species-tab-label">Tous</span>
+                    </button>
+                    <button type="button" class="species-tab{% if filters.species == 'chien' %} active{% endif %}" data-species="chien" role="tab" aria-selected="{% if filters.species == 'chien' %}true{% else %}false{% endif %}">
+                        <span class="species-tab-icon">🐕</span>
+                        <span class="species-tab-label">Chiens</span>
+                    </button>
+                    <button type="button" class="species-tab{% if filters.species == 'chat' %} active{% endif %}" data-species="chat" role="tab" aria-selected="{% if filters.species == 'chat' %}true{% else %}false{% endif %}">
+                        <span class="species-tab-icon">🐈</span>
+                        <span class="species-tab-label">Chats</span>
+                    </button>
+                    <button type="button" class="species-tab{% if filters.species == 'rongeur' %} active{% endif %}" data-species="rongeur" role="tab" aria-selected="{% if filters.species == 'rongeur' %}true{% else %}false{% endif %}">
+                        <span class="species-tab-icon">🐹</span>
+                        <span class="species-tab-label">Rongeurs</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tier 2: Refined Dropdowns Row (3 Balanced Columns) -->
+            <div class="filter-dropdowns-row">
+                <div class="filter-select-field">
+                    <label for="id_status" class="filter-label">Statut d'adoption</label>
+                    <div class="filter-select-wrap">
                         <select name="status" id="id_status" class="filter-select">
                             <option value="">Tous les statuts</option>
                             <option value="adoptable" {% if filters.status == "adoptable" %}selected{% endif %}>Adoptable</option>
@@ -62,18 +62,22 @@
                             <option value="adopte" {% if filters.status == "adopte" %}selected{% endif %}>Adopté</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="filter-select-field">
-                        <label for="id_sex" class="filter-label">Sexe</label>
+                <div class="filter-select-field">
+                    <label for="id_sex" class="filter-label">Sexe</label>
+                    <div class="filter-select-wrap">
                         <select name="sex" id="id_sex" class="filter-select">
-                            <option value="">Tous</option>
+                            <option value="">Tous les sexes</option>
                             <option value="male" {% if filters.sex == "male" %}selected{% endif %}>Mâle</option>
                             <option value="femelle" {% if filters.sex == "femelle" %}selected{% endif %}>Femelle</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="filter-select-field">
-                        <label for="id_housing" class="filter-label">Habitat</label>
+                <div class="filter-select-field">
+                    <label for="id_housing" class="filter-label">Type d'habitat</label>
+                    <div class="filter-select-wrap">
                         <select name="housing" id="id_housing" class="filter-select">
                             <option value="">Indifférent</option>
                             <option value="maison" {% if filters.housing == "maison" %}selected{% endif %}>Maison</option>
@@ -83,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- Checkbox toggles row -->
+            <!-- Tier 3: Compatibility Checkboxes & Reset Button -->
             <div class="filter-toggles-row">
                 <div class="filter-checkbox-pills">
                     <label class="filter-pill-checkbox">
@@ -166,8 +170,8 @@
                     {% endif %}
                     {% if filters.emergency == "1" %}
                     <span class="active-chip active-chip--emergency" data-field="emergency">
-                        🚨 Urgences
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre urgences">&times;</button>
+                        🚨 Urgence
+                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre urgence">&times;</button>
                     </span>
                     {% endif %}
                 </div>
