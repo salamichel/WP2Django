@@ -27,7 +27,7 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - `sql_parser.py` : Analyseur SQL sans dépendance MySQL.
 - `importers.py` : Conversion des données WP en modèles Django.
 - `content_processor.py` : Nettoyage HTML, réécriture d'URLs d'images, extraction de galeries.
-- `AnimalDataExtractor` : Extraction automatique des fiches animaux depuis les métadonnées WP.
+- `AnimalDataExtractor` : Extraction automatique des fiches animaux depuis les métadonnées WP, avec analyse narrative en langage naturel pour les ententes (`ok_dogs`, `ok_cats`, `ok_children`) et exclusion stricte du statut/tag Urgence si l'animal est adopté ou décédé.
 - `image_optimizer.py` : Optimisation & redimensionnement automatique des photos WP (max 1600px, EXIF orientation). Support in-place et tolérance aux images tronquées (`LOAD_TRUNCATED_IMAGES = True`, `MAX_IMAGE_PIXELS = None`).
 
 ### 3. Application `contact`
@@ -40,7 +40,9 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - **Slugs** : Générés automatiquement via `slugify` dans les méthodes `save()`.
 - **Sécurité Admin** : Préférer `format_html()` pour le rendu HTML sécurisé dans `admin.py`.
 
-### 4. Standards UI/UX & Intégration Front-End
+### 4. Standards UI/UX, Éditeur WYSIWYG & Intégration Front-End
+- **Éditeur WYSIWYG (CKEditor 5)** : Toujours activer `htmlSupport` (GHS) dans `settings.py` pour préserver les attributs `style="..."` et classes custom. Déclarer dans `admin_custom.css` un miroir complet du CSS front-end pour `.ck-content` (polices `Playfair Display`/`Inter`, boutons `.btn`, grilles de cartes et alertes).
+- **Règle d'Urgence Animaux** : Priorité absolue `Décédé > Adopté > Réservé > Urgence > Adoptable`. Un animal adopté ou décédé ne doit jamais recevoir `is_emergency = True` ni le tag `Urgence`.
 - **Menus déroulants & Mega Menus** : Toujours inclure un pont invisible (`::before`) et un délai de grâce (150-200ms) pour éviter les fermetures prématurées au survol.
 - **Champs de recherche** : Toujours neutraliser les pictogrammes natifs WebKit (`::-webkit-search-decoration`, etc.) pour éviter la superposition avec les icônes SVG custom.
 - **Formulaires & Selects Admin** : Assurer une largeur minimale (`min-width: 200px`), un dégagement pour la flèche (`padding-right: 32px`) et le wrapping du texte dans les options et widgets Select2 pour éviter toute troncature.
