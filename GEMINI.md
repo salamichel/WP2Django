@@ -28,6 +28,7 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - `importers.py` : Conversion des données WP en modèles Django.
 - `content_processor.py` : Nettoyage HTML, réécriture d'URLs d'images, extraction de galeries.
 - `AnimalDataExtractor` : Extraction automatique des fiches animaux depuis les métadonnées WP.
+- `image_optimizer.py` : Optimisation & redimensionnement automatique des photos WP (max 1600px, EXIF orientation). Support in-place et tolérance aux images tronquées (`LOAD_TRUNCATED_IMAGES = True`, `MAX_IMAGE_PIXELS = None`).
 
 ### 3. Application `contact`
 - Formulaire de contact enregistré en base et connecté à l'API Brevo.
@@ -43,3 +44,5 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - **Menus déroulants & Mega Menus** : Toujours inclure un pont invisible (`::before`) et un délai de grâce (150-200ms) pour éviter les fermetures prématurées au survol.
 - **Champs de recherche** : Toujours neutraliser les pictogrammes natifs WebKit (`::-webkit-search-decoration`, etc.) pour éviter la superposition avec les icônes SVG custom.
 - **Formulaires & Selects Admin** : Assurer une largeur minimale (`min-width: 200px`), un dégagement pour la flèche (`padding-right: 32px`) et le wrapping du texte dans les options et widgets Select2 pour éviter toute troncature.
+- **Formulaires Mobiles (iOS Safari)** : Toujours fixer `font-size: 16px` et `min-height: 48px` sur les champs de saisie pour empêcher le zoom automatique indésirable lors du tap sur mobile.
+- **Fiches Animaux & Galerie Photos** : Toujours centrer la photo de présentation principale (`max-height: 520px`, `border-radius: 24px`) et l'associer à la galerie photo au sein de la même visionneuse plein écran GLightbox avec support du swipe tactile.
