@@ -502,3 +502,84 @@ class AdoptionAndEmergencyFeaturesTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(ContactMessage.objects.filter(email="marie@example.com", category="adoption").exists())
 
+
+class AnimalAndArticleAdminTests(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser("admin", "admin@test.com", "password123")
+        self.client.login(username="admin", password="password123")
+        self.cat_chiens = Category.objects.create(name="Chiens à l'adoption", slug="chiens-a-ladoption")
+
+    def test_animal_auto_title_and_slug(self):
+        from blog.models import Animal
+        animal = Animal.objects.create(
+            animal_name="Milou",
+            species="chien",
+            breed="Fox Terrier",
+        )
+        self.assertEqual(animal.title, "Milou - Fox Terrier")
+        self.assertEqual(animal.slug, "milou")
+        self.assertTrue(animal.is_adoptable)
+
+    def test_animal_age_display(self):
+        from blog.models import Animal
+        from datetime import date, timedelta
+        two_years_ago = date.today() - timedelta(days=730)
+        animal = Animal.objects.create(
+            animal_name="Rex",
+            species="chien",
+            birth_date=two_years_ago,
+        )
+        self.assertIn("an", animal.age_display)
+
+    def test_adopted_animal_emergency_rule(self):
+        from blog.models import Animal
+        animal = Animal.objects.create(
+            animal_name="Lucky",
+            species="chien",
+            adoption_status="adopte",
+            is_emergency=True,
+        )
+        self.assertFalse(animal.is_emergency)
+        self.assertFalse(animal.is_adoptable)
+
+    def test_proxy_querysets_separation(self):
+        from blog.models import Animal, Article, Post
+        Animal.objects.create(animal_name="Oscar", species="chat")
+        Article.objects.create(title="Nouvelle de l'asso", content="Actualité...")
+
+        self.assertEqual(Animal.objects.count(), 1)
+        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(Post.objects.count(), 2)
+
+    def test_animal_admin_actions(self):
+        from blog.models import Animal
+        from django.contrib.admin.sites import site
+        from blog.admin import AnimalAdmin
+
+        a1 = Animal.objects.create(animal_name="A1", species="chien", adoption_status="adoptable")
+        a2 = Animal.objects.create(animal_name="A2", species="chien", adoption_status="adoptable")
+
+        admin_instance = AnimalAdmin(Animal, site)
+        qs = Animal.objects.filter(pk__in=[a1.pk, a2.pk])
+
+        # Test mark_as_reserved
+        request = type("Req", (), {"user": self.admin_user, "_messages": []})()
+        admin_instance.message_user = lambda req, msg: None
+
+        admin_instance.mark_as_reserved(request, qs)
+        a1.refresh_from_db()
+        self.assertEqual(a1.adoption_status, "reserve")
+
+        # Test mark_as_emergency
+        admin_instance.mark_as_emergency(request, qs)
+        a1.refresh_from_db()
+        self.assertTrue(a1.is_emergency)
+
+        # Test mark_as_adopted (resets emergency)
+        admin_instance.mark_as_adopted(request, qs)
+        a1.refresh_from_db()
+        self.assertEqual(a1.adoption_status, "adopte")
+        self.assertFalse(a1.is_emergency)
+        self.assertIsNotNone(a1.adoption_date)
+
+

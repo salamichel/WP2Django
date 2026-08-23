@@ -54,6 +54,58 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.gallery-card.is-featured {
+    border: 2px solid #e8734a;
+    box-shadow: 0 0 0 2px rgba(232, 115, 74, 0.2), 0 4px 12px rgba(0,0,0,0.1);
+}
+.gallery-card-star {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    color: #cbd5e1;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    font-size: 13px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 3;
+    padding: 0;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.gallery-card:hover .gallery-card-star {
+    color: #f59e0b;
+    border-color: #f59e0b;
+}
+.gallery-card.is-featured .gallery-card-star {
+    background: #f59e0b;
+    color: #fff;
+    border-color: #d97706;
+}
+.gallery-card-featured-badge {
+    display: none;
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e8734a;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    pointer-events: none;
+    z-index: 2;
+    white-space: nowrap;
+}
+.gallery-card.is-featured .gallery-card-featured-badge {
+    display: block;
+}
 .gallery-card-delete {
     position: absolute;
     top: -6px;

@@ -187,7 +187,7 @@ class Post(models.Model):
         months = delta.days // 30
         if months < 1:
             weeks = delta.days // 7
-            return f"{weeks} semaine{'s' if weeks > 1 else ''}" if weeks > 0 else "Nouveau-ne"
+            return f"{weeks} semaine{'s' if weeks > 1 else ''}" if weeks > 0 else "Nouveau-né"
         if months < 12:
             return f"{months} mois"
         years = months // 12
@@ -195,6 +195,90 @@ class Post(models.Model):
         if remaining:
             return f"{years} an{'s' if years > 1 else ''} et {remaining} mois"
         return f"{years} an{'s' if years > 1 else ''}"
+
+
+class AnimalManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            models.Q(species__in=["chien", "chat", "rongeur", "autre"]) | ~models.Q(animal_name="")
+        )
+
+
+class ArticleManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            species="", animal_name=""
+        )
+
+
+class Animal(Post):
+    objects = AnimalManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Fiche animal"
+        verbose_name_plural = "Animaux à l'adoption"
+
+    def clean(self):
+        super().clean()
+        if not self.species and not self.animal_name:
+            self.species = "chien"
+        if not self.animal_name and self.title:
+            self.animal_name = self.title
+
+    def save(self, *args, **kwargs):
+        # Auto-fill title from animal_name
+        if self.animal_name:
+            if not self.title or self.title == "Sans titre":
+                if self.breed:
+                    self.title = f"{self.animal_name} - {self.breed}"
+                else:
+                    self.title = self.animal_name
+
+        # Auto-fill slug from title or animal_name
+        if not self.slug:
+            base_name = self.animal_name or self.title or "animal"
+            candidate_slug = slugify(base_name)
+            slug = candidate_slug
+            counter = 1
+            while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                counter += 1
+                slug = f"{candidate_slug}-{counter}"
+            self.slug = slug
+
+        # Business rule: adopted animals never have emergency
+        if self.adoption_status == "adopte":
+            self.is_emergency = False
+            self.is_adoptable = False
+        else:
+            self.is_adoptable = True
+
+        if not self.species:
+            self.species = "chien"
+
+        super().save(*args, **kwargs)
+
+
+class Article(Post):
+    objects = ArticleManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Article"
+        verbose_name_plural = "Articles & Actualités"
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.title:
+            candidate_slug = slugify(self.title)
+            slug = candidate_slug
+            counter = 1
+            while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                counter += 1
+                slug = f"{candidate_slug}-{counter}"
+            self.slug = slug
+        super().save(*args, **kwargs)
 
 
 class Page(models.Model):

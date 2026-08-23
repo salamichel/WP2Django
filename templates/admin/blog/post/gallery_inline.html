@@ -22,7 +22,8 @@
     {% for inline_admin_form in inline_admin_formset %}
       {% if inline_admin_form.original %}
         <div class="gallery-card" draggable="true"
-             data-inline-idx="{{ forloop.counter0 }}">
+             data-inline-idx="{{ forloop.counter0 }}"
+             data-media-id="{{ inline_admin_form.original.media_id }}">
           {% if inline_admin_form.original.media and inline_admin_form.original.media.file %}
             <img src="{{ inline_admin_form.original.media.file.url }}"
                  alt="{{ inline_admin_form.original.media.alt_text|default:'' }}">
@@ -30,6 +31,8 @@
           {% else %}
             <div style="width:100%;height:80px;background:#f0eded;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.7rem">No file</div>
           {% endif %}
+          <button type="button" class="gallery-card-star" title="Définir comme photo principale">★</button>
+          <span class="gallery-card-featured-badge">Principale</span>
           <span class="gallery-card-delete" title="Retirer">&times;</span>
           {# Hidden form fields #}
           <div style="display:none">

@@ -7,6 +7,52 @@
 
         var prefix = "postgalleryimage_set";
         var dragItem = null;
+        var featuredInput = document.getElementById("id_featured_image");
+
+        // ── Featured Image Sync ──
+
+        function updateFeaturedState() {
+            var currentFeaturedId = featuredInput ? featuredInput.value : "";
+            var cards = container.querySelectorAll(".gallery-card");
+            cards.forEach(function(card) {
+                var mediaId = card.getAttribute("data-media-id");
+                if (mediaId && currentFeaturedId && String(mediaId) === String(currentFeaturedId)) {
+                    card.classList.add("is-featured");
+                } else {
+                    card.classList.remove("is-featured");
+                }
+            });
+        }
+
+        // Set featured on star click
+        container.addEventListener("click", function(e) {
+            var starBtn = e.target.closest(".gallery-card-star");
+            if (!starBtn) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            var card = starBtn.closest(".gallery-card");
+            if (!card) return;
+            var mediaId = card.getAttribute("data-media-id");
+            if (!mediaId) return;
+
+            if (featuredInput) {
+                // If Select2 widget is used
+                if (window.jQuery && window.jQuery(featuredInput).data("select2")) {
+                    window.jQuery(featuredInput).val(mediaId).trigger("change");
+                } else {
+                    featuredInput.value = mediaId;
+                    var evt = new Event("change", { bubbles: true });
+                    featuredInput.dispatchEvent(evt);
+                }
+            }
+            updateFeaturedState();
+        });
+
+        // If featured select changes externally
+        if (featuredInput) {
+            featuredInput.addEventListener("change", updateFeaturedState);
+        }
 
         // ── Reorder drag-and-drop ──
 
@@ -58,6 +104,7 @@
                 card.style.display = "none";
             }
             updatePositions();
+            updateFeaturedState();
         });
 
         function updatePositions() {
@@ -68,8 +115,9 @@
             });
         }
 
-        // Init positions on load
+        // Init positions and featured state on load
         updatePositions();
+        updateFeaturedState();
 
         // ── File upload zone ──
 
@@ -113,6 +161,16 @@
             return "";
         }
 
+        function getUploadUrl() {
+            // Adapt to current admin model path (e.g. /admin/blog/animal/ or /admin/blog/post/ or /admin/blog/article/)
+            var path = window.location.pathname;
+            var match = path.match(/(\/admin\/blog\/[^\/]+\/)/);
+            if (match) {
+                return match[1] + "upload-media/";
+            }
+            return "/admin/blog/post/upload-media/";
+        }
+
         function uploadFiles(files) {
             var formData = new FormData();
             for (var i = 0; i < files.length; i++) {
@@ -124,8 +182,7 @@
             labelEl.textContent = "Upload de " + files.length + " fichier(s)...";
 
             var xhr = new XMLHttpRequest();
-            // The upload endpoint is on PostAdmin: /admin/blog/post/upload-media/
-            xhr.open("POST", "/admin/blog/post/upload-media/");
+            xhr.open("POST", getUploadUrl());
             xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
 
             xhr.upload.addEventListener("progress", function(e) {
@@ -140,14 +197,22 @@
                 if (xhr.status === 200) {
                     var data = JSON.parse(xhr.responseText);
                     fillEl.style.width = "100%";
-                    labelEl.textContent = data.uploaded.length + " image(s) ajoutee(s)";
-                    data.uploaded.forEach(function(item) {
+                    labelEl.textContent = data.uploaded.length + " image(s) ajoutée(s)";
+                    data.uploaded.forEach(function(item, idx) {
                         if (item.is_image) {
                             addGalleryCard(item);
+                            // If no featured image is currently set, set the very first uploaded image as featured!
+                            if (idx === 0 && featuredInput && !featuredInput.value) {
+                                if (window.jQuery && window.jQuery(featuredInput).data("select2")) {
+                                    window.jQuery(featuredInput).val(item.id).trigger("change");
+                                } else {
+                                    featuredInput.value = item.id;
+                                }
+                            }
                         }
                     });
-                    // Reset input so same files can be re-selected
                     uploadInput.value = "";
+                    updateFeaturedState();
                 } else {
                     labelEl.textContent = "Erreur (" + xhr.status + ")";
                     fillEl.style.width = "0%";
@@ -155,30 +220,27 @@
             });
 
             xhr.addEventListener("error", function() {
-                labelEl.textContent = "Erreur reseau";
+                labelEl.textContent = "Erreur réseau";
             });
 
             xhr.send(formData);
         }
 
         function addGalleryCard(item) {
-            // Get the TOTAL_FORMS management field
             var totalInput = document.getElementById("id_" + prefix + "-TOTAL_FORMS");
             if (!totalInput) return;
             var idx = parseInt(totalInput.value, 10);
 
-            // Find an empty (unused) inline form, or clone from extra forms
-            var extraForms = document.querySelector(".gallery-dnd-extra-forms");
-            var emptyForm = extraForms ? extraForms.querySelector(".inline-related") : null;
-
-            // Build the new card
             var card = document.createElement("div");
             card.className = "gallery-card";
             card.draggable = true;
             card.setAttribute("data-inline-idx", idx);
+            card.setAttribute("data-media-id", item.id);
             card.innerHTML =
                 '<img src="' + escHtml(item.url) + '" alt="">' +
                 '<div class="gallery-card-label">' + escHtml(item.title).substring(0, 18) + '</div>' +
+                '<button type="button" class="gallery-card-star" title="Définir comme photo principale">★</button>' +
+                '<span class="gallery-card-featured-badge">Principale</span>' +
                 '<span class="gallery-card-delete" title="Retirer">&times;</span>' +
                 '<div style="display:none">' +
                     '<input type="hidden" name="' + prefix + '-' + idx + '-media" value="' + item.id + '">' +
@@ -191,8 +253,8 @@
             container.appendChild(card);
             totalInput.value = idx + 1;
 
-            // Update all positions
             updatePositions();
+            updateFeaturedState();
         }
 
         function escHtml(s) {
