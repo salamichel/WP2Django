@@ -1746,12 +1746,12 @@ input[type="search"] {
     outline: none;
 }
 
-/* Meta Subheader */
+/* Meta Subheader & Count Bar */
 .catalogue-meta-subheader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     font-size: 0.92rem;
     color: #64748b;
 }
@@ -1764,6 +1764,51 @@ input[type="search"] {
     font-size: 0.84rem;
     font-weight: 700;
     color: #0369a1;
+}
+
+/* AJAX Results Meta Bar & Indicator */
+.results-meta-bar {
+    display: none;
+}
+
+.results-loading-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0284c7;
+    background: #f0f9ff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid #bae6fd;
+}
+
+.results-loading-indicator.active {
+    display: inline-flex;
+}
+
+.loader-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #bae6fd;
+    border-top-color: #0284c7;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.ajax-results-container {
+    position: relative;
+    transition: opacity 0.2s ease;
+}
+
+.ajax-results-container.is-loading {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 /* ==========================================================================

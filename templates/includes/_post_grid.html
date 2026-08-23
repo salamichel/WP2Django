@@ -1,21 +1,14 @@
 <!-- Dynamic Post Grid & Pagination Partial -->
 <div id="ajax-post-grid-container" class="ajax-results-container">
-    <div class="results-meta-bar">
-        <div class="results-count" id="results-count" data-count="{{ total_count }}">
-            <span class="results-count-icon">🐾</span>
-            <span class="results-count-text">
-                {% if total_count == 0 %}
-                    <strong>Aucun résultat</strong> pour cette recherche
-                {% elif total_count == 1 %}
-                    <strong>1 compagnon / article</strong> trouvé
-                {% else %}
-                    <strong>{{ total_count }} compagnons & articles</strong> trouvés
-                {% endif %}
-            </span>
+    <!-- Active Filters Feedback & Counter Bar -->
+    <div class="catalogue-meta-subheader">
+        <div class="cat-residents-count">
+            <strong>{{ total_count }} pensionnaire{{ total_count|pluralize }}</strong> affiché{{ total_count|pluralize }}
         </div>
-        <div class="results-loading-indicator" id="results-loader" aria-hidden="true">
-            <span class="loader-spinner"></span>
-            <span class="loader-text">Mise à jour...</span>
+        <div class="cat-active-filter-indicator">
+            <span class="cat-filter-tag">
+                Filtre : {% if filters.species == 'chien' %}Les Chiens{% elif filters.species == 'chat' %}Les Chats{% elif filters.species == 'rongeur' %}Les Rongeurs{% elif filters.emergency == '1' %}SOS Urgences{% else %}Tous les Résidents{% endif %}
+            </span>
         </div>
     </div>
 
