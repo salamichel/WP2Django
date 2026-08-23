@@ -1,0 +1,26 @@
+# Fichiers de persistance locale et sockets
+data/
+data/mysql/
+data/postgres/
+
+# Dépendances locales
+node_modules/
+vendor/
+
+# Uploads et médias volumineux
+public/uploads/
+media/
+
+# Git et OS
+.git/
+.gitignore
+.env
+.env.local
+.DS_Store
+Thumbs.db
+
+# Caches et logs
+var/
+*.log
+tmp/
+tmp_react_source/

@@ -36,6 +36,7 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 ## ⚙️ Configuration Technique & Conventions
 - **Règle Persistance Docker (Moka Studio)** : Ne JAMAIS utiliser de volumes nommés Docker. Persister toutes les données en local sur le serveur (`./data/postgres` pour PostgreSQL, `./media` pour les uploads, `./staticfiles` pour les assets compilés).
 - **Stack** : Django 5.2, PostgreSQL 16 (ou SQLite pour les tests), Docker, Nginx, CKEditor 5.
+- **Cache Statique Nginx & Cache-Busting** : Ne JAMAIS utiliser `immutable` sur des fichiers statiques sans hash de contenu. Utiliser `must-revalidate` dans Nginx et toujours ajouter un paramètre de version (`?v=X.Y`) dans `base.html` sur `style.css` et `main.js` pour garantir un affichage propre dès la première visite.
 - **Variables d'environnement** : Voir `.env.example`.
 - **Slugs** : Générés automatiquement via `slugify` dans les méthodes `save()`.
 - **Sécurité Admin** : Préférer `format_html()` pour le rendu HTML sécurisé dans `admin.py`.
@@ -47,4 +48,5 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - **Champs de recherche** : Toujours neutraliser les pictogrammes natifs WebKit (`::-webkit-search-decoration`, etc.) pour éviter la superposition avec les icônes SVG custom.
 - **Formulaires & Selects Admin** : Assurer une largeur minimale (`min-width: 200px`), un dégagement pour la flèche (`padding-right: 32px`) et le wrapping du texte dans les options et widgets Select2 pour éviter toute troncature.
 - **Formulaires Mobiles (iOS Safari)** : Toujours fixer `font-size: 16px` et `min-height: 48px` sur les champs de saisie pour empêcher le zoom automatique indésirable lors du tap sur mobile.
-- **Fiches Animaux & Galerie Photos** : Toujours centrer la photo de présentation principale (`max-height: 520px`, `border-radius: 24px`) et l'associer à la galerie photo au sein de la même visionneuse plein écran GLightbox avec support du swipe tactile.
+- **Filtres Multi-Critères Mobiles** : Sur écran mobile (<= 680px), empiler la recherche textuelle en 100%, répartir les onglets espèces en grille `repeat(N, 1fr)` pour éviter tout overflow horizontal, et organiser les tags de compatibilité en grille 2x2 uniforme avec le bouton d'effacement pleine largeur en-dessous.
+- **Fiches Animaux & Galerie Photos** : Toujours centrer la photo de présentation principale (`max-height: 520px`, `border-radius: 24px`) et l'associer à la galerie photo au sein de la même visionneuse plein écran GLightbox avec support du swipe tactile. Structurer la fiche en 4 blocs : Grille 2x2 des caractéristiques clés, boîte pastel des garanties sanitaires, badges tricolores d'ententes (Chiens/Chats/Enfants), et grand bouton CTA pleine largeur (50-54px).

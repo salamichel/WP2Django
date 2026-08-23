@@ -1073,6 +1073,155 @@ input[type="search"] {
     opacity: 1;
 }
 
+/* --- Responsive Layout for Adoption Filter Section --- */
+@media (max-width: 860px) {
+    .filter-top-bar {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 680px) {
+    .adoption-filter-wrapper {
+        padding: 1.15rem 0.95rem;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-top-bar {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-search-input {
+        font-size: 16px !important; /* Prevents iOS auto-zoom */
+        height: 48px;
+    }
+
+    .species-tabs-bar {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        padding: 4px;
+        height: 46px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .species-tab {
+        height: 38px;
+        padding: 0 2px;
+        font-size: 0.82rem;
+        gap: 4px;
+        border-radius: 10px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .species-tab-icon {
+        font-size: 0.95rem;
+    }
+
+    .species-tab-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filter-dropdowns-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-select-field:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .filter-label {
+        font-size: 0.72rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .filter-select {
+        height: 48px;
+        min-height: 48px;
+        font-size: 16px !important; /* Prevents iOS auto-zoom */
+        padding: 0 2rem 0 0.85rem;
+        border-radius: 12px;
+        background-position: right 0.75rem center;
+    }
+
+    .filter-toggles-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+        padding-top: 0.85rem;
+    }
+
+    .filter-checkbox-pills {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .filter-pill-checkbox {
+        width: 100%;
+        display: flex;
+    }
+
+    .filter-pill-checkbox .pill-badge {
+        width: 100%;
+        height: 44px;
+        min-height: 44px;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        padding: 0 0.35rem;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .filter-reset-wrapper {
+        width: 100%;
+        margin-top: 0.15rem;
+    }
+
+    .btn-reset-all {
+        width: 100%;
+        height: 42px;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-reset-all:hover,
+    .btn-reset-all:active {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+}
+
+@media (max-width: 380px) {
+    .species-tab {
+        font-size: 0.74rem;
+        gap: 2px;
+    }
+    .species-tab-icon {
+        font-size: 0.85rem;
+    }
+    .filter-pill-checkbox .pill-badge {
+        font-size: 0.76rem;
+        gap: 3px;
+    }
+}
+
 /* ==========================================================================
    Results Meta Bar & AJAX States
    ========================================================================== */
@@ -3480,65 +3629,447 @@ textarea {
     }
 }
 
+/* ==========================================================================
+   Animal Profile Card (Modern Structured UI/UX)
+   ========================================================================== */
 .animal-profile-card {
     background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    border: 1.5px solid #e2e8f0;
+    border-radius: 24px;
     padding: 1.75rem;
     margin: 2rem 0;
-    box-shadow: var(--shadow);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .animal-profile-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.animal-profile-title {
+.animal-profile-id {
+    flex: 1;
+    min-width: 200px;
+}
+
+.animal-profile-name {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.animal-profile-breed {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.animal-profile-status-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.animal-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: 9999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+}
+
+.animal-status-badge--adoptable {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.animal-status-badge--emergency {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    animation: pulseBadge 2s infinite;
+}
+
+.animal-status-badge--fa {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.animal-status-badge--reserved {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.animal-status-badge--adopted {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+/* Adopted Banner */
+.animal-adopted-banner {
+    background: #ecfdf5;
+    border: 1.5px solid #a7f3d0;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.adopted-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.adopted-emoji {
+    font-size: 1.6rem;
+}
+
+.btn-adopted-year {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 1rem;
+    background: #059669;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.btn-adopted-year:hover {
+    background: #047857;
+}
+
+/* Section 1 : Stats Grid (2x2 Cards) */
+.animal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 0.95rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.stat-card-value {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
 }
 
-.animal-profile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.25rem;
+.stat-card-icon {
+    font-size: 1.15rem;
+    line-height: 1;
 }
 
-.animal-profile-item {
+.stat-card-chip-num {
+    font-size: 0.88rem;
+    font-family: var(--font-mono, monospace);
+    font-weight: 600;
+    color: #334155;
+    word-break: break-all;
+}
+
+/* Section 2 : Health & Veterinary Guarantee Box */
+.animal-health-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1.5px solid #bbf7d0;
+    border-radius: 20px;
+    padding: 1.25rem 1.35rem;
+    margin-bottom: 1.5rem;
+}
+
+.health-box-header {
     display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
 }
 
-.animal-profile-label {
+.health-shield-icon {
+    color: #059669;
+    flex-shrink: 0;
+}
+
+.health-box-header h4 {
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #065f46;
+    margin: 0;
+}
+
+.health-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem 1.25rem;
+}
+
+.health-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.health-check-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: #10b981;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+/* Section 3 : Ententes & Cohabitation */
+.animal-compat-section {
+    margin-bottom: 1.75rem;
+}
+
+.compat-section-title {
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-text-muted);
+    color: #64748b;
+    margin-bottom: 0.75rem;
 }
 
-.animal-profile-value {
-    font-size: 0.98rem;
+.compat-pills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+.compat-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.85rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.88rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: #334155;
+    transition: all 0.2s ease;
 }
 
+.compat-pill-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.compat-pill-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.compat-pill-name {
+    font-weight: 700;
+}
+
+.compat-pill-status {
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+}
+
+.compat-pill--yes {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #065f46;
+}
+
+.compat-pill--yes .compat-pill-status {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.compat-pill--no {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.compat-pill--no .compat-pill-status {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.compat-pill--test {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+.compat-pill--test .compat-pill-status {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* Section 4 : Action CTA */
 .animal-profile-cta {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border);
-    text-align: center;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.btn-adopt-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    width: 100%;
+    height: 54px;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff !important;
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: 16px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.28);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.btn-adopt-main:hover {
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    box-shadow: 0 12px 28px rgba(22, 163, 74, 0.38);
+    transform: translateY(-2px);
+}
+
+.btn-adopt-main:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.btn-adopt-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+/* Responsive Mobile adjustments for Animal Profile */
+@media (max-width: 640px) {
+    .animal-profile-card {
+        padding: 1.25rem 1rem;
+        border-radius: 20px;
+        margin: 1.5rem 0;
+    }
+
+    .animal-profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+        margin-bottom: 1.15rem;
+        padding-bottom: 1rem;
+    }
+
+    .animal-profile-name {
+        font-size: 1.6rem;
+    }
+
+    .animal-stats-grid {
+        gap: 0.65rem;
+        margin-bottom: 1.15rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem 0.85rem;
+        border-radius: 14px;
+    }
+
+    .stat-card-value {
+        font-size: 0.92rem;
+        gap: 0.35rem;
+    }
+
+    .animal-health-box {
+        padding: 1rem;
+        border-radius: 16px;
+        margin-bottom: 1.15rem;
+    }
+
+    .health-checklist {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .health-item {
+        font-size: 0.84rem;
+    }
+
+    .compat-pills-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .compat-pill {
+        padding: 0.55rem 0.75rem;
+    }
+
+    .btn-adopt-main {
+        height: 50px;
+        font-size: 0.96rem;
+    }
 }
 
 .post-content {

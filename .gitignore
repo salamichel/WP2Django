@@ -1,4 +1,4 @@
-# Python
+# Python & Django
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,41 +8,57 @@ dist/
 build/
 eggs/
 *.egg
-
-# Django
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+.coverage
+htmlcov/
+.pytest_cache/
 
-# Environment
+# Environment & Virtualenvs
 .env
+.env.local
+.env.*.local
 .venv/
 env/
 venv/
+ENV/
 
-# IDE
+# Node.js & Frontend build
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+public/
+
+# PHP / Composer
+vendor/
+
+# IDE, OS & Agent metadata
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# Docker & Local Data Persistence
-docker-compose.override.yml
-data/
-
-# Media uploads
-media/uploads/
-
-# Static collected
-staticfiles/
-
-# OS
 .DS_Store
 Thumbs.db
+desktop.ini
+.agent/
+.agents/
 
-# WordPress import files (large)
+# Docker & Local Data Persistence (Moka Studio standard)
+docker-compose.override.yml
+data/
+staticfiles/
+
+# Media Uploads & CKEditor
+media/*
+!media/.gitkeep
+
+# WordPress Import & Dumps (large files)
 *.sql
 *.sql.gz
+*.zip
+*.tar.gz
 wp-content/

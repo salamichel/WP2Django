@@ -214,10 +214,15 @@ def category_detail(request, slug):
     }
 
     if canonical_slug in animal_species_map:
+        clean_name = category.name
+        if clean_name.lower().startswith("les "):
+            clean_name = clean_name[4:]
+        elif clean_name.lower().startswith("le ") or clean_name.lower().startswith("la "):
+            clean_name = clean_name[3:]
         return _render_post_catalogue(
             request,
             initial_filters={"species": animal_species_map[canonical_slug]},
-            page_title=f"Nos {category.name} à l'adoption",
+            page_title=f"Nos {clean_name} à l'adoption",
             category=category,
         )
     elif canonical_slug in ["urgences", "urgence"]:

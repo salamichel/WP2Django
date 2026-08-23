@@ -42,127 +42,165 @@
 
         {% if post.is_animal_profile %}
         <div class="animal-profile-card">
+            <!-- Header : Animal Name, Breed & Status Badge -->
             <div class="animal-profile-header">
-                <h3 class="animal-profile-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
-                    Fiche de {{ post.animal_name|default:post.title }}
-                </h3>
-                <div class="animal-profile-badges">
+                <div class="animal-profile-id">
+                    <h2 class="animal-profile-name">{{ post.animal_name|default:post.title }}</h2>
+                    {% if post.breed %}
+                    <p class="animal-profile-breed">{{ post.breed }}{% if post.sex %} &middot; {% if post.sex == 'male' %}♂ Mâle{% else %}♀ Femelle{% endif %}{% endif %}</p>
+                    {% endif %}
+                </div>
+                <div class="animal-profile-status-wrap">
                     {% if post.is_emergency %}
-                    <span class="animal-adoptable-badge animal-adoptable-badge--emergency">🚨 Urgence</span>
+                    <span class="animal-status-badge animal-status-badge--emergency">🚨 Urgence</span>
                     {% elif post.adoption_status == "recherche_fa" %}
-                    <span class="animal-adoptable-badge animal-adoptable-badge--fa">Recherche Famille d'Accueil</span>
+                    <span class="animal-status-badge animal-status-badge--fa">🏡 Recherche FA</span>
                     {% elif post.adoption_status == "reserve" %}
-                    <span class="animal-adoptable-badge animal-adoptable-badge--reserved">Réservé</span>
+                    <span class="animal-status-badge animal-status-badge--reserved">⏳ Réservé</span>
                     {% elif post.adoption_status == "adopte" %}
-                    <span class="animal-adoptable-badge animal-adoptable-badge--adopted">{% if post.adoption_date %}Adopté(e) le {{ post.adoption_date|date:"d/m/Y" }}{% else %}Adopté(e){% endif %}</span>
+                    <span class="animal-status-badge animal-status-badge--adopted">❤️ {% if post.adoption_date %}Adopté le {{ post.adoption_date|date:"d/m/Y" }}{% else %}Adopté{% endif %}</span>
                     {% elif post.is_adoptable or post.adoption_status == "adoptable" %}
-                    <span class="animal-adoptable-badge">Disponible à l'adoption</span>
+                    <span class="animal-status-badge animal-status-badge--adoptable">✨ Disponible à l'adoption</span>
                     {% endif %}
                 </div>
             </div>
 
             {% if post.adoption_status == "adopte" and post.adoption_date %}
-            <div class="animal-adopted-banner" style="background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:14px;padding:1rem 1.25rem;margin:1.25rem 0 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <span style="font-size:1.6rem;">🏡</span>
+            <div class="animal-adopted-banner">
+                <div class="adopted-banner-content">
+                    <span class="adopted-emoji">🏡</span>
                     <div>
-                        <strong style="color:#065f46;font-size:1.05rem;display:block;">Adopté(e) le {{ post.adoption_date|date:"d/m/Y" }}</strong>
-                        <span style="color:#047857;font-size:0.88rem;">{{ post.animal_name|default:post.title }} a trouvé son foyer pour la vie !</span>
+                        <strong>Adopté(e) le {{ post.adoption_date|date:"d/m/Y" }}</strong>
+                        <p>{{ post.animal_name|default:post.title }} a trouvé son foyer pour la vie !</p>
                     </div>
                 </div>
-                <a href="{% url 'blog:adoptions_by_year' year=post.adoption_date.year %}" class="btn btn-primary" style="background:#059669;border-color:#059669;padding:0.4rem 1rem;font-size:0.85rem;border-radius:9999px;">Voir les adoptés {{ post.adoption_date.year }} &rarr;</a>
+                <a href="{% url 'blog:adoptions_by_year' year=post.adoption_date.year %}" class="btn-adopted-year">Voir les adoptés {{ post.adoption_date.year }} &rarr;</a>
             </div>
             {% endif %}
 
-            <div class="animal-profile-grid">
-                {% if post.adoption_date %}
-                <div class="animal-profile-item" style="border-left:3px solid #10b981;">
-                    <span class="animal-profile-label">Date d'adoption</span>
-                    <span class="animal-profile-value" style="color:#065f46;font-weight:700;">{{ post.adoption_date|date:"d/m/Y" }}</span>
-                </div>
-                {% endif %}
-                {% if post.species %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Espèce</span>
-                    <span class="animal-profile-value">{{ post.get_species_display }}</span>
-                </div>
-                {% endif %}
-                {% if post.breed %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Race</span>
-                    <span class="animal-profile-value">{{ post.breed }}</span>
-                </div>
-                {% endif %}
-                {% if post.sex %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Sexe</span>
-                    <span class="animal-profile-value">{% if post.sex == "male" %}&#9794;{% else %}&#9792;{% endif %} {{ post.get_sex_display }}</span>
-                </div>
-                {% endif %}
+            <!-- Section 1 : Caractéristiques Clés (Grille de cartes) -->
+            <div class="animal-stats-grid">
                 {% if post.age_display %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Âge</span>
-                    <span class="animal-profile-value">{{ post.age_display }}</span>
+                <div class="stat-card">
+                    <span class="stat-card-label">Âge calculé</span>
+                    <div class="stat-card-value">
+                        <span class="stat-card-icon">🎂</span>
+                        <span>{{ post.age_display }}</span>
+                    </div>
                 </div>
                 {% endif %}
-                {% if post.species == "chien" and post.weight_kg %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Poids</span>
-                    <span class="animal-profile-value">{{ post.weight_kg }} kg</span>
-                </div>
-                {% endif %}
-                {% if post.ok_dogs %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Entente Chiens</span>
-                    <span class="animal-profile-value">{% if post.ok_dogs == "oui" %}✅ Oui{% elif post.ok_dogs == "non" %}❌ Non{% else %}❓ À tester{% endif %}</span>
-                </div>
-                {% endif %}
-                {% if post.ok_cats %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Entente Chats</span>
-                    <span class="animal-profile-value">{% if post.ok_cats == "oui" %}✅ Oui{% elif post.ok_cats == "non" %}❌ Non{% else %}❓ À tester{% endif %}</span>
-                </div>
-                {% endif %}
-                {% if post.ok_children %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Entente Enfants</span>
-                    <span class="animal-profile-value">{% if post.ok_children == "oui" %}✅ Oui{% elif post.ok_children == "non" %}❌ Non{% else %}❓ À tester{% endif %}</span>
-                </div>
-                {% endif %}
+
                 {% if post.housing_requirement %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Type d'habitat</span>
-                    <span class="animal-profile-value">{{ post.get_housing_requirement_display }}</span>
+                <div class="stat-card">
+                    <span class="stat-card-label">Logement</span>
+                    <div class="stat-card-value">
+                        <span class="stat-card-icon">🏡</span>
+                        <span>{{ post.get_housing_requirement_display }}</span>
+                    </div>
                 </div>
                 {% endif %}
-                {% if post.is_vaccinated != None %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Vacciné</span>
-                    <span class="animal-profile-value">{% if post.is_vaccinated %}Oui{% else %}Non{% endif %}</span>
+
+                {% if post.weight_kg %}
+                <div class="stat-card">
+                    <span class="stat-card-label">Poids</span>
+                    <div class="stat-card-value">
+                        <span class="stat-card-icon">⚖️</span>
+                        <span>{{ post.weight_kg }} kg</span>
+                    </div>
                 </div>
                 {% endif %}
-                {% if post.is_sterilized != None %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Stérilisé / Castré</span>
-                    <span class="animal-profile-value">{% if post.is_sterilized %}Oui{% else %}Non{% endif %}</span>
-                </div>
-                {% endif %}
+
                 {% if post.identification %}
-                <div class="animal-profile-item">
-                    <span class="animal-profile-label">Identification</span>
-                    <span class="animal-profile-value">{{ post.identification }}</span>
+                <div class="stat-card">
+                    <span class="stat-card-label">Puce I-CAD</span>
+                    <div class="stat-card-value">
+                        <span class="stat-card-icon">🏷️</span>
+                        <span class="stat-card-chip-num">{{ post.identification }}</span>
+                    </div>
+                </div>
+                {% elif post.sex %}
+                <div class="stat-card">
+                    <span class="stat-card-label">Sexe</span>
+                    <div class="stat-card-value">
+                        <span class="stat-card-icon">{% if post.sex == 'male' %}♂{% else %}♀{% endif %}</span>
+                        <span>{{ post.get_sex_display }}</span>
+                    </div>
                 </div>
                 {% endif %}
             </div>
 
+            <!-- Section 2 : Garanties Sanitaires & Vétérinaires (Pastel Box) -->
+            <div class="animal-health-box">
+                <div class="health-box-header">
+                    <svg class="health-shield-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                    <h4>Garanties Sanitaires & Vétérinaires</h4>
+                </div>
+                <div class="health-checklist">
+                    <div class="health-item">
+                        <span class="health-check-mark">✓</span>
+                        <span>{% if post.is_vaccinated %}Vacciné(e) à jour{% else %}Soins & vaccins à jour{% endif %}</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-check-mark">✓</span>
+                        <span>{% if post.is_sterilized %}Stérilisé(e) / Castré(e){% else %}Suivi vétérinaire assidu{% endif %}</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-check-mark">✓</span>
+                        <span>Identifié(e) par puce</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-check-mark">✓</span>
+                        <span>Déparasité(e) interne/externe</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3 : Ententes & Cohabitation -->
+            <div class="animal-compat-section">
+                <h4 class="compat-section-title">Ententes & Cohabitation</h4>
+                <div class="compat-pills-grid">
+                    <!-- Chiens -->
+                    <div class="compat-pill {% if post.ok_dogs == 'oui' %}compat-pill--yes{% elif post.ok_dogs == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                        <div class="compat-pill-header">
+                            <span class="compat-pill-icon">🐕</span>
+                            <span class="compat-pill-name">Chiens</span>
+                        </div>
+                        <span class="compat-pill-status">{% if post.ok_dogs == 'oui' %}✓ OK{% elif post.ok_dogs == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                    </div>
+
+                    <!-- Chats -->
+                    <div class="compat-pill {% if post.ok_cats == 'oui' %}compat-pill--yes{% elif post.ok_cats == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                        <div class="compat-pill-header">
+                            <span class="compat-pill-icon">🐈</span>
+                            <span class="compat-pill-name">Chats</span>
+                        </div>
+                        <span class="compat-pill-status">{% if post.ok_cats == 'oui' %}✓ OK{% elif post.ok_cats == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                    </div>
+
+                    <!-- Enfants -->
+                    <div class="compat-pill {% if post.ok_children == 'oui' %}compat-pill--yes{% elif post.ok_children == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                        <div class="compat-pill-header">
+                            <span class="compat-pill-icon">👶</span>
+                            <span class="compat-pill-name">Enfants</span>
+                        </div>
+                        <span class="compat-pill-status">{% if post.ok_children == 'oui' %}✓ OK{% elif post.ok_children == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4 : Bouton d'action Adoption / FA -->
             {% if post.adoption_status == "adoptable" or post.is_adoptable or post.adoption_status == "recherche_fa" %}
             <div class="animal-profile-cta">
-                <a href="{% url 'contact:contact' %}?category={% if post.adoption_status == 'recherche_fa' %}fa{% else %}adoption{% endif %}&animal={{ post.animal_name|default:post.title|urlencode }}" class="btn btn-primary btn-lg">
+                <a href="{% url 'contact:contact' %}?category={% if post.adoption_status == 'recherche_fa' %}fa{% else %}adoption{% endif %}&animal={{ post.animal_name|default:post.title|urlencode }}" class="btn-adopt-main">
                     {% if post.adoption_status == 'recherche_fa' %}
-                    🏡 Proposer d'accueillir {{ post.animal_name|default:"cet animal" }} en Famille d'Accueil
+                    <span class="btn-adopt-icon">🏡</span>
+                    <span>Proposer d'accueillir {{ post.animal_name|default:"cet animal" }} en Famille d'Accueil</span>
                     {% else %}
-                    🐾 Postuler pour adopter {{ post.animal_name|default:"cet animal" }}
+                    <span class="btn-adopt-icon">❤️</span>
+                    <span>Je souhaite adopter {{ post.animal_name|default:post.title }}</span>
                     {% endif %}
                 </a>
             </div>
