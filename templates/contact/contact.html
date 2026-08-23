@@ -13,26 +13,31 @@
 
     <!-- Quick Contact Cards (Mobile & Desktop) -->
     <div class="contact-quick-cards">
-        <a href="tel:+33123456789" class="contact-quick-card">
+        {% if site_settings.phone %}
+        <a href="{{ site_settings.phone_url }}" class="contact-quick-card">
             <div class="quick-card-icon quick-card-icon--phone">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
             <div class="quick-card-text">
-                <span class="quick-card-label">Permanence téléphonique</span>
-                <strong>01 23 45 67 89</strong>
+                <span class="quick-card-label">{{ site_settings.opening_hours|default:"Permanence téléphonique" }}</span>
+                <strong>{{ site_settings.phone }}</strong>
             </div>
         </a>
+        {% endif %}
 
-        <a href="mailto:contact@revesdechiens.fr" class="contact-quick-card">
+        {% if site_settings.contact_email %}
+        <a href="mailto:{{ site_settings.contact_email }}" class="contact-quick-card">
             <div class="quick-card-icon quick-card-icon--mail">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             </div>
             <div class="quick-card-text">
                 <span class="quick-card-label">Email direct</span>
-                <strong>contact@revesdechiens.fr</strong>
+                <strong>{{ site_settings.contact_email }}</strong>
             </div>
         </a>
+        {% endif %}
 
+        {% if site_settings.has_social_links %}
         <div class="contact-quick-card contact-quick-card--social">
             <div class="quick-card-icon quick-card-icon--social">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -40,10 +45,15 @@
             <div class="quick-card-text">
                 <span class="quick-card-label">Réseaux sociaux</span>
                 <div class="quick-card-links">
-                    <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> &middot; <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+                    {% if site_settings.facebook_url %}<a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+                    {% if site_settings.facebook_url and site_settings.instagram_url %} &middot; {% endif %}
+                    {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+                    {% if site_settings.tiktok_url %} &middot; <a href="{{ site_settings.tiktok_url }}" target="_blank" rel="noopener">TikTok</a>{% endif %}
+                    {% if site_settings.youtube_url %} &middot; <a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener">YouTube</a>{% endif %}
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <!-- Main Contact Form Card -->

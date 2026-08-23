@@ -489,4 +489,96 @@ class PluginData(models.Model):
         ordering = ["plugin_name", "-created_at"]
 
     def __str__(self):
-        return f"{self.plugin_name}: {self.source_table}"
+        return f"{self.plugin_name} ({self.source_table})"
+
+
+class SiteSettings(models.Model):
+    """Singleton model for site-wide configuration, contact info, and social links."""
+    # Coordonnées de contact
+    association_name = models.CharField(
+        "Nom de l'association", max_length=255, default="Association Rêves de Chiens"
+    )
+    tagline = models.CharField(
+        "Slogan / Sous-titre", max_length=512, blank=True,
+        default="Refuge Solidaire pour chiens, chats & rongeurs"
+    )
+    contact_email = models.EmailField(
+        "Email de contact", default="contact@revesdechiens.fr",
+        help_text="Email affiché publiquement et utilisé pour recevoir les messages du formulaire de contact."
+    )
+    phone = models.CharField(
+        "Téléphone", max_length=50, blank=True, default="01 23 45 67 89",
+        help_text="Numéro affiché (ex: 01 23 45 67 89 ou 06 12 34 56 78)."
+    )
+    opening_hours = models.CharField(
+        "Disponibilités / Permanence", max_length=255, blank=True,
+        default="Permanence téléphonique du lundi au samedi 9h-18h",
+        help_text="Horaires ou indications de permanence affichés sur la page contact."
+    )
+
+    # Adresse et localisation
+    address_line1 = models.CharField("Adresse / Rue", max_length=255, blank=True, default="")
+    postal_code = models.CharField("Code postal", max_length=20, blank=True, default="")
+    city = models.CharField("Ville", max_length=100, blank=True, default="")
+    region_coverage = models.CharField(
+        "Zone d'intervention couverte", max_length=255, blank=True,
+        default="Île-de-France & environs",
+        help_text="Zone géographique d'intervention affichée dans le pied de page et les mentions."
+    )
+
+    # Réseaux sociaux & Financement
+    facebook_url = models.URLField("Lien Facebook", blank=True, default="https://facebook.com")
+    instagram_url = models.URLField("Lien Instagram", blank=True, default="https://www.instagram.com/refuge_reves_de_chiens/")
+    instagram_username = models.CharField(
+        "Identifiant Instagram", max_length=100, blank=True, default="@refuge_reves_de_chiens"
+    )
+    tiktok_url = models.URLField("Lien TikTok", blank=True, default="")
+    youtube_url = models.URLField("Lien YouTube", blank=True, default="")
+    twitter_url = models.URLField("Lien X / Twitter", blank=True, default="")
+    linkedin_url = models.URLField("Lien LinkedIn", blank=True, default="")
+    helloasso_url = models.URLField(
+        "Lien HelloAsso (Dons & Adhésions)", blank=True,
+        default="https://www.helloasso.com/associations/reves-de-chiens",
+        help_text="Lien vers votre formulaire officiel de dons ou adhésions HelloAsso."
+    )
+
+    # Identité & Légal
+    siret = models.CharField("Numéro SIRET", max_length=50, blank=True, default="")
+    rna_number = models.CharField("Numéro RNA", max_length=50, blank=True, default="W751234567")
+    legal_status = models.CharField(
+        "Statut / Reconnaissance", max_length=255, blank=True,
+        default="Association reconnue d'intérêt général"
+    )
+    footer_custom_text = models.TextField(
+        "Texte personnalisé pied de page", blank=True, default="",
+        help_text="Message ou mention additionnelle affichée dans le pied de page."
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Paramètres du Site"
+        verbose_name_plural = "Paramètres Généraux du Site"
+
+    def __str__(self):
+        return f"Configuration Générale - {self.association_name}"
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+    @property
+    def phone_url(self):
+        """Returns standard tel:+33... link for href."""
+        if not self.phone:
+            return ""
+        import re
+        clean = re.sub(r"[^\d+]", "", self.phone)
+        if clean.startswith("0") and len(clean) == 10:
+            clean = "+33" + clean[1:]
+        return f"tel:{clean}"
+
+    @property
+    def has_social_links(self):
+        return bool(self.facebook_url or self.instagram_url or self.tiktok_url or self.youtube_url or self.twitter_url or self.linkedin_url)

@@ -583,3 +583,86 @@ class AnimalAndArticleAdminTests(TestCase):
         self.assertIsNotNone(a1.adoption_date)
 
 
+class SiteSettingsTests(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser("admin", "admin@test.com", "password123")
+        self.client.login(username="admin", password="password123")
+
+    def test_singleton_get_solo(self):
+        from blog.models import SiteSettings
+        s1 = SiteSettings.get_solo()
+        s1.phone = "01 99 88 77 66"
+        s1.contact_email = "test@revesdechiens.fr"
+        s1.save()
+
+        s2 = SiteSettings.get_solo()
+        self.assertEqual(s1.pk, s2.pk)
+        self.assertEqual(s2.phone, "01 99 88 77 66")
+        self.assertEqual(s2.contact_email, "test@revesdechiens.fr")
+        self.assertEqual(SiteSettings.objects.count(), 1)
+
+    def test_phone_url_property(self):
+        from blog.models import SiteSettings
+        s = SiteSettings.get_solo()
+        s.phone = "01 23 45 67 89"
+        self.assertEqual(s.phone_url, "tel:+33123456789")
+
+        s.phone = "+33 6 12 34 56 78"
+        self.assertEqual(s.phone_url, "tel:+33612345678")
+
+        s.phone = ""
+        self.assertEqual(s.phone_url, "")
+
+    def test_has_social_links(self):
+        from blog.models import SiteSettings
+        s = SiteSettings.get_solo()
+        s.facebook_url = "https://facebook.com"
+        self.assertTrue(s.has_social_links)
+
+        s.facebook_url = ""
+        s.instagram_url = ""
+        s.tiktok_url = ""
+        s.youtube_url = ""
+        s.twitter_url = ""
+        s.linkedin_url = ""
+        self.assertFalse(s.has_social_links)
+
+    def test_context_processor_injection(self):
+        from blog.models import SiteSettings
+        s = SiteSettings.get_solo()
+        s.association_name = "Association Rêves de Chiens Test"
+        s.contact_email = "contact-test@revesdechiens.fr"
+        s.save()
+
+        resp = self.client.get("/contact/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("site_settings", resp.context)
+        self.assertEqual(resp.context["site_settings"].contact_email, "contact-test@revesdechiens.fr")
+        self.assertContains(resp, "contact-test@revesdechiens.fr")
+
+    def test_contact_page_hides_empty_fields(self):
+        from blog.models import SiteSettings
+        s = SiteSettings.get_solo()
+        s.phone = ""
+        s.facebook_url = ""
+        s.instagram_url = ""
+        s.tiktok_url = ""
+        s.youtube_url = ""
+        s.twitter_url = ""
+        s.linkedin_url = ""
+        s.save()
+
+        resp = self.client.get("/contact/")
+        self.assertEqual(resp.status_code, 200)
+        # Phone card should not be shown
+        self.assertNotContains(resp, "quick-card-icon--phone")
+        # Social card should not be shown
+        self.assertNotContains(resp, "quick-card-icon--social")
+
+    def test_admin_singleton_redirect(self):
+        resp = self.client.get("/admin/blog/sitesettings/")
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/admin/blog/sitesettings/1/change/", resp.url)
+
+
+

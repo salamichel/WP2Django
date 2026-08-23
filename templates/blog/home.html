@@ -297,9 +297,9 @@
                 <div class="solidarity-badge solidarity-badge--insta">📸 Instagram</div>
                 <h3>Suivez le quotidien de nos protégés</h3>
                 <p>Retrouvez en direct nos chiens et chats en famille d'accueil, les vidéos de leurs progrès et les
-                    nouvelles des adoptés sur <strong>@refuge_reves_de_chiens</strong>.</p>
+                    nouvelles des adoptés sur <strong>{{ site_settings.instagram_username|default:"@refuge_reves_de_chiens" }}</strong>.</p>
                 <div class="solidarity-action">
-                    <a href="https://www.instagram.com/refuge_reves_de_chiens/" target="_blank" rel="noopener"
+                    <a href="{{ site_settings.instagram_url|default:'https://www.instagram.com/refuge_reves_de_chiens/' }}" target="_blank" rel="noopener"
                         class="btn btn-outline btn-lg">S'abonner sur Instagram</a>
                     <span class="solidarity-subtext">+ de photos, vidéos et stories chaque jour</span>
                 </div>

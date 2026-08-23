@@ -24,8 +24,10 @@ def _send_brevo_emails(contact_msg):
             sib_api_v3_sdk.ApiClient(configuration)
         )
 
-        sender = {"name": settings.SITE_NAME, "email": settings.BREVO_SENDER_EMAIL}
-        recipient_email = settings.CONTACT_RECIPIENT_EMAIL or "contact@revesdechiens.fr"
+        from blog.models import SiteSettings
+        site_settings = SiteSettings.get_solo()
+        sender = {"name": site_settings.association_name or settings.SITE_NAME, "email": settings.BREVO_SENDER_EMAIL}
+        recipient_email = site_settings.contact_email or settings.CONTACT_RECIPIENT_EMAIL or "contact@revesdechiens.fr"
 
         # 1. Notification to the shelter team
         team_content = (

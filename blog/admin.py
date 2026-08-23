@@ -3,12 +3,13 @@ import mimetypes
 from django import forms
 from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import path
+from django.shortcuts import redirect
+from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from blog.models import (
     Post, Animal, Article, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
-    PostGalleryImage,
+    PostGalleryImage, SiteSettings,
 )
 
 
@@ -659,3 +660,51 @@ class PluginDataAdmin(admin.ModelAdmin):
     list_display = ("plugin_name", "source_table", "related_post", "created_at")
     list_filter = ("plugin_name",)
     search_fields = ("plugin_name", "source_table")
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ("📞 Coordonnées & Permanence", {
+            "fields": (
+                ("contact_email", "phone"),
+                ("opening_hours",),
+            ),
+            "description": "Ces informations sont affichées dans l'en-tête, le pied de page et la page de contact.",
+        }),
+        ("📍 Adresse & Zone d'intervention", {
+            "fields": (
+                ("address_line1",),
+                ("postal_code", "city"),
+                ("region_coverage",),
+            ),
+        }),
+        ("🌐 Réseaux Sociaux & Financement Participatif", {
+            "fields": (
+                ("facebook_url", "instagram_url"),
+                ("instagram_username", "helloasso_url"),
+                ("tiktok_url", "youtube_url"),
+                ("twitter_url", "linkedin_url"),
+            ),
+            "description": "Laissez un champ vide pour masquer automatiquement l'icône correspondante sur le site public.",
+        }),
+        ("🏛️ Identité & Informations Légales", {
+            "fields": (
+                ("association_name", "tagline"),
+                ("rna_number", "siret"),
+                ("legal_status",),
+                ("footer_custom_text",),
+            ),
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return not SiteSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        obj = SiteSettings.get_solo()
+        return redirect(reverse("admin:blog_sitesettings_change", args=[obj.pk]))
+
