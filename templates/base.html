@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.2">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.6">
     <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
     {% block extra_head %}{% endblock %}
 </head>
@@ -339,23 +339,7 @@
         {% endif %}
 
         {% block page_content %}
-        <div class="site-layout">
-            <button class="sidebar-toggle" aria-label="Ouvrir le menu latéral" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-                <span>Guides & Navigation</span>
-            </button>
-            <aside class="sidebar" id="sidebar">
-                {% include "includes/sidebar.html" %}
-            </aside>
-            <div class="layout-content">
-                {% block content %}{% endblock %}
-            </div>
-        </div>
+        {% block content %}{% endblock %}
         {% endblock %}
     </main>
 
@@ -597,7 +581,7 @@
         </div>
     </div>
 
-    <script src="{% static 'js/main.js' %}?v=2.0"></script>
+    <script src="{% static 'js/main.js' %}?v=2.5"></script>
     {% block extra_js %}{% endblock %}
 </body>
 

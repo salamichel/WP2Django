@@ -10,8 +10,203 @@
 {% endblock %}
 
 {% block content %}
-<article class="post-single">
-    <div class="container container--narrow">
+<article class="post-single{% if post.is_animal_profile %} post-single--animal{% endif %}">
+    <div class="container{% if not post.is_animal_profile %} container--narrow{% endif %}">
+        
+        <!-- Top Navigation & Share Toolbar -->
+        <div class="post-detail-top-bar">
+            <a href="{% if post.is_animal_profile %}{% url 'blog:post_list' %}{% else %}{% url 'blog:home' %}{% endif %}" class="btn-detail-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Retour aux animaux</span>
+            </a>
+            <button type="button" class="btn-detail-share" id="btn-share-post" onclick="if(navigator.share){navigator.share({title:document.title,url:window.location.href});}else{navigator.clipboard.writeText(window.location.href);alert('Lien de la fiche copié dans le presse-papiers !');}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <span>Partager la fiche</span>
+            </button>
+        </div>
+
+        {% if post.is_animal_profile %}
+        <!-- Split Hero 2 Columns (Mockup 3) -->
+        <section class="animal-split-hero">
+            <!-- Left Visuals Column (Main Photo + Gallery Thumbnails) -->
+            <div class="animal-hero-visuals">
+                <div class="animal-main-photo-wrap">
+                    <!-- Badges Overlay -->
+                    {% if post.is_emergency %}
+                    <span class="hero-badge-left hero-badge--emergency">SOS Urgence Sauvetage 🚨</span>
+                    <span class="hero-badge-right hero-badge--urgent-pill">! URGENCE SAUVETAGE</span>
+                    {% elif post.adoption_status == "recherche_fa" %}
+                    <span class="hero-badge-left hero-badge--fa">Recherche Famille d'Accueil 🏡</span>
+                    {% elif post.adoption_status == "reserve" %}
+                    <span class="hero-badge-left hero-badge--reserved">Réservé(e) ⏳</span>
+                    {% elif post.adoption_status == "adopte" %}
+                    <span class="hero-badge-left hero-badge--adopted">Adopté(e) ❤️</span>
+                    {% else %}
+                    <span class="hero-badge-left hero-badge--adoptable">À l'Adoption 🐾</span>
+                    {% endif %}
+
+                    {% if post.featured_image and post.featured_image.file %}
+                    <a href="{{ post.featured_image.file.url }}" class="glightbox main-photo-link" data-gallery="animal-profile-gallery" data-title="{{ post.animal_name|default:post.title }}" data-description="{{ post.breed|default:'' }}">
+                        <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" class="animal-main-img">
+                        <span class="main-photo-zoom-hint">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                            <span>Agrandir</span>
+                        </span>
+                    </a>
+                    {% else %}
+                    <div class="animal-photo-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="64" height="64"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Gallery Thumbnails Bar (4 items) -->
+                {% if gallery_images %}
+                <div class="animal-gallery-thumbnails">
+                    {% if post.featured_image and post.featured_image.file %}
+                    <a href="{{ post.featured_image.file.url }}" class="glightbox thumb-card active" data-gallery="animal-profile-gallery" data-title="{{ post.animal_name|default:post.title }}">
+                        <img src="{{ post.featured_image.file.url }}" alt="{{ post.title }}" loading="lazy">
+                    </a>
+                    {% endif %}
+                    {% for gi in gallery_images|slice:":3" %}
+                    <a href="{{ gi.media.file.url }}" class="glightbox thumb-card" data-gallery="animal-profile-gallery" data-title="{{ post.animal_name|default:post.title }}" data-description="{{ gi.media.caption|default:'' }}">
+                        <img src="{{ gi.media.file.url }}" alt="{{ gi.media.alt_text|default:post.title }}" loading="lazy">
+                    </a>
+                    {% endfor %}
+                    {% if gallery_images|length > 3 %}
+                    <a href="{{ gallery_images.3.media.file.url }}" class="glightbox thumb-card thumb-card--more" data-gallery="animal-profile-gallery" data-title="{{ post.animal_name|default:post.title }}">
+                        <img src="{{ gallery_images.3.media.file.url }}" alt="{{ post.title }}" loading="lazy">
+                        <span class="thumb-more-overlay">+{{ gallery_images|length|add:"-3" }}</span>
+                    </a>
+                    <!-- Hidden remaining images for GLightbox -->
+                    {% for gi in gallery_images|slice:"4:" %}
+                    <a href="{{ gi.media.file.url }}" class="glightbox hidden" data-gallery="animal-profile-gallery" data-title="{{ post.animal_name|default:post.title }}"></a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Specs & Card Summary -->
+            <div class="animal-hero-specs">
+                <div class="specs-eyebrow">
+                    {{ post.get_species_display|upper }}{% if post.sex %} &bull; {% if post.sex == 'male' %}MÂLE &#9794;{% else %}FEMELLE &#9792;{% endif %}{% endif %}
+                </div>
+
+                <h1 class="specs-animal-name">{{ post.animal_name|default:post.title }}</h1>
+                {% if post.breed %}
+                <p class="specs-animal-breed">{{ post.breed }}</p>
+                {% endif %}
+
+                <!-- 2x2 Key Stats Grid -->
+                <div class="animal-stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-card-label">ÂGE CALCULÉ</span>
+                        <div class="stat-card-value">
+                            <span class="stat-card-icon">📅</span>
+                            <strong>{{ post.age_display|default:"Non renseigné" }}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">LOGEMENT</span>
+                        <div class="stat-card-value">
+                            <span class="stat-card-icon">🏡</span>
+                            <strong>{{ post.get_housing_requirement_display|default:"Indifférent" }}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">POIDS</span>
+                        <div class="stat-card-value">
+                            <span class="stat-card-icon">⚖️</span>
+                            <strong>{% if post.weight_kg %}{{ post.weight_kg }} kg{% else %}Non renseigné{% endif %}</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">PUCE I-CAD</span>
+                        <div class="stat-card-value">
+                            <span class="stat-card-chip-num">{{ post.identification|default:"Enregistrée" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Garanties Sanitaires & Vétérinaires (Pastel Green Box) -->
+                <div class="animal-health-box">
+                    <div class="health-box-header">
+                        <svg class="health-shield-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <h4>GARANTIES SANITAIRES & VÉTÉRINAIRES</h4>
+                    </div>
+                    <div class="health-checklist-grid">
+                        <div class="health-item">
+                            <span class="health-check-mark">✓</span>
+                            <span>Vacciné(e) à jour</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-check-mark">✓</span>
+                            <span>Stérilisé(e) / Castré(e)</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-check-mark">✓</span>
+                            <span>Identifié(e) par puce</span>
+                        </div>
+                        <div class="health-item">
+                            <span class="health-check-mark">✓</span>
+                            <span>Déparasité(e) interne/externe</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ententes & Cohabitation -->
+                <div class="animal-compat-section">
+                    <h4 class="compat-section-title">ENTENTES & COHABITATION :</h4>
+                    <div class="compat-pills-row">
+                        <!-- Chiens -->
+                        <div class="compat-pill {% if post.ok_dogs == 'oui' %}compat-pill--yes{% elif post.ok_dogs == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                            <span class="compat-label">Chiens</span>
+                            <span class="compat-val">{% if post.ok_dogs == 'oui' %}✓ OK{% elif post.ok_dogs == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                        </div>
+                        <!-- Chats -->
+                        <div class="compat-pill {% if post.ok_cats == 'oui' %}compat-pill--yes{% elif post.ok_cats == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                            <span class="compat-label">Chats</span>
+                            <span class="compat-val">{% if post.ok_cats == 'oui' %}✓ OK{% elif post.ok_cats == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                        </div>
+                        <!-- Enfants -->
+                        <div class="compat-pill {% if post.ok_children == 'oui' %}compat-pill--yes{% elif post.ok_children == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
+                            <span class="compat-label">Enfants</span>
+                            <span class="compat-val">{% if post.ok_children == 'oui' %}✓ OK{% elif post.ok_children == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Big CTA Button -->
+                {% if post.adoption_status == "adoptable" or post.is_adoptable or post.adoption_status == "recherche_fa" %}
+                <div class="animal-profile-cta">
+                    <a href="{% url 'contact:contact' %}?category={% if post.adoption_status == 'recherche_fa' %}fa{% else %}adoption{% endif %}&animal={{ post.animal_name|default:post.title|urlencode }}" class="btn-adopt-main">
+                        {% if post.adoption_status == 'recherche_fa' %}
+                        <span class="btn-adopt-icon">🏡</span>
+                        <span>Proposer d'accueillir {{ post.animal_name|default:"cet animal" }} en FA</span>
+                        {% else %}
+                        <span class="btn-adopt-icon">❤️</span>
+                        <span>Je souhaite adopter {{ post.animal_name|default:post.title }}</span>
+                        {% endif %}
+                    </a>
+                    <p class="adopt-cta-caption">Participation aux frais vétérinaires déductible d'impôts &bull; Suivi bienveillant à vie</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Bottom Full Narrative Story Card -->
+        <section class="animal-story-container">
+            <div class="animal-story-card">
+                <h2 class="animal-story-title">Histoire, Caractère & Besoins de {{ post.animal_name|default:post.title }}</h2>
+                <div class="post-content story-content">
+                    {{ post.content|safe }}
+                </div>
+            </div>
+        </section>
+
+        {% else %}
+        <!-- Standard Blog Post View -->
         <header class="post-header">
             <div class="post-meta">
                 {% for cat in post.categories.all %}
@@ -30,181 +225,7 @@
 
         {% if post.featured_image and post.featured_image.file %}
         <div class="post-featured-image-wrapper">
-            <a href="{{ post.featured_image.file.url }}" class="glightbox post-featured-image" data-gallery="post-gallery" data-title="{{ post.animal_name|default:post.title }}" data-description="Photo principale de présentation">
-                <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" class="featured-img-main">
-                <span class="featured-image-zoom-badge">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-                    <span>Agrandir</span>
-                </span>
-            </a>
-        </div>
-        {% endif %}
-
-        {% if post.is_animal_profile %}
-        <div class="animal-profile-card">
-            <!-- Header : Animal Name, Breed & Status Badge -->
-            <div class="animal-profile-header">
-                <div class="animal-profile-id">
-                    <h2 class="animal-profile-name">{{ post.animal_name|default:post.title }}</h2>
-                    {% if post.breed %}
-                    <p class="animal-profile-breed">{{ post.breed }}{% if post.sex %} &middot; {% if post.sex == 'male' %}♂ Mâle{% else %}♀ Femelle{% endif %}{% endif %}</p>
-                    {% endif %}
-                </div>
-                <div class="animal-profile-status-wrap">
-                    {% if post.is_emergency %}
-                    <span class="animal-status-badge animal-status-badge--emergency">🚨 Urgence</span>
-                    {% elif post.adoption_status == "recherche_fa" %}
-                    <span class="animal-status-badge animal-status-badge--fa">🏡 Recherche FA</span>
-                    {% elif post.adoption_status == "reserve" %}
-                    <span class="animal-status-badge animal-status-badge--reserved">⏳ Réservé</span>
-                    {% elif post.adoption_status == "adopte" %}
-                    <span class="animal-status-badge animal-status-badge--adopted">❤️ {% if post.adoption_date %}Adopté le {{ post.adoption_date|date:"d/m/Y" }}{% else %}Adopté{% endif %}</span>
-                    {% elif post.is_adoptable or post.adoption_status == "adoptable" %}
-                    <span class="animal-status-badge animal-status-badge--adoptable">✨ Disponible à l'adoption</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            {% if post.adoption_status == "adopte" and post.adoption_date %}
-            <div class="animal-adopted-banner">
-                <div class="adopted-banner-content">
-                    <span class="adopted-emoji">🏡</span>
-                    <div>
-                        <strong>Adopté(e) le {{ post.adoption_date|date:"d/m/Y" }}</strong>
-                        <p>{{ post.animal_name|default:post.title }} a trouvé son foyer pour la vie !</p>
-                    </div>
-                </div>
-                <a href="{% url 'blog:adoptions_by_year' year=post.adoption_date.year %}" class="btn-adopted-year">Voir les adoptés {{ post.adoption_date.year }} &rarr;</a>
-            </div>
-            {% endif %}
-
-            <!-- Section 1 : Caractéristiques Clés (Grille de cartes) -->
-            <div class="animal-stats-grid">
-                {% if post.age_display %}
-                <div class="stat-card">
-                    <span class="stat-card-label">Âge calculé</span>
-                    <div class="stat-card-value">
-                        <span class="stat-card-icon">🎂</span>
-                        <span>{{ post.age_display }}</span>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if post.housing_requirement %}
-                <div class="stat-card">
-                    <span class="stat-card-label">Logement</span>
-                    <div class="stat-card-value">
-                        <span class="stat-card-icon">🏡</span>
-                        <span>{{ post.get_housing_requirement_display }}</span>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if post.weight_kg %}
-                <div class="stat-card">
-                    <span class="stat-card-label">Poids</span>
-                    <div class="stat-card-value">
-                        <span class="stat-card-icon">⚖️</span>
-                        <span>{{ post.weight_kg }} kg</span>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if post.identification %}
-                <div class="stat-card">
-                    <span class="stat-card-label">Puce I-CAD</span>
-                    <div class="stat-card-value">
-                        <span class="stat-card-icon">🏷️</span>
-                        <span class="stat-card-chip-num">{{ post.identification }}</span>
-                    </div>
-                </div>
-                {% elif post.sex %}
-                <div class="stat-card">
-                    <span class="stat-card-label">Sexe</span>
-                    <div class="stat-card-value">
-                        <span class="stat-card-icon">{% if post.sex == 'male' %}♂{% else %}♀{% endif %}</span>
-                        <span>{{ post.get_sex_display }}</span>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Section 2 : Garanties Sanitaires & Vétérinaires (Pastel Box) -->
-            <div class="animal-health-box">
-                <div class="health-box-header">
-                    <svg class="health-shield-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        <path d="m9 12 2 2 4-4"/>
-                    </svg>
-                    <h4>Garanties Sanitaires & Vétérinaires</h4>
-                </div>
-                <div class="health-checklist">
-                    <div class="health-item">
-                        <span class="health-check-mark">✓</span>
-                        <span>{% if post.is_vaccinated %}Vacciné(e) à jour{% else %}Soins & vaccins à jour{% endif %}</span>
-                    </div>
-                    <div class="health-item">
-                        <span class="health-check-mark">✓</span>
-                        <span>{% if post.is_sterilized %}Stérilisé(e) / Castré(e){% else %}Suivi vétérinaire assidu{% endif %}</span>
-                    </div>
-                    <div class="health-item">
-                        <span class="health-check-mark">✓</span>
-                        <span>Identifié(e) par puce</span>
-                    </div>
-                    <div class="health-item">
-                        <span class="health-check-mark">✓</span>
-                        <span>Déparasité(e) interne/externe</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3 : Ententes & Cohabitation -->
-            <div class="animal-compat-section">
-                <h4 class="compat-section-title">Ententes & Cohabitation</h4>
-                <div class="compat-pills-grid">
-                    <!-- Chiens -->
-                    <div class="compat-pill {% if post.ok_dogs == 'oui' %}compat-pill--yes{% elif post.ok_dogs == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
-                        <div class="compat-pill-header">
-                            <span class="compat-pill-icon">🐕</span>
-                            <span class="compat-pill-name">Chiens</span>
-                        </div>
-                        <span class="compat-pill-status">{% if post.ok_dogs == 'oui' %}✓ OK{% elif post.ok_dogs == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
-                    </div>
-
-                    <!-- Chats -->
-                    <div class="compat-pill {% if post.ok_cats == 'oui' %}compat-pill--yes{% elif post.ok_cats == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
-                        <div class="compat-pill-header">
-                            <span class="compat-pill-icon">🐈</span>
-                            <span class="compat-pill-name">Chats</span>
-                        </div>
-                        <span class="compat-pill-status">{% if post.ok_cats == 'oui' %}✓ OK{% elif post.ok_cats == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
-                    </div>
-
-                    <!-- Enfants -->
-                    <div class="compat-pill {% if post.ok_children == 'oui' %}compat-pill--yes{% elif post.ok_children == 'non' %}compat-pill--no{% else %}compat-pill--test{% endif %}">
-                        <div class="compat-pill-header">
-                            <span class="compat-pill-icon">👶</span>
-                            <span class="compat-pill-name">Enfants</span>
-                        </div>
-                        <span class="compat-pill-status">{% if post.ok_children == 'oui' %}✓ OK{% elif post.ok_children == 'non' %}✕ Non{% else %}? À tester{% endif %}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 4 : Bouton d'action Adoption / FA -->
-            {% if post.adoption_status == "adoptable" or post.is_adoptable or post.adoption_status == "recherche_fa" %}
-            <div class="animal-profile-cta">
-                <a href="{% url 'contact:contact' %}?category={% if post.adoption_status == 'recherche_fa' %}fa{% else %}adoption{% endif %}&animal={{ post.animal_name|default:post.title|urlencode }}" class="btn-adopt-main">
-                    {% if post.adoption_status == 'recherche_fa' %}
-                    <span class="btn-adopt-icon">🏡</span>
-                    <span>Proposer d'accueillir {{ post.animal_name|default:"cet animal" }} en Famille d'Accueil</span>
-                    {% else %}
-                    <span class="btn-adopt-icon">❤️</span>
-                    <span>Je souhaite adopter {{ post.animal_name|default:post.title }}</span>
-                    {% endif %}
-                </a>
-            </div>
-            {% endif %}
+            <img src="{{ post.featured_image.file.url }}" alt="{{ post.featured_image.alt_text|default:post.title }}" class="featured-img-main">
         </div>
         {% endif %}
 
@@ -217,14 +238,14 @@
             <div class="gallery-section-header">
                 <div class="gallery-header-left">
                     <span class="gallery-pill-badge">📸 Photos</span>
-                    <h3 class="gallery-title">Galerie photos de {{ post.animal_name|default:post.title }}</h3>
+                    <h3 class="gallery-title">Galerie photos</h3>
                 </div>
                 <span class="gallery-count-badge">{{ gallery_images|length }} photo{{ gallery_images|length|pluralize }}</span>
             </div>
 
             <div class="gallery-grid">
                 {% for gi in gallery_images %}
-                <a href="{{ gi.media.file.url }}" class="glightbox gallery-card" data-gallery="post-gallery" data-title="{{ post.animal_name|default:post.title }}" data-description="{{ gi.media.caption|default:gi.media.alt_text|default:'Photo de la galerie' }}">
+                <a href="{{ gi.media.file.url }}" class="glightbox gallery-card" data-gallery="post-gallery" data-title="{{ post.title }}" data-description="{{ gi.media.caption|default:gi.media.alt_text|default:'Photo de la galerie' }}">
                     <div class="gallery-card-img-wrap">
                         <img src="{{ gi.media.file.url }}" alt="{{ gi.media.alt_text|default:post.title }}" loading="lazy" class="gallery-card-img">
                         <div class="gallery-card-overlay">
@@ -241,6 +262,7 @@
             </div>
         </section>
         {% endif %}
+        {% endif %}
 
         <footer class="post-footer">
             {% if post.tags.exists %}
@@ -250,16 +272,6 @@
                 {% endfor %}
             </div>
             {% endif %}
-
-            <div class="post-share">
-                <span>Partager :</span>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener" class="share-link" aria-label="Facebook">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                </a>
-                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" rel="noopener" class="share-link" aria-label="Twitter">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
-                </a>
-            </div>
         </footer>
     </div>
 </article>

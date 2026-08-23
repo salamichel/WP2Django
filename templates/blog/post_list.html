@@ -1,187 +1,231 @@
 {% extends "base.html" %}
 
-{% block title %}{% if page_title %}{{ page_title }}{% else %}Nos protégés & Actualités{% endif %} - {{ site_name }}{% endblock %}
+{% block title %}{% if page_title %}{{ page_title }}{% else %}Catalogue des Résidents{% endif %} - {{ site_name }}{% endblock %}
 {% block meta_description %}{% if category and category.description %}{{ category.description }}{% else %}Découvrez tous nos chiens, chats et rongeurs disponibles à l'adoption ou en recherche de famille d'accueil au refuge Rêves de Chiens.{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="page-header page-header--filter">
-        <div class="page-header-text">
-            <h1>{% if page_title %}{{ page_title }}{% else %}Nos protégés & Actualités{% endif %}</h1>
-            <p class="page-header-sub">{% if category and category.description %}{{ category.description }}{% else %}Trouvez votre futur compagnon et découvrez la vie de notre association.{% endif %}</p>
-        </div>
-      <!-- Live Multi-Filter Card -->
-    <div class="adoption-filter-wrapper" id="live-filter-wrapper">
-        <form id="live-filter-form" method="get" action="{% url 'blog:post_list' %}" class="adoption-filters-form" role="search">
-            <!-- Hidden input for species tab -->
-            <input type="hidden" name="species" id="filter-species-input" value="{{ filters.species|default:'' }}">
-
-            <!-- Tier 1: Unified Top Search & Species Segmented Control -->
-            <div class="filter-top-bar">
-                <!-- Text Search Input with Left Icon & Clear Button -->
-                <div class="filter-search-box">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" name="q" id="filter-q-input" class="filter-search-input" placeholder="Rechercher un protégé (nom, race, mot-clé...)" value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Recherche">
-                    <button type="button" class="search-clear-btn{% if not filters.q %} hidden{% endif %}" id="search-clear-btn" aria-label="Effacer la recherche">&times;</button>
-                </div>
-
-                <!-- Quick Species Tabs (Segmented Control) -->
-                <div class="species-tabs-bar" role="tablist" aria-label="Filtrer par espèce">
-                    <button type="button" class="species-tab{% if not filters.species %} active{% endif %}" data-species="" role="tab" aria-selected="{% if not filters.species %}true{% else %}false{% endif %}">
-                        <span class="species-tab-icon">🐾</span>
-                        <span class="species-tab-label">Tous</span>
-                    </button>
-                    <button type="button" class="species-tab{% if filters.species == 'chien' %} active{% endif %}" data-species="chien" role="tab" aria-selected="{% if filters.species == 'chien' %}true{% else %}false{% endif %}">
-                        <span class="species-tab-icon">🐕</span>
-                        <span class="species-tab-label">Chiens</span>
-                    </button>
-                    <button type="button" class="species-tab{% if filters.species == 'chat' %} active{% endif %}" data-species="chat" role="tab" aria-selected="{% if filters.species == 'chat' %}true{% else %}false{% endif %}">
-                        <span class="species-tab-icon">🐈</span>
-                        <span class="species-tab-label">Chats</span>
-                    </button>
-                    <button type="button" class="species-tab{% if filters.species == 'rongeur' %} active{% endif %}" data-species="rongeur" role="tab" aria-selected="{% if filters.species == 'rongeur' %}true{% else %}false{% endif %}">
-                        <span class="species-tab-icon">🐹</span>
-                        <span class="species-tab-label">Rongeurs</span>
-                    </button>
-                </div>
+<div class="container catalogue-page-container">
+    <!-- Top Header Banner & Quick Species Selector -->
+    <div class="catalogue-header-card">
+        <div class="cat-header-top-row">
+            <nav class="cat-breadcrumbs" aria-label="Fil d'Ariane">
+                <a href="{% url 'blog:home' %}" class="cat-breadcrumb-link">&larr; Accueil</a>
+                <span class="cat-breadcrumb-sep">/</span>
+                <span class="cat-breadcrumb-curr">Catalogue des Résidents</span>
+            </nav>
+            <div class="cat-quick-species-pills" role="tablist" aria-label="Accès rapide par espèce">
+                <a href="{% url 'blog:category' slug='chiens' %}" class="pill-species-quick{% if filters.species == 'chien' %} active{% endif %}">
+                    <span class="p-emoji">🐕</span>
+                    <span>Chiens ({{ species_counts.chiens|default:0 }})</span>
+                </a>
+                <a href="{% url 'blog:category' slug='chats' %}" class="pill-species-quick{% if filters.species == 'chat' %} active{% endif %}">
+                    <span class="p-emoji">🐈</span>
+                    <span>Chats ({{ species_counts.chats|default:0 }})</span>
+                </a>
+                <a href="{% url 'blog:category' slug='rongeurs' %}" class="pill-species-quick{% if filters.species == 'rongeur' %} active{% endif %}">
+                    <span class="p-emoji">🐹</span>
+                    <span>Rongeurs ({{ species_counts.rongeurs|default:0 }})</span>
+                </a>
+                <a href="{% url 'blog:category' slug='urgences' %}" class="pill-species-quick pill-species-quick--urgent{% if filters.emergency == '1' %} active{% endif %}">
+                    <span class="p-emoji">🚨</span>
+                    <span>SOS Urgences ({{ species_counts.urgences|default:0 }})</span>
+                </a>
             </div>
+        </div>
 
-            <!-- Tier 2: Refined Dropdowns Row (3 Balanced Columns) -->
-            <div class="filter-dropdowns-row">
-                <div class="filter-select-field">
-                    <label for="id_status" class="filter-label">Statut d'adoption</label>
-                    <div class="filter-select-wrap">
-                        <select name="status" id="id_status" class="filter-select">
+        <div class="cat-header-main-row">
+            <h1 class="cat-page-title">{% if page_title %}{{ page_title }}{% else %}Nos Protégés à l'Adoption{% endif %}</h1>
+            <p class="cat-page-subtitle">{% if category and category.description %}{{ category.description }}{% else %}Nos fidèles compagnons en attente d'une famille aimante et bienveillante pour la vie.{% endif %}</p>
+        </div>
+    </div>
+
+    <!-- Main 2-Column Catalogue Layout -->
+    <div class="catalogue-grid-layout" id="live-filter-wrapper">
+        <!-- Left Column: Filters Sidebar -->
+        <aside class="catalogue-sidebar-col" aria-label="Filtres de recherche">
+            <form id="live-filter-form" method="get" action="{% url 'blog:post_list' %}" class="catalogue-filter-panel" role="search">
+                <input type="hidden" name="species" id="filter-species-input" value="{{ filters.species|default:'' }}">
+
+                <!-- Widget 1: Filtrer les Résidents (Espèces) -->
+                <div class="sidebar-filter-widget">
+                    <h3 class="filter-widget-title">Filtrer les résidents</h3>
+                    <div class="species-sidebar-list">
+                        <button type="button" class="species-sidebar-item{% if not filters.species and not filters.emergency %} active{% endif %}" data-species="" data-emergency="">
+                            <span class="species-item-left"><span class="species-ico">🐾</span> Tous les résidents</span>
+                            <span class="species-count-badge">{{ species_counts.total|default:0 }}</span>
+                        </button>
+                        <button type="button" class="species-sidebar-item{% if filters.species == 'chien' %} active{% endif %}" data-species="chien" data-emergency="">
+                            <span class="species-item-left"><span class="species-ico">🐕</span> Chiens</span>
+                            <span class="species-count-badge">{{ species_counts.chiens|default:0 }}</span>
+                        </button>
+                        <button type="button" class="species-sidebar-item{% if filters.species == 'chat' %} active{% endif %}" data-species="chat" data-emergency="">
+                            <span class="species-item-left"><span class="species-ico">🐈</span> Chats</span>
+                            <span class="species-count-badge">{{ species_counts.chats|default:0 }}</span>
+                        </button>
+                        <button type="button" class="species-sidebar-item{% if filters.species == 'rongeur' %} active{% endif %}" data-species="rongeur" data-emergency="">
+                            <span class="species-item-left"><span class="species-ico">🐹</span> NAC / Rongeurs</span>
+                            <span class="species-count-badge">{{ species_counts.rongeurs|default:0 }}</span>
+                        </button>
+                        <button type="button" class="species-sidebar-item species-sidebar-item--urgent{% if filters.emergency == '1' %} active{% endif %}" data-species="" data-emergency="1">
+                            <span class="species-item-left"><span class="species-ico">🚨</span> SOS Urgences</span>
+                            <span class="species-count-badge species-count-badge--urgent">{{ species_counts.urgences|default:0 }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Widget 2: Compatibilités -->
+                <div class="sidebar-filter-widget">
+                    <h3 class="filter-widget-title">Compatibilités</h3>
+                    <div class="sidebar-checkbox-list">
+                        <label class="sidebar-checkbox-label">
+                            <input type="checkbox" name="ok_dogs" value="oui" {% if filters.ok_dogs == "oui" %}checked{% endif %}>
+                            <span class="chk-box"></span>
+                            <span class="chk-text">OK Chiens</span>
+                        </label>
+                        <label class="sidebar-checkbox-label">
+                            <input type="checkbox" name="ok_cats" value="oui" {% if filters.ok_cats == "oui" %}checked{% endif %}>
+                            <span class="chk-box"></span>
+                            <span class="chk-text">OK Chats</span>
+                        </label>
+                        <label class="sidebar-checkbox-label">
+                            <input type="checkbox" name="ok_children" value="oui" {% if filters.ok_children == "oui" %}checked{% endif %}>
+                            <span class="chk-box"></span>
+                            <span class="chk-text">OK Enfants</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Widget 3: Statut Sanitaire -->
+                <div class="sidebar-filter-widget">
+                    <h3 class="filter-widget-title">Statut Sanitaire</h3>
+                    <div class="sidebar-checkbox-list">
+                        <label class="sidebar-checkbox-label">
+                            <input type="checkbox" name="vaccinated" value="1" {% if filters.vaccinated == "1" %}checked{% endif %}>
+                            <span class="chk-box"></span>
+                            <span class="chk-text">Vacciné(e)</span>
+                        </label>
+                        <label class="sidebar-checkbox-label">
+                            <input type="checkbox" name="sterilized" value="1" {% if filters.sterilized == "1" %}checked{% endif %}>
+                            <span class="chk-box"></span>
+                            <span class="chk-text">Stérilisé(e)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Widget 4: Statut d'adoption -->
+                <div class="sidebar-filter-widget">
+                    <h3 class="filter-widget-title">Statut d'adoption</h3>
+                    <div class="sidebar-select-wrap">
+                        <select name="status" id="id_status" class="sidebar-select">
                             <option value="">Tous les statuts</option>
-                            <option value="adoptable" {% if filters.status == "adoptable" %}selected{% endif %}>Adoptable</option>
-                            <option value="recherche_fa" {% if filters.status == "recherche_fa" %}selected{% endif %}>Recherche FA</option>
-                            <option value="reserve" {% if filters.status == "reserve" %}selected{% endif %}>Réservé</option>
-                            <option value="adopte" {% if filters.status == "adopte" %}selected{% endif %}>Adopté</option>
+                            <option value="adoptable" {% if filters.status == "adoptable" %}selected{% endif %}>🐾 À l'adoption</option>
+                            <option value="reserve" {% if filters.status == "reserve" %}selected{% endif %}>⏳ Réservé(e)</option>
+                            <option value="recherche_fa" {% if filters.status == "recherche_fa" %}selected{% endif %}>🏡 Recherche FA</option>
+                            <option value="adopte" {% if filters.status == "adopte" %}selected{% endif %}>❤️ Adopté(e)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="filter-select-field">
-                    <label for="id_sex" class="filter-label">Sexe</label>
-                    <div class="filter-select-wrap">
-                        <select name="sex" id="id_sex" class="filter-select">
-                            <option value="">Tous les sexes</option>
-                            <option value="male" {% if filters.sex == "male" %}selected{% endif %}>Mâle</option>
-                            <option value="femelle" {% if filters.sex == "femelle" %}selected{% endif %}>Femelle</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="filter-select-field">
-                    <label for="id_housing" class="filter-label">Type d'habitat</label>
-                    <div class="filter-select-wrap">
-                        <select name="housing" id="id_housing" class="filter-select">
+                <!-- Widget 5: Logement -->
+                <div class="sidebar-filter-widget">
+                    <h3 class="filter-widget-title">Logement</h3>
+                    <div class="sidebar-select-wrap">
+                        <select name="housing" id="id_housing" class="sidebar-select">
                             <option value="">Indifférent</option>
-                            <option value="maison" {% if filters.housing == "maison" %}selected{% endif %}>Maison</option>
+                            <option value="maison" {% if filters.housing == "maison" %}selected{% endif %}>Maison avec jardin</option>
                             <option value="appartement" {% if filters.housing == "appartement" %}selected{% endif %}>Appartement</option>
                         </select>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tier 3: Compatibility Checkboxes & Reset Button -->
-            <div class="filter-toggles-row">
-                <div class="filter-checkbox-pills">
-                    <label class="filter-pill-checkbox">
-                        <input type="checkbox" name="ok_dogs" value="oui" {% if filters.ok_dogs == "oui" %}checked{% endif %}>
-                        <span class="pill-badge"><span class="pill-emoji">🐕</span> Ok chiens</span>
-                    </label>
-                    <label class="filter-pill-checkbox">
-                        <input type="checkbox" name="ok_cats" value="oui" {% if filters.ok_cats == "oui" %}checked{% endif %}>
-                        <span class="pill-badge"><span class="pill-emoji">🐈</span> Ok chats</span>
-                    </label>
-                    <label class="filter-pill-checkbox">
-                        <input type="checkbox" name="ok_children" value="oui" {% if filters.ok_children == "oui" %}checked{% endif %}>
-                        <span class="pill-badge"><span class="pill-emoji">👶</span> Ok enfants</span>
-                    </label>
-                    <label class="filter-pill-checkbox filter-pill-checkbox--emergency">
-                        <input type="checkbox" name="emergency" value="1" {% if filters.emergency == "1" %}checked{% endif %}>
-                        <span class="pill-badge"><span class="pill-emoji">🚨</span> Urgences uniquement</span>
-                    </label>
-                </div>
+                <!-- Hidden inputs for sync -->
+                <input type="hidden" name="emergency" id="filter-emergency-input" value="{{ filters.emergency|default:'' }}">
+                <input type="hidden" name="sort" id="filter-sort-input" value="{{ filters.sort|default:'recent' }}">
 
-                <div class="filter-reset-wrapper{% if not has_filters %} hidden{% endif %}" id="filter-reset-container">
-                    <button type="button" class="btn btn-sm btn-ghost btn-reset-all" id="btn-reset-all">
+                <!-- Reset Filters Button -->
+                <div class="sidebar-reset-wrap{% if not has_filters %} hidden{% endif %}" id="filter-reset-container">
+                    <button type="button" class="btn-sidebar-reset" id="btn-reset-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        Tout effacer
+                        <span>Tout effacer</span>
                     </button>
                 </div>
-            </div>
+            </form>
 
-            <!-- Active filter chips bar -->
-            <div class="active-chips-bar{% if not has_filters %} hidden{% endif %}" id="active-chips-bar" aria-live="polite">
-                <span class="active-chips-label">Filtres actifs :</span>
-                <div class="active-chips-list" id="active-chips-list">
-                    {% if filters.species %}
-                    <span class="active-chip" data-field="species">
-                        Espèce : {{ filters.species|capfirst }}
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre espèce">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.q %}
-                    <span class="active-chip" data-field="q">
-                        Recherche : "{{ filters.q }}"
-                        <button type="button" class="chip-remove" aria-label="Supprimer la recherche textuelle">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.status %}
-                    <span class="active-chip" data-field="status">
-                        Statut : {{ filters.status }}
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre statut">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.sex %}
-                    <span class="active-chip" data-field="sex">
-                        Sexe : {{ filters.sex|capfirst }}
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre sexe">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.housing %}
-                    <span class="active-chip" data-field="housing">
-                        Habitat : {{ filters.housing|capfirst }}
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre habitat">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.ok_dogs == "oui" %}
-                    <span class="active-chip" data-field="ok_dogs">
-                        🐕 Ok chiens
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre ok chiens">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.ok_cats == "oui" %}
-                    <span class="active-chip" data-field="ok_cats">
-                        🐈 Ok chats
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre ok chats">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.ok_children == "oui" %}
-                    <span class="active-chip" data-field="ok_children">
-                        👶 Ok enfants
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre ok enfants">&times;</button>
-                    </span>
-                    {% endif %}
-                    {% if filters.emergency == "1" %}
-                    <span class="active-chip active-chip--emergency" data-field="emergency">
-                        🚨 Urgence
-                        <button type="button" class="chip-remove" aria-label="Supprimer le filtre urgence">&times;</button>
-                    </span>
-                    {% endif %}
+            <!-- Widget 5: Capacité Refuge (Informative Card) -->
+            <div class="catalogue-capacity-widget">
+                <div class="capacity-widget-header">
+                    <svg class="capacity-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>Capacité Refuge</span>
+                </div>
+                <div class="capacity-stat-line">
+                    <span>Box & FA Occupés</span>
+                    <strong class="capacity-stat-num">{{ capacity_rate|default:85 }}%</strong>
+                </div>
+                <div class="capacity-progress-bar">
+                    <div class="capacity-progress-fill" style="width: {{ capacity_rate|default:85 }}%;"></div>
+                </div>
+                <div class="capacity-stat-sub">
+                    <span>Adoptions / Mois</span>
+                    <strong class="capacity-month-num">{{ adoptions_month|default:14 }}</strong>
                 </div>
             </div>
-        </form>
-    </div>
+        </aside>
 
-    <!-- Live Post Grid Target Container -->
-    <div id="live-results-wrapper">
-        {% include "includes/_post_grid.html" %}
+        <!-- Right Column: Main Content & Grid -->
+        <main class="catalogue-content-col">
+            <!-- Top Toolbar (Search, View Mode Switcher, Sort) -->
+            <div class="catalogue-toolbar-bar">
+                <div class="cat-search-box">
+                    <svg class="cat-search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" name="q" id="filter-q-input" class="cat-search-input" placeholder="Rechercher par nom, race, matricule puce..." value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Recherche">
+                    <button type="button" class="search-clear-btn{% if not filters.q %} hidden{% endif %}" id="search-clear-btn" aria-label="Effacer la recherche">&times;</button>
+                </div>
+
+                <div class="cat-toolbar-controls">
+                    <!-- View Density / Grid Switcher -->
+                    <div class="view-mode-toggle" role="group" aria-label="Mode d'affichage">
+                        <button type="button" class="btn-view-mode active" id="btn-view-density" data-view="density" aria-pressed="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="18" height="7" rx="1"/></svg>
+                            <span>Haute Densité</span>
+                        </button>
+                        <button type="button" class="btn-view-mode" id="btn-view-grid" data-view="grid" aria-pressed="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                            <span>Grille</span>
+                        </button>
+                    </div>
+
+                    <!-- Sort Select -->
+                    <div class="cat-sort-control">
+                        <label for="cat-sort-select" class="cat-sort-label">Trier :</label>
+                        <div class="cat-sort-select-wrap">
+                            <select id="cat-sort-select" class="cat-sort-select">
+                                <option value="recent" {% if filters.sort == "recent" %}selected{% endif %}>Récent</option>
+                                <option value="oldest" {% if filters.sort == "oldest" %}selected{% endif %}>Plus ancien</option>
+                                <option value="name_asc" {% if filters.sort == "name_asc" %}selected{% endif %}>Nom A &rarr; Z</option>
+                                <option value="age_asc" {% if filters.sort == "age_asc" %}selected{% endif %}>Plus jeune</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Filters Feedback & Counter Bar -->
+            <div class="catalogue-meta-subheader">
+                <div class="cat-residents-count">
+                    <strong>{{ total_count }} pensionnaire{{ total_count|pluralize }}</strong> affiché{{ total_count|pluralize }}
+                </div>
+                <div class="cat-active-filter-indicator">
+                    <span class="cat-filter-tag">
+                        Filtre : {% if filters.species == 'chien' %}Les Chiens{% elif filters.species == 'chat' %}Les Chats{% elif filters.species == 'rongeur' %}Les Rongeurs{% elif filters.emergency == '1' %}SOS Urgences{% else %}Tous les Résidents{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Live Post Grid Target Container -->
+            <div id="live-results-wrapper">
+                {% include "includes/_post_grid.html" %}
+            </div>
+        </main>
     </div>
 </div>
 {% endblock %}

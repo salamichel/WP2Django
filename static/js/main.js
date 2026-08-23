@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initScrollAnimations();
     initAlerts();
     initLiveFilters();
+    initViewModeToggle();
     initStickyHeader();
 });
 
@@ -210,7 +211,7 @@ function initMobileBottomNav() {
    ========================================================================== */
 function initSidebar() {
     const sidebarToggle = document.querySelector(".sidebar-toggle");
-    const sidebar = document.getElementById("sidebar");
+    const sidebar = document.querySelector(".sidebar");
 
     if (!sidebarToggle || !sidebar) return;
 
@@ -453,6 +454,38 @@ function initLiveFilters() {
         applyFilters(null, true, false);
     }
 
+    // --- Event: Species Sidebar Items Click ---
+    const sidebarSpeciesItems = document.querySelectorAll(".species-sidebar-item");
+    const emergencyInput = document.getElementById("filter-emergency-input");
+    sidebarSpeciesItems.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const speciesVal = this.getAttribute("data-species") || "";
+            const emergencyVal = this.getAttribute("data-emergency") || "";
+
+            sidebarSpeciesItems.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+
+            if (speciesInput) speciesInput.value = speciesVal;
+            if (emergencyInput) emergencyInput.value = emergencyVal;
+
+            // Also sync top quick pills if present
+            const quickPills = document.querySelectorAll(".pill-species-quick");
+            quickPills.forEach(p => p.classList.remove("active"));
+
+            applyFilters(null, true, false);
+        });
+    });
+
+    // --- Event: Sort Select Change ---
+    const sortSelect = document.getElementById("cat-sort-select");
+    const sortInput = document.getElementById("filter-sort-input");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            if (sortInput) sortInput.value = this.value;
+            applyFilters(null, true, false);
+        });
+    }
+
     // --- Event: Species Tabs Click ---
     speciesTabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
@@ -617,6 +650,77 @@ function initLiveFilters() {
 
     // Initial binding for pagination on first page load
     bindPaginationEvents();
+}
+
+/* ==========================================================================
+   4. View Mode Switcher (Haute Densité vs Grille Standard)
+   ========================================================================== */
+function initViewModeToggle() {
+    const btnDensity = document.getElementById("btn-view-density");
+    const btnGrid = document.getElementById("btn-view-grid");
+
+    function setViewMode(mode) {
+        const grid = document.getElementById("post-grid");
+        if (grid) {
+            grid.classList.remove("view-density", "view-grid");
+            grid.classList.add(`view-${mode}`);
+        }
+
+        if (btnDensity && btnGrid) {
+            if (mode === "density") {
+                btnDensity.classList.add("active");
+                btnDensity.setAttribute("aria-pressed", "true");
+                btnGrid.classList.remove("active");
+                btnGrid.setAttribute("aria-pressed", "false");
+            } else {
+                btnGrid.classList.add("active");
+                btnGrid.setAttribute("aria-pressed", "true");
+                btnDensity.classList.remove("active");
+                btnDensity.setAttribute("aria-pressed", "false");
+            }
+        }
+
+        try {
+            localStorage.setItem("catalogue_view_mode", mode);
+        } catch (e) {}
+    }
+
+    // Load initial view mode from storage or default to density
+    let savedMode = "density";
+    try {
+        savedMode = localStorage.getItem("catalogue_view_mode") || "density";
+    } catch (e) {}
+
+    setViewMode(savedMode);
+
+    if (btnDensity) {
+        btnDensity.addEventListener("click", function () {
+            setViewMode("density");
+        });
+    }
+
+    if (btnGrid) {
+        btnGrid.addEventListener("click", function () {
+            setViewMode("grid");
+        });
+    }
+
+    // Observe AJAX grid replacements to preserve mode
+    const liveWrapper = document.getElementById("live-results-wrapper");
+    if (liveWrapper && window.MutationObserver) {
+        const observer = new MutationObserver(function () {
+            let currentMode = "density";
+            try {
+                currentMode = localStorage.getItem("catalogue_view_mode") || "density";
+            } catch (e) {}
+            const currentGrid = document.getElementById("post-grid");
+            if (currentGrid && !currentGrid.classList.contains(`view-${currentMode}`)) {
+                currentGrid.classList.remove("view-density", "view-grid");
+                currentGrid.classList.add(`view-${currentMode}`);
+            }
+        });
+        observer.observe(liveWrapper, { childList: true });
+    }
 }
 
 /* ==========================================================================

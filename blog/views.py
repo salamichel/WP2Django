@@ -45,6 +45,9 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
     ok_cats = request.GET.get("ok_cats", init_f.get("ok_cats", "")).strip()
     ok_children = request.GET.get("ok_children", init_f.get("ok_children", "")).strip()
     housing = request.GET.get("housing", init_f.get("housing", "")).strip()
+    vaccinated = request.GET.get("vaccinated", init_f.get("vaccinated", "")).strip()
+    sterilized = request.GET.get("sterilized", init_f.get("sterilized", "")).strip()
+    sort = request.GET.get("sort", "recent").strip()
 
     if "emergency" in request.GET:
         emergency = request.GET.get("emergency", "").strip()
@@ -57,7 +60,8 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
             Q(animal_name__icontains=q) |
             Q(breed__icontains=q) |
             Q(content__icontains=q) |
-            Q(excerpt__icontains=q)
+            Q(excerpt__icontains=q) |
+            Q(identification__icontains=q)
         )
     if species:
         queryset = queryset.filter(species=species)
@@ -73,13 +77,37 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         queryset = queryset.filter(ok_children=ok_children)
     if housing:
         queryset = queryset.filter(housing_requirement=housing)
+    if vaccinated == "1" or vaccinated == "true":
+        queryset = queryset.filter(is_vaccinated=True)
+    if sterilized == "1" or sterilized == "true":
+        queryset = queryset.filter(is_sterilized=True)
     if emergency in ["1", "true", "True", "urgence", "urgences"]:
         queryset = queryset.filter(is_emergency=True)
+
+    # Sorting
+    if sort == "oldest":
+        queryset = queryset.order_by("published_at", "created_at")
+    elif sort == "name_asc":
+        queryset = queryset.order_by("animal_name", "title")
+    elif sort == "age_asc":
+        queryset = queryset.order_by("-birth_date")
+    else:
+        queryset = queryset.order_by("-published_at", "-created_at")
 
     total_count = queryset.count()
     paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
     page = request.GET.get("page")
     posts = paginator.get_page(page)
+
+    # Compute global species counters
+    base_active = Post.objects.filter(status="published")
+    species_counts = {
+        "chiens": base_active.filter(species="chien").count(),
+        "chats": base_active.filter(species="chat").count(),
+        "rongeurs": base_active.filter(species="rongeur").count(),
+        "urgences": base_active.filter(is_emergency=True).count(),
+        "total": base_active.count(),
+    }
 
     current_filters = {
         "q": q,
@@ -90,16 +118,22 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         "ok_cats": ok_cats,
         "ok_children": ok_children,
         "housing": housing,
+        "vaccinated": vaccinated,
+        "sterilized": sterilized,
         "emergency": emergency,
+        "sort": sort,
     }
 
     context = {
         "posts": posts,
         "total_count": total_count,
+        "species_counts": species_counts,
         "filters": current_filters,
-        "has_filters": any(current_filters.values()),
+        "has_filters": any(v for k, v in current_filters.items() if k != "sort" and v),
         "page_title": page_title,
         "category": category,
+        "capacity_rate": 85,
+        "adoptions_month": 14,
     }
 
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest" or request.GET.get("ajax") == "1"
