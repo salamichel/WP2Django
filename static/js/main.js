@@ -684,14 +684,18 @@ function initViewModeToggle() {
         }
 
         try {
-            localStorage.setItem("catalogue_view_mode", mode);
+            localStorage.setItem("catalogue_view_mode_v2", mode);
         } catch (e) {}
     }
 
-    // Load initial view mode from storage or default to grid
+    // Load initial view mode from storage (v2) or default strictly to grid
     let savedMode = "grid";
     try {
-        savedMode = localStorage.getItem("catalogue_view_mode") || "grid";
+        // Clear legacy key if present to prevent stuck density mode
+        if (localStorage.getItem("catalogue_view_mode")) {
+            localStorage.removeItem("catalogue_view_mode");
+        }
+        savedMode = localStorage.getItem("catalogue_view_mode_v2") || "grid";
     } catch (e) {}
 
     setViewMode(savedMode);
@@ -714,7 +718,7 @@ function initViewModeToggle() {
         const observer = new MutationObserver(function () {
             let currentMode = "grid";
             try {
-                currentMode = localStorage.getItem("catalogue_view_mode") || "grid";
+                currentMode = localStorage.getItem("catalogue_view_mode_v2") || "grid";
             } catch (e) {}
             const currentGrid = document.getElementById("post-grid");
             if (currentGrid && !currentGrid.classList.contains(`view-${currentMode}`)) {
