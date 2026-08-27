@@ -363,7 +363,8 @@ function initLiveFilters() {
             },
             q: function (v) { return `Recherche : "${v}"`; },
             status: function (v) {
-                const map = { adoptable: "Adoptable", recherche_fa: "Recherche FA", reserve: "Réservé", adopte: "Adopté" };
+                if (v === "adoptable") return null;
+                const map = { all: "Tous les statuts", recherche_fa: "Recherche FA", reserve: "Réservé", adopte: "Adopté" };
                 return `Statut : ${map[v] || v}`;
             },
             sex: function (v) {
@@ -382,6 +383,7 @@ function initLiveFilters() {
 
         for (const [key, value] of params.entries()) {
             if (key === "page" || !value) continue;
+            if (key === "status" && value === "adoptable") continue;
             hasAnyFilter = true;
 
             const chip = document.createElement("span");
@@ -390,6 +392,7 @@ function initLiveFilters() {
 
             const labelFormatter = labels[key];
             const textContent = labelFormatter ? labelFormatter(value) : `${key}: ${value}`;
+            if (!textContent) continue;
 
             chip.innerHTML = `${textContent} <button type="button" class="chip-remove" aria-label="Supprimer ce filtre">&times;</button>`;
             activeChipsList.appendChild(chip);
@@ -685,10 +688,10 @@ function initViewModeToggle() {
         } catch (e) {}
     }
 
-    // Load initial view mode from storage or default to density
-    let savedMode = "density";
+    // Load initial view mode from storage or default to grid
+    let savedMode = "grid";
     try {
-        savedMode = localStorage.getItem("catalogue_view_mode") || "density";
+        savedMode = localStorage.getItem("catalogue_view_mode") || "grid";
     } catch (e) {}
 
     setViewMode(savedMode);
@@ -709,9 +712,9 @@ function initViewModeToggle() {
     const liveWrapper = document.getElementById("live-results-wrapper");
     if (liveWrapper && window.MutationObserver) {
         const observer = new MutationObserver(function () {
-            let currentMode = "density";
+            let currentMode = "grid";
             try {
-                currentMode = localStorage.getItem("catalogue_view_mode") || "density";
+                currentMode = localStorage.getItem("catalogue_view_mode") || "grid";
             } catch (e) {}
             const currentGrid = document.getElementById("post-grid");
             if (currentGrid && !currentGrid.classList.contains(`view-${currentMode}`)) {
@@ -719,7 +722,7 @@ function initViewModeToggle() {
                 currentGrid.classList.add(`view-${currentMode}`);
             }
         });
-        observer.observe(liveWrapper, { childList: true });
+        observer.observe(liveWrapper, { childList: true, subtree: true });
     }
 }
 

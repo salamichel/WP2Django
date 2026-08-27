@@ -58,8 +58,8 @@
                     <h3 class="filter-widget-title">Statut d'adoption</h3>
                     <div class="sidebar-select-wrap">
                         <select name="status" id="id_status" class="sidebar-select">
-                            <option value="">Tous les statuts</option>
                             <option value="adoptable" {% if filters.status == "adoptable" %}selected{% endif %}>🐾 À l'adoption</option>
+                            <option value="all" {% if filters.status == "all" %}selected{% endif %}>Tous les statuts</option>
                             <option value="reserve" {% if filters.status == "reserve" %}selected{% endif %}>⏳ Réservé(e)</option>
                             <option value="recherche_fa" {% if filters.status == "recherche_fa" %}selected{% endif %}>🏡 Recherche FA</option>
                             <option value="adopte" {% if filters.status == "adopte" %}selected{% endif %}>❤️ Adopté(e)</option>
@@ -170,27 +170,6 @@
                     </button>
                 </div>
             </form>
-
-            <!-- Widget 5: Capacité Refuge (Informative Card) -->
-            <div class="catalogue-capacity-widget">
-                <div class="capacity-widget-header">
-                    <svg class="capacity-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                    </svg>
-                    <span>Capacité Refuge</span>
-                </div>
-                <div class="capacity-stat-line">
-                    <span>Box & FA Occupés</span>
-                    <strong class="capacity-stat-num">{{ capacity_rate|default:85 }}%</strong>
-                </div>
-                <div class="capacity-progress-bar">
-                    <div class="capacity-progress-fill" style="width: {{ capacity_rate|default:85 }}%;"></div>
-                </div>
-                <div class="capacity-stat-sub">
-                    <span>Adoptions / Mois</span>
-                    <strong class="capacity-month-num">{{ adoptions_month|default:14 }}</strong>
-                </div>
-            </div>
         </aside>
 
         <!-- Right Column: Main Content & Grid -->
@@ -209,14 +188,14 @@
                 <div class="cat-toolbar-controls">
                     <!-- View Density / Grid Switcher -->
                     <div class="view-mode-toggle" role="group" aria-label="Mode d'affichage">
-                        <button type="button" class="btn-view-mode active" id="btn-view-density" data-view="density" aria-pressed="true">
+                        <button type="button" class="btn-view-mode" id="btn-view-density" data-view="density" aria-pressed="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="18" height="7" rx="1" />
                                 <rect x="3" y="14" width="18" height="7" rx="1" />
                             </svg>
                             <span>Haute Densité</span>
                         </button>
-                        <button type="button" class="btn-view-mode" id="btn-view-grid" data-view="grid" aria-pressed="false">
+                        <button type="button" class="btn-view-mode active" id="btn-view-grid" data-view="grid" aria-pressed="true">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="7" height="7" rx="1" />
                                 <rect x="14" y="3" width="7" height="7" rx="1" />

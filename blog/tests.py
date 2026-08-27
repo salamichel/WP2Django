@@ -421,13 +421,13 @@ class AdoptionAndEmergencyFeaturesTest(TestCase):
             status="published",
         )
 
-    def test_home_page_emergency_posts(self):
+    def test_home_page_adoptable_posts(self):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("emergency_posts", resp.context)
-        emergency_slugs = [p.slug for p in resp.context["emergency_posts"]]
-        self.assertIn("max-chien-adorable", emergency_slugs)
-        self.assertIn("bella-chatte-douce", emergency_slugs)
+        self.assertIn("posts", resp.context)
+        post_slugs = [p.slug for p in resp.context["posts"]]
+        self.assertIn("max-chien-adorable", post_slugs)
+        self.assertNotIn("bella-chatte-douce", post_slugs)
 
     def test_post_list_filtering(self):
         # Filter dogs only

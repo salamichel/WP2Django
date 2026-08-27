@@ -7,16 +7,14 @@ from blog.models import Post, Page, Category, Tag, AdoptionTariff
 
 
 def home(request):
-    emergency_posts = Post.objects.filter(status="published").filter(
-        Q(is_emergency=True) | Q(adoption_status="recherche_fa")
-    ).select_related("author", "featured_image").prefetch_related("categories", "tags")[:4]
-
-    latest_posts = Post.objects.filter(status="published").select_related(
+    latest_posts = Post.objects.filter(
+        status="published",
+        adoption_status="adoptable"
+    ).select_related(
         "author", "featured_image"
     ).prefetch_related("categories", "tags")[:6]
 
     return render(request, "blog/home.html", {
-        "emergency_posts": emergency_posts,
         "posts": latest_posts,
     })
 
@@ -40,7 +38,28 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         species = init_f.get("species", "").strip()
 
     sex = request.GET.get("sex", init_f.get("sex", "")).strip()
-    adoption_status = request.GET.get("status", init_f.get("status", "")).strip()
+
+    if "status" in request.GET:
+        raw_status = request.GET.get("status", "").strip()
+        if raw_status in ("all", "tous"):
+            adoption_status = ""
+            status_filter_val = "all"
+        else:
+            adoption_status = raw_status
+            status_filter_val = raw_status
+    elif "status" in init_f:
+        raw_status = init_f.get("status", "").strip()
+        if raw_status in ("all", "tous"):
+            adoption_status = ""
+            status_filter_val = "all"
+        else:
+            adoption_status = raw_status
+            status_filter_val = raw_status
+    else:
+        # Default to 'adoptable'
+        adoption_status = "adoptable"
+        status_filter_val = "adoptable"
+
     ok_dogs = request.GET.get("ok_dogs", init_f.get("ok_dogs", "")).strip()
     ok_cats = request.GET.get("ok_cats", init_f.get("ok_cats", "")).strip()
     ok_children = request.GET.get("ok_children", init_f.get("ok_children", "")).strip()
@@ -99,13 +118,13 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
     page = request.GET.get("page")
     posts = paginator.get_page(page)
 
-    # Compute global species counters
-    base_active = Post.objects.filter(status="published")
+    # Compute global species counters (focused on adoptable residents)
+    base_active = Post.objects.filter(status="published", adoption_status="adoptable")
     species_counts = {
         "chiens": base_active.filter(species="chien").count(),
         "chats": base_active.filter(species="chat").count(),
         "rongeurs": base_active.filter(species="rongeur").count(),
-        "urgences": base_active.filter(is_emergency=True).count(),
+        "urgences": Post.objects.filter(status="published", is_emergency=True).count(),
         "total": base_active.count(),
     }
 
@@ -113,7 +132,7 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         "q": q,
         "species": species,
         "sex": sex,
-        "status": adoption_status,
+        "status": status_filter_val,
         "ok_dogs": ok_dogs,
         "ok_cats": ok_cats,
         "ok_children": ok_children,
@@ -124,16 +143,20 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         "sort": sort,
     }
 
+    has_custom_filters = bool(
+        q or species or sex or ok_dogs or ok_cats or ok_children or housing
+        or vaccinated or sterilized or emergency
+        or (status_filter_val and status_filter_val != "adoptable")
+    )
+
     context = {
         "posts": posts,
         "total_count": total_count,
         "species_counts": species_counts,
         "filters": current_filters,
-        "has_filters": any(v for k, v in current_filters.items() if k != "sort" and v),
+        "has_filters": has_custom_filters,
         "page_title": page_title,
         "category": category,
-        "capacity_rate": 85,
-        "adoptions_month": 14,
     }
 
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest" or request.GET.get("ajax") == "1"

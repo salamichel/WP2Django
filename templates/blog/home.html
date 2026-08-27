@@ -72,10 +72,6 @@
                                 <span class="species-emoji">🐹</span>
                                 <span>Rongeurs</span>
                             </a>
-                            <a href="{% url 'blog:category' slug='urgences' %}" class="hero-species-btn hero-species-btn--urgent">
-                                <span class="species-emoji">🚨</span>
-                                <span>Urgences</span>
-                            </a>
                         </div>
                     </div>
 
@@ -93,25 +89,27 @@
     </div>
 </section>
 
-{% if emergency_posts %}
-<!-- Urgences / Recherche FA -->
-<section class="section section--emergency">
+<!-- Section : Nos Protégés à l'Adoption (Directement sous le Hero) -->
+<section class="section">
     <div class="container">
-        <div class="section-header section-header--emergency">
-            <div class="emergency-title-group">
-                <span class="emergency-badge">🚨 Priorité</span>
-                <h2>Urgences & Recherche de Familles d'Accueil</h2>
+        <div class="section-header">
+            <div>
+                <span class="hero-badge">🐾 Nos pensionnaires</span>
+                <h2>Ils recherchent leur foyer pour la vie</h2>
             </div>
-            <a href="{% url 'blog:category' slug='urgences' %}" class="section-link">Voir toutes les urgences &rarr;</a>
+            <a href="{% url 'blog:post_list' %}" class="section-link">Voir tous nos protégés &rarr;</a>
         </div>
         <div class="post-grid">
-            {% for post in emergency_posts %}
+            {% for post in posts %}
             {% include "includes/_post_card.html" %}
+            {% empty %}
+            <div class="empty-state">
+                <p>Tous nos protégés ont trouvé leur famille ou sont en cours d'adoption.</p>
+            </div>
             {% endfor %}
         </div>
     </div>
 </section>
-{% endif %}
 
 <!-- Reassurance Stats Banner -->
 <section class="stats-section">
@@ -122,9 +120,9 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
                 </div>
                 <div class="stat-info">
-                    <span class="stat-number">{{ posts|length }}</span>
-                    <span class="stat-label">Protégés & actualités</span>
-                    <span class="stat-sub">Accueillis et soignés</span>
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Familles d'Accueil</span>
+                    <span class="stat-sub">Sociabilisés en foyer</span>
                 </div>
             </div>
 
@@ -153,7 +151,7 @@
     </div>
 </section>
 
-<!-- 6 Quick Action Cards (Reassurance & Engagement) -->
+<!-- 4 Quick Action Cards (Reassurance & Engagement) -->
 <section class="section section--quick-actions">
     <div class="container">
         <div class="section-header text-center">
@@ -162,7 +160,7 @@
             <p class="section-subtitle">Chaque geste compte : découvrez comment participer à nos côtés selon vos souhaits.</p>
         </div>
 
-        <div class="quick-actions-grid">
+        <div class="quick-actions-grid quick-actions-grid--4cols">
             <a href="/familles-accueil/" class="quick-action-card quick-action-card--fa">
                 <div class="quick-action-top">
                     <div class="quick-action-icon">
@@ -178,7 +176,7 @@
                 </span>
             </a>
 
-            <a href="/conseils-adoption/" class="quick-action-card quick-action-card--advice">
+            <a href="/puis-je-adopter/" class="quick-action-card quick-action-card--advice">
                 <div class="quick-action-top">
                     <div class="quick-action-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -222,55 +220,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </span>
             </a>
-
-            <a href="{% url 'blog:category' slug='urgences' %}" class="quick-action-card quick-action-card--emergency">
-                <div class="quick-action-top">
-                    <div class="quick-action-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </div>
-                    <span class="quick-action-badge quick-action-badge--urgent">🚨 SOS</span>
-                </div>
-                <h3>Les Urgences</h3>
-                <p>Nos protégés ayant besoin d'une famille d'accueil en urgence ou de soins lourds immédiats.</p>
-                <span class="quick-action-link">
-                    <span>Voir les urgences</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </span>
-            </a>
-
-            <a href="{% url 'blog:post_list' %}" class="quick-action-card quick-action-card--news">
-                <div class="quick-action-top">
-                    <div class="quick-action-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
-                    </div>
-                    <span class="quick-action-badge">Refuge</span>
-                </div>
-                <h3>Actualités & Sauvetages</h3>
-                <p>Suivez les dernières adoptions, les sauvetages réussis et les événements du refuge.</p>
-                <span class="quick-action-link">
-                    <span>Lire les actualités</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </span>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Latest posts -->
-<section class="section">
-    <div class="container">
-        <div class="section-header">
-            <h2>À l'adoption & Actualités</h2>
-            <a href="{% url 'blog:post_list' %}" class="section-link">Tout voir &rarr;</a>
-        </div>
-        <div class="post-grid">
-            {% for post in posts %}
-            {% include "includes/_post_card.html" %}
-            {% empty %}
-            <div class="empty-state">
-                <p>Aucun article pour le moment.</p>
-            </div>
-            {% endfor %}
         </div>
     </div>
 </section>
@@ -284,7 +233,7 @@
                 <div class="solidarity-badge">🪙 1€ / mois</div>
                 <h3>Les petites rivières font les grands fleuves</h3>
                 <p>Avec le groupe <strong>Teaming Rêves de Chiens</strong>, donnez seulement 1 euro par mois pour aider
-                    à financer les opérations, vaccins et sauvetages urgents.</p>
+                    à financer les opérations, vaccins et sauvetages de l'association.</p>
                 <div class="solidarity-action">
                     <a href="https://www.teaming.net" target="_blank" rel="noopener"
                         class="btn btn-primary btn-lg">Rejoindre notre Teaming</a>
