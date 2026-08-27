@@ -50,3 +50,12 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - **Formulaires Mobiles (iOS Safari)** : Toujours fixer `font-size: 16px` et `min-height: 48px` sur les champs de saisie pour empêcher le zoom automatique indésirable lors du tap sur mobile.
 - **Filtres Multi-Critères Mobiles** : Sur écran mobile (<= 680px), empiler la recherche textuelle en 100%, répartir les onglets espèces en grille `repeat(N, 1fr)` pour éviter tout overflow horizontal, et organiser les tags de compatibilité en grille 2x2 uniforme avec le bouton d'effacement pleine largeur en-dessous.
 - **Fiches Animaux & Galerie Photos** : Toujours centrer la photo de présentation principale (`max-height: 520px`, `border-radius: 24px`) et l'associer à la galerie photo au sein de la même visionneuse plein écran GLightbox avec support du swipe tactile. Structurer la fiche en 4 blocs : Grille 2x2 des caractéristiques clés, boîte pastel des garanties sanitaires, badges tricolores d'ententes (Chiens/Chats/Enfants), et grand bouton CTA pleine largeur (50-54px).
+
+### 5. Rubrique Adoption, CMS Pages & Tarifs Dynamiques
+- **Structure Canonique des Pages d'Adoption** :
+  - `/puis-je-adopter/` : Les 7 questions préalables avant d'adopter, l'engagement pour la vie, et les 5 atouts majeurs de l'animal adulte.
+  - `/conditions-adoption/` : Les 3 étapes d'adoption (Île-de-France / Viry-Châtillon, 3 semaines d'essai, kit de transition, remboursement garanti), stérilisation obligatoire, documents requis, matériel obligatoire le jour J, grille tarifaire dynamique 2026, alimentation, réglementation (certificat d'engagement 7 jours, ICAD, voyages UE).
+  - `/formulaire-adoption/` : Hub d'accès vers les dossiers de candidature Chien et Chat.
+- **Gestion des Tarifs Administrables** : Le modèle `AdoptionTariff` gère les montants par espèce (`chien`, `chat`, `rongeur`, `autre`), tranche d'âge, notes et ordre d'affichage. Il est administrable directement dans Django Admin (`list_editable`) et automatiquement injecté dans `/conditions-adoption/` via le filtre `render_cms_content` et la balise `<!-- ADOPTION_TARIFFS_TABLE_DYNAMIC -->`.
+- **Règle de Nettoyage de Seed & Redirection 301** : Lorsqu'une page CMS provisoire est remplacée (ex: `conseils-adoption` remplacée par `puis-je-adopter`), toujours créer un enregistrement permanent 301 dans le modèle `Redirect` pour préserver le référencement et éviter les liens brisés.
+

@@ -582,3 +582,29 @@ class SiteSettings(models.Model):
     @property
     def has_social_links(self):
         return bool(self.facebook_url or self.instagram_url or self.tiktok_url or self.youtube_url or self.twitter_url or self.linkedin_url)
+
+
+class AdoptionTariff(models.Model):
+    """Tarifs et frais d'adoption administrables par espèce et tranche d'âge."""
+    SPECIES_CHOICES = [
+        ("chien", "Chien"),
+        ("chat", "Chat"),
+        ("rongeur", "Rongeur"),
+        ("autre", "Autre"),
+    ]
+
+    species = models.CharField("Espèce", max_length=20, choices=SPECIES_CHOICES, default="chien")
+    age_bracket = models.CharField("Tranche d'âge / Catégorie", max_length=150, help_text="Ex: Jusqu'à 11 mois, De 1 à 5 ans...")
+    amount = models.DecimalField("Tarif (€)", max_digits=6, decimal_places=2, help_text="Montant en euros")
+    notes = models.CharField("Précisions / Inclusions", max_length=255, blank=True, default="", help_text="Ex: Stérilisation et vaccins compris")
+    order = models.PositiveIntegerField("Ordre d'affichage", default=0)
+    is_active = models.BooleanField("Actif", default=True, help_text="Décocher pour masquer ce tarif")
+
+    class Meta:
+        verbose_name = "Tarif d'adoption"
+        verbose_name_plural = "Tarifs d'adoption"
+        ordering = ["species", "order", "amount"]
+
+    def __str__(self):
+        return f"{self.get_species_display()} - {self.age_bracket} : {self.amount} €"
+

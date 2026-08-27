@@ -1,15 +1,55 @@
 {% extends "base.html" %}
+{% load dashboard_tags %}
 
 {% block title %}{{ page.seo_title|default:page.title }} - {{ site_name }}{% endblock %}
 {% block meta_description %}{{ page.seo_description|default:"" }}{% endblock %}
 
 {% block content %}
-<article class="page-single">
-    <div class="container container--narrow">
-        <h1>{{ page.title }}</h1>
-        <div class="page-content post-content">
-            {{ page.content|safe }}
+<div class="cms-page-wrapper">
+    <div class="container">
+        
+        <!-- Breadcrumb Navigation -->
+        <nav class="cms-breadcrumb" aria-label="Fil d'Ariane">
+            <a href="{% url 'blog:home' %}" class="cms-breadcrumb-link">&larr; Accueil</a>
+            <span class="cms-breadcrumb-sep">/</span>
+            {% if page.slug == 'puis-je-adopter' or page.slug == 'conditions-adoption' or page.slug == 'formulaire-adoption' %}
+            <a href="/puis-je-adopter/" class="cms-breadcrumb-link">Adoption</a>
+            {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+            <a href="/dons-parrainages/" class="cms-breadcrumb-link">Agir & Soutenir</a>
+            {% else %}
+            <a href="/a-propos/" class="cms-breadcrumb-link">L'Association</a>
+            {% endif %}
+            <span class="cms-breadcrumb-sep">/</span>
+            <span class="cms-breadcrumb-curr">{{ page.title }}</span>
+        </nav>
+
+        <!-- 2-Column Grid Layout -->
+        <div class="cms-layout-grid">
+            
+            <!-- Left Main Content Column -->
+            <main class="cms-main-col">
+                <article class="cms-article-card">
+                    <header class="cms-article-header">
+                        {% if page.slug == 'puis-je-adopter' or page.slug == 'conditions-adoption' or page.slug == 'formulaire-adoption' %}
+                        <span class="cms-header-category-badge">🐾 Guide d'Adoption</span>
+                        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+                        <span class="cms-header-category-badge cms-header-category-badge--orange">❤️ Solidarité & Entraide</span>
+                        {% else %}
+                        <span class="cms-header-category-badge cms-header-category-badge--green">ℹ️ Association Rêves de Chiens</span>
+                        {% endif %}
+                        <h1 class="cms-main-title">{{ page.title }}</h1>
+                    </header>
+
+                    <div class="page-content post-content cms-body-content">
+                        {{ page.content|render_cms_content }}
+                    </div>
+                </article>
+            </main>
+
+            <!-- Right Contextual Sidebar Column -->
+            {% include "includes/_cms_sidebar.html" %}
+
         </div>
     </div>
-</article>
+</div>
 {% endblock %}

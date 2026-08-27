@@ -1,0 +1,204 @@
+<aside class="cms-sidebar-col" aria-label="Menu de la rubrique">
+    <div class="cms-sticky-sidebar">
+        
+        {% if page.slug == 'puis-je-adopter' or page.slug == 'conditions-adoption' or page.slug == 'formulaire-adoption' %}
+        <!-- Rubrique : Adoption -->
+        <nav class="cms-section-nav" aria-label="Dans cette rubrique">
+            <div class="cms-section-nav-header">
+                <span class="cms-section-badge">Adoption</span>
+                <h3 class="cms-section-nav-title">Guide & Démarches</h3>
+            </div>
+            <ul class="cms-section-list">
+                <li>
+                    <a href="/puis-je-adopter/" class="cms-section-link{% if page.slug == 'puis-je-adopter' %} active{% endif %}">
+                        <span class="cms-link-icon">💡</span>
+                        <span class="cms-link-text">Puis-je adopter ?</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/conditions-adoption/" class="cms-section-link{% if page.slug == 'conditions-adoption' %} active{% endif %}">
+                        <span class="cms-link-icon">📋</span>
+                        <span class="cms-link-text">Conditions & Tarifs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/formulaire-adoption/" class="cms-section-link{% if page.slug == 'formulaire-adoption' %} active{% endif %}">
+                        <span class="cms-link-icon">📝</span>
+                        <span class="cms-link-text">Formulaire d'adoption</span>
+                    </a>
+                </li>
+                <li class="cms-section-divider"></li>
+                <li>
+                    <a href="{% url 'blog:category' slug='chiens' %}" class="cms-section-link">
+                        <span class="cms-link-icon">🐕</span>
+                        <span class="cms-link-text">Les Chiens à l'adoption</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'blog:category' slug='chats' %}" class="cms-section-link">
+                        <span class="cms-link-icon">🐈</span>
+                        <span class="cms-link-text">Les Chats & Chatons</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'blog:category' slug='rongeurs' %}" class="cms-section-link">
+                        <span class="cms-link-icon">🐹</span>
+                        <span class="cms-link-text">Les Rongeurs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'blog:category' slug='urgences' %}" class="cms-section-link cms-section-link--urgent">
+                        <span class="cms-link-icon">🚨</span>
+                        <span class="cms-link-text">Urgences SOS</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'blog:post_list' %}?status=adopte" class="cms-section-link">
+                        <span class="cms-link-icon">❤️</span>
+                        <span class="cms-link-text">Les Heureux Adoptés</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CTA Card Adoption -->
+        <div class="cms-sidebar-cta cms-sidebar-cta--adopt">
+            <div class="cms-cta-icon-pill">🐾 Coup de cœur</div>
+            <h4 class="cms-cta-title">Adopter, c'est sauver deux vies</h4>
+            <p class="cms-cta-desc">Celle de votre futur compagnon et celle qui prendra sa place en Famille d'Accueil.</p>
+            <a href="{% url 'blog:post_list' %}" class="btn btn-primary btn-block btn-sm">
+                Voir tous nos protégés &rarr;
+            </a>
+        </div>
+
+        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+        <!-- Rubrique : Agir & Soutenir -->
+        <nav class="cms-section-nav" aria-label="Dans cette rubrique">
+            <div class="cms-section-nav-header">
+                <span class="cms-section-badge cms-section-badge--orange">Solidarité</span>
+                <h3 class="cms-section-nav-title">Agir & Soutenir</h3>
+            </div>
+            <ul class="cms-section-list">
+                <li>
+                    <a href="/familles-accueil/" class="cms-section-link{% if page.slug == 'familles-accueil' %} active{% endif %}">
+                        <span class="cms-link-icon">🏡</span>
+                        <span class="cms-link-text">Devenir Famille d'Accueil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/dons-parrainages/" class="cms-section-link{% if page.slug == 'dons-parrainages' %} active{% endif %}">
+                        <span class="cms-link-icon">🪙</span>
+                        <span class="cms-link-text">Dons & Parrainages</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/conditions-abandon/" class="cms-section-link{% if page.slug == 'conditions-abandon' %} active{% endif %}">
+                        <span class="cms-link-icon">⚠️</span>
+                        <span class="cms-link-text">Prise en charge & Abandon</span>
+                    </a>
+                </li>
+                <li class="cms-section-divider"></li>
+                <li>
+                    <a href="/conditions-adoption/" class="cms-section-link">
+                        <span class="cms-link-icon">📋</span>
+                        <span class="cms-link-text">Conditions d'adoption</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'contact:contact' %}" class="cms-section-link">
+                        <span class="cms-link-icon">✉️</span>
+                        <span class="cms-link-text">Nous écrire</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CTA Card FA -->
+        <div class="cms-sidebar-cta cms-sidebar-cta--fa">
+            <div class="cms-cta-icon-pill">🏡 Devenir FA</div>
+            <h4 class="cms-cta-title">Ouvrez votre cœur et votre foyer</h4>
+            <p class="cms-cta-desc">Frais vétérinaires 100% pris en charge par Rêves de Chiens. Accompagnement continu.</p>
+            <a href="{% url 'contact:contact' %}?category=fa" class="btn btn-secondary btn-block btn-sm">
+                Proposer ma candidature FA &rarr;
+            </a>
+        </div>
+
+        {% else %}
+        <!-- Rubrique : L'Association & Autres -->
+        <nav class="cms-section-nav" aria-label="Dans cette rubrique">
+            <div class="cms-section-nav-header">
+                <span class="cms-section-badge cms-section-badge--green">Refuge</span>
+                <h3 class="cms-section-nav-title">L'Association</h3>
+            </div>
+            <ul class="cms-section-list">
+                <li>
+                    <a href="/a-propos/" class="cms-section-link{% if page.slug == 'a-propos' %} active{% endif %}">
+                        <span class="cms-link-icon">ℹ️</span>
+                        <span class="cms-link-text">Qui sommes-nous ?</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/conditions-adoption/" class="cms-section-link">
+                        <span class="cms-link-icon">📋</span>
+                        <span class="cms-link-text">Conditions d'adoption</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/familles-accueil/" class="cms-section-link">
+                        <span class="cms-link-icon">🏡</span>
+                        <span class="cms-link-text">Devenir Famille d'Accueil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/dons-parrainages/" class="cms-section-link">
+                        <span class="cms-link-icon">🪙</span>
+                        <span class="cms-link-text">Dons & Parrainages</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/mentions-legales/" class="cms-section-link{% if page.slug == 'mentions-legales' %} active{% endif %}">
+                        <span class="cms-link-icon">📜</span>
+                        <span class="cms-link-text">Mentions légales</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'contact:contact' %}" class="cms-section-link">
+                        <span class="cms-link-icon">✉️</span>
+                        <span class="cms-link-text">Contact</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CTA Card Asso -->
+        <div class="cms-sidebar-cta cms-sidebar-cta--asso">
+            <div class="cms-cta-icon-pill">🤝 100% Bénévole</div>
+            <h4 class="cms-cta-title">Soutenez nos sauvetages</h4>
+            <p class="cms-cta-desc">Chaque don est déductible à 66% de vos impôts et va directement aux soins des animaux.</p>
+            <a href="/dons-parrainages/" class="btn btn-primary btn-block btn-sm">
+                Faire un don solidaire &rarr;
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Boîte Contact & Permanence -->
+        <div class="cms-sidebar-help">
+            <div class="cms-help-header">
+                <span class="cms-help-icon">📞</span>
+                <strong>Une question sur nos démarches ?</strong>
+            </div>
+            <p class="cms-help-text">Nos bénévoles sont à votre disposition pour vous renseigner et vous accompagner.</p>
+            {% if site_settings.phone %}
+            <a href="{{ site_settings.phone_url }}" class="cms-help-phone-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>{{ site_settings.phone }}</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'contact:contact' %}" class="cms-help-email-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>Écrire à l'association &rarr;</span>
+            </a>
+        </div>
+
+    </div>
+</aside>

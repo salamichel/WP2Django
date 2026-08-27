@@ -2,7 +2,10 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from blog.models import Post, Page, Category, Tag, Comment, Menu, MenuItem, Redirect, Media, PostGalleryImage
+from blog.models import (
+    Post, Page, Category, Tag, Comment, Menu, MenuItem, Redirect, Media, PostGalleryImage,
+    AdoptionTariff,
+)
 
 
 class CategoryModelTest(TestCase):
@@ -663,6 +666,82 @@ class SiteSettingsTests(TestCase):
         resp = self.client.get("/admin/blog/sitesettings/")
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/admin/blog/sitesettings/1/change/", resp.url)
+
+
+class AdoptionTariffTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        AdoptionTariff.objects.all().delete()
+        self.tariff_dog = AdoptionTariff.objects.create(
+            species="chien",
+            age_bracket="Jusqu'à 11 mois",
+            amount=350.00,
+            order=1,
+            is_active=True,
+        )
+        self.tariff_cat = AdoptionTariff.objects.create(
+            species="chat",
+            age_bracket="Jusqu'à 6 mois",
+            amount=195.00,
+            order=1,
+            is_active=True,
+        )
+        self.page, _ = Page.objects.update_or_create(
+            slug="conditions-adoption",
+            defaults={
+                "title": "Conditions d'adoption et tarifs",
+                "content": "<p>Présentation</p><!-- ADOPTION_TARIFFS_TABLE_DYNAMIC --><p>Suite</p>",
+                "status": "published",
+            }
+        )
+
+    def test_adoption_tariff_str(self):
+        self.assertIn("Chien", str(self.tariff_dog))
+        self.assertIn("350", str(self.tariff_dog))
+
+    def test_page_renders_dynamic_tariffs(self):
+        resp = self.client.get("/conditions-adoption/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "350 €")
+        self.assertContains(resp, "195 €")
+        self.assertContains(resp, "11 mois")
+        self.assertContains(resp, "6 mois")
+
+
+    def test_page_puis_je_adopter(self):
+        Page.objects.update_or_create(
+            slug="puis-je-adopter",
+            defaults={
+                "title": "Puis-je adopter ?",
+                "content": "<p>Avant d'adopter un animal</p>",
+                "status": "published",
+            }
+        )
+        resp = self.client.get("/puis-je-adopter/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Avant d'adopter un animal")
+
+    def test_redirect_conseils_to_puis_je_adopter(self):
+        Redirect.objects.update_or_create(
+            old_path="/conseils-adoption/",
+            defaults={
+                "new_path": "/puis-je-adopter/",
+                "is_permanent": True,
+            }
+        )
+        resp = self.client.get("/conseils-adoption/")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp["Location"], "/puis-je-adopter/")
+
+    def test_admin_adoptiontariff_changelist(self):
+        admin_user = User.objects.create_superuser("admin_test", "admin@test.com", "pass")
+        self.client.force_login(admin_user)
+        resp = self.client.get("/admin/blog/adoptiontariff/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "350 €")
+
+
+
 
 
 

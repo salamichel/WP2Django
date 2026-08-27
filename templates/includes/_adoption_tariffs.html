@@ -1,0 +1,143 @@
+<div class="adoption-tariffs-container" style="margin: 2rem 0;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Carte Tarifs Chiens -->
+        <div class="tariff-card" style="background: #ffffff; border: 2px solid #1982c4; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(25, 130, 196, 0.08); display: flex; flex-direction: column;">
+            <div style="background: linear-gradient(135deg, #1982c4 0%, #13669a 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.8rem;">🐕</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.25rem; font-weight: 700;">Chiens & Chiots</h3>
+                        <span style="font-size: 0.82rem; opacity: 0.9;">Tarifs d'adoption</span>
+                    </div>
+                </div>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;">2026</span>
+            </div>
+            
+            <div style="padding: 1.25rem 1.5rem; flex-grow: 1;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <th style="text-align: left; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Tranche d'âge</th>
+                            <th style="text-align: right; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Participation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dog_tariffs %}
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s ease;">
+                            <td style="padding: 0.9rem 0.5rem;">
+                                <strong style="color: #1e293b; font-size: 1rem; display: block;">{{ item.age_bracket }}</strong>
+                                {% if item.notes %}
+                                <span style="color: #64748b; font-size: 0.82rem;">{{ item.notes }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right; padding: 0.9rem 0.5rem; white-space: nowrap;">
+                                <span style="background: #e8f4fd; color: #1982c4; font-weight: 800; font-size: 1.15rem; padding: 4px 12px; border-radius: 8px; display: inline-block;">{{ item.amount|floatformat:0 }} €</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" style="padding: 1rem; text-align: center; color: #64748b;">Consultez nos bénévoles pour les tarifs chiot et chien.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: #f8fafc; padding: 0.9rem 1.5rem; border-top: 1px solid #e2e8f0; font-size: 0.82rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                <span>✨</span>
+                <span>Vaccination complète, puce ICAD, stérilisation et antiparasitaires inclus.</span>
+            </div>
+        </div>
+
+        <!-- Carte Tarifs Chats -->
+        <div class="tariff-card" style="background: #ffffff; border: 2px solid #8338ec; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(131, 56, 236, 0.08); display: flex; flex-direction: column;">
+            <div style="background: linear-gradient(135deg, #8338ec 0%, #6826c4 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.8rem;">🐈</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.25rem; font-weight: 700;">Chats & Chatons</h3>
+                        <span style="font-size: 0.82rem; opacity: 0.9;">Tarifs d'adoption</span>
+                    </div>
+                </div>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;">2026</span>
+            </div>
+            
+            <div style="padding: 1.25rem 1.5rem; flex-grow: 1;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <th style="text-align: left; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Tranche d'âge</th>
+                            <th style="text-align: right; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Participation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cat_tariffs %}
+                        <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s ease;">
+                            <td style="padding: 0.9rem 0.5rem;">
+                                <strong style="color: #1e293b; font-size: 1rem; display: block;">{{ item.age_bracket }}</strong>
+                                {% if item.notes %}
+                                <span style="color: #64748b; font-size: 0.82rem;">{{ item.notes }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right; padding: 0.9rem 0.5rem; white-space: nowrap;">
+                                <span style="background: #f4ecfd; color: #8338ec; font-weight: 800; font-size: 1.15rem; padding: 4px 12px; border-radius: 8px; display: inline-block;">{{ item.amount|floatformat:0 }} €</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" style="padding: 1rem; text-align: center; color: #64748b;">Consultez nos bénévoles pour les tarifs chaton et chat.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: #f8fafc; padding: 0.9rem 1.5rem; border-top: 1px solid #e2e8f0; font-size: 0.82rem; color: #475569; display: flex; align-items: center; gap: 6px;">
+                <span>✨</span>
+                <span>Test FIV/FeLV (+6 mois), vaccins, puce ICAD, stérilisation et antiparasitaires inclus.</span>
+            </div>
+        </div>
+
+        {% if other_tariffs %}
+        <!-- Carte Autres Animaux (Rongeurs...) -->
+        <div class="tariff-card" style="background: #ffffff; border: 2px solid #2b9348; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(43, 147, 72, 0.08); display: flex; flex-direction: column; grid-column: 1 / -1;">
+            <div style="background: linear-gradient(135deg, #2b9348 0%, #1e6b34 100%); color: #ffffff; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.8rem;">🐹</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.25rem; font-weight: 700;">Rongeurs & Autres Animaux</h3>
+                        <span style="font-size: 0.82rem; opacity: 0.9;">Tarifs d'adoption</span>
+                    </div>
+                </div>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;">2026</span>
+            </div>
+            
+            <div style="padding: 1.25rem 1.5rem; flex-grow: 1;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <th style="text-align: left; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Catégorie</th>
+                            <th style="text-align: right; padding: 0.75rem 0.5rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Participation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in other_tariffs %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 0.9rem 0.5rem;">
+                                <strong style="color: #1e293b; font-size: 1rem; display: block;">{{ item.age_bracket }}</strong>
+                                {% if item.notes %}<span style="color: #64748b; font-size: 0.82rem;">{{ item.notes }}</span>{% endif %}
+                            </td>
+                            <td style="text-align: right; padding: 0.9rem 0.5rem; white-space: nowrap;">
+                                <span style="background: #eafaf1; color: #2b9348; font-weight: 800; font-size: 1.15rem; padding: 4px 12px; border-radius: 8px; display: inline-block;">{{ item.amount|floatformat:0 }} €</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

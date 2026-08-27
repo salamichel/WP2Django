@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from blog.models import (
     Post, Animal, Article, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
-    PostGalleryImage, SiteSettings,
+    PostGalleryImage, SiteSettings, AdoptionTariff,
 )
 
 
@@ -707,4 +707,41 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         obj = SiteSettings.get_solo()
         return redirect(reverse("admin:blog_sitesettings_change", args=[obj.pk]))
+
+
+@admin.register(AdoptionTariff)
+class AdoptionTariffAdmin(admin.ModelAdmin):
+    list_display = ("species_badge", "age_bracket", "amount_display", "amount", "notes", "order", "is_active")
+    list_editable = ("amount", "order", "is_active")
+    list_filter = ("species", "is_active")
+    search_fields = ("age_bracket", "notes")
+    ordering = ("species", "order", "amount")
+    list_per_page = 25
+
+    def species_badge(self, obj):
+        colors = {
+            "chien": ("#1982c4", "#e8f4fd", "🐕 Chien"),
+            "chat": ("#8338ec", "#f4ecfd", "🐈 Chat"),
+            "rongeur": ("#2b9348", "#eafaf1", "🐹 Rongeur"),
+            "autre": ("#f77f00", "#fef3e6", "🐾 Autre"),
+        }
+        color, bg, label = colors.get(obj.species, ("#6c757d", "#f8f9fa", obj.species))
+        return format_html(
+            '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;'
+            'font-size:0.8rem;font-weight:700;color:{};background:{};border:1px solid {}40;">{}</span>',
+            color, bg, color, label
+        )
+    species_badge.short_description = "Espèce"
+    species_badge.admin_order_field = "species"
+
+    def amount_display(self, obj):
+        val = f"{int(obj.amount)}" if obj.amount == int(obj.amount) else f"{obj.amount:.2f}"
+        return format_html(
+            '<span style="font-weight:800;color:#2d3436;font-size:0.95rem;">{} €</span>',
+            val
+        )
+    amount_display.short_description = "Tarif public"
+    amount_display.admin_order_field = "amount"
+
+
 

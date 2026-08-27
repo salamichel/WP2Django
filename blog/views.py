@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Q
 
-from blog.models import Post, Page, Category, Tag
+from blog.models import Post, Page, Category, Tag, AdoptionTariff
 
 
 def home(request):
@@ -166,7 +166,20 @@ def post_detail(request, slug):
 
 def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug, status="published")
-    return render(request, "blog/page_detail.html", {"page": page})
+    context = {"page": page}
+    if slug == "conditions-adoption":
+        tariffs = AdoptionTariff.objects.filter(is_active=True).order_by("species", "order", "amount")
+        dog_tariffs = [t for t in tariffs if t.species == "chien"]
+        cat_tariffs = [t for t in tariffs if t.species == "chat"]
+        other_tariffs = [t for t in tariffs if t.species not in ("chien", "chat")]
+        context.update({
+            "has_tariffs": tariffs.exists(),
+            "dog_tariffs": dog_tariffs,
+            "cat_tariffs": cat_tariffs,
+            "other_tariffs": other_tariffs,
+        })
+    return render(request, "blog/page_detail.html", context)
+
 
 
 def _get_adoption_years():
