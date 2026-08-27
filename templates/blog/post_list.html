@@ -5,44 +5,24 @@
 
 {% block content %}
 <div class="container catalogue-page-container">
-    <!-- Top Header Banner & Quick Species Selector -->
-    <div class="catalogue-header-card">
-        <div class="cat-header-top-row">
-            <nav class="cat-breadcrumbs" aria-label="Fil d'Ariane">
-                <a href="{% url 'blog:home' %}" class="cat-breadcrumb-link">&larr; Accueil</a>
-                <span class="cat-breadcrumb-sep">/</span>
-                <span class="cat-breadcrumb-curr">Catalogue des Résidents</span>
-            </nav>
-            <div class="cat-quick-species-pills" role="tablist" aria-label="Accès rapide par espèce">
-                <a href="{% url 'blog:category' slug='chiens' %}"
-                    class="pill-species-quick{% if filters.species == 'chien' %} active{% endif %}">
-                    <span class="p-emoji">🐕</span>
-                    <span>Chiens ({{ species_counts.chiens|default:0 }})</span>
-                </a>
-                <a href="{% url 'blog:category' slug='chats' %}"
-                    class="pill-species-quick{% if filters.species == 'chat' %} active{% endif %}">
-                    <span class="p-emoji">🐈</span>
-                    <span>Chats ({{ species_counts.chats|default:0 }})</span>
-                </a>
-                <a href="{% url 'blog:category' slug='rongeurs' %}"
-                    class="pill-species-quick{% if filters.species == 'rongeur' %} active{% endif %}">
-                    <span class="p-emoji">🐹</span>
-                    <span>Rongeurs ({{ species_counts.rongeurs|default:0 }})</span>
-                </a>
-                <a href="{% url 'blog:category' slug='urgences' %}"
-                    class="pill-species-quick pill-species-quick--urgent{% if filters.emergency == '1' %} active{% endif %}">
-                    <span class="p-emoji">🚨</span>
-                    <span>SOS Urgences ({{ species_counts.urgences|default:0 }})</span>
-                </a>
-            </div>
-        </div>
+    <!-- Breadcrumb Navigation -->
+    <nav class="cms-breadcrumb" aria-label="Fil d'Ariane">
+        <a href="{% url 'blog:home' %}" class="cms-breadcrumb-link">&larr; Accueil</a>
+        <span class="cms-breadcrumb-sep">/</span>
+        {% if category %}
+        <a href="{% url 'blog:post_list' %}" class="cms-breadcrumb-link">Adoption</a>
+        <span class="cms-breadcrumb-sep">/</span>
+        <span class="cms-breadcrumb-curr">{% if page_title %}{{ page_title }}{% else %}{{ category.name }}{% endif %}</span>
+        {% else %}
+        <span class="cms-breadcrumb-curr">{% if page_title %}{{ page_title }}{% else %}Catalogue des Résidents{% endif %}</span>
+        {% endif %}
+    </nav>
 
-        <div class="cat-header-main-row">
-            <h1 class="cat-page-title">{% if page_title %}{{ page_title }}{% else %}Nos Protégés à l'Adoption{% endif %}
-            </h1>
-            <p class="cat-page-subtitle">{% if category and category.description %}{{ category.description }}{% else
-                %}Nos fidèles compagnons en attente d'une famille aimante et bienveillante pour la vie.{% endif %}</p>
-        </div>
+    <!-- Page Header (Standardisé) -->
+    <div class="page-header">
+        <span class="cms-header-category-badge">🐾 Nos Protégés</span>
+        <h1>{% if page_title %}{{ page_title }}{% else %}Nos Protégés à l'Adoption{% endif %}</h1>
+        <p class="page-header-sub">{% if category and category.description %}{{ category.description }}{% else %}Nos fidèles compagnons en attente d'une famille aimante et bienveillante pour la vie.{% endif %}</p>
     </div>
 
     <!-- Main 2-Column Catalogue Layout -->

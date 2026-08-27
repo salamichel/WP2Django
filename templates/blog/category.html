@@ -3,9 +3,22 @@
 {% block title %}{{ category.name }} - {{ site_name }}{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" style="padding-top: 1.5rem; padding-bottom: 4rem;">
+    <!-- Fil d'Ariane -->
+    <nav class="cms-breadcrumb" aria-label="Fil d'Ariane">
+        <a href="{% url 'blog:home' %}" class="cms-breadcrumb-link">&larr; Accueil</a>
+        <span class="cms-breadcrumb-sep">/</span>
+        {% if is_adoption_archive %}
+        <a href="{% url 'blog:post_list' %}" class="cms-breadcrumb-link">Adoption</a>
+        <span class="cms-breadcrumb-sep">/</span>
+        <span class="cms-breadcrumb-curr">{{ page_title|default:category.name }}</span>
+        {% else %}
+        <span class="cms-breadcrumb-curr">{{ category.name }}</span>
+        {% endif %}
+    </nav>
+
     <div class="page-header">
-        <span class="page-header-badge">Categorie</span>
+        <span class="cms-header-category-badge">{% if is_adoption_archive %}❤️ Heureux Adoptés{% else %}📂 Catégorie{% endif %}</span>
         <h1>{{ page_title|default:category.name }}</h1>
         {% if category.description %}
         <p class="page-header-sub">{{ category.description }}</p>
