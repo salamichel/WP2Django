@@ -410,9 +410,14 @@ def search(request):
     posts = Post.objects.none()
     if query:
         posts = Post.objects.filter(
-            Q(title__icontains=query) | Q(content__icontains=query) | Q(excerpt__icontains=query),
+            Q(title__icontains=query) |
+            Q(animal_name__icontains=query) |
+            Q(breed__icontains=query) |
+            Q(content__icontains=query) |
+            Q(excerpt__icontains=query) |
+            Q(identification__icontains=query),
             status="published",
-        ).select_related("author", "featured_image")
+        ).select_related("author", "featured_image").prefetch_related("categories", "tags").order_by("-published_at", "-created_at")
     site_settings = SiteSettings.get_solo()
     per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
     paginator = Paginator(posts, per_page)

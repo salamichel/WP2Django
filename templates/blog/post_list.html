@@ -131,6 +131,7 @@
                 </div>
 
                 <!-- Hidden inputs for sync -->
+                <input type="hidden" name="q" id="filter-q-hidden" value="{{ filters.q|default:'' }}">
                 <input type="hidden" name="emergency" id="filter-emergency-input" value="{{ filters.emergency|default:'' }}">
                 <input type="hidden" name="sort" id="filter-sort-input" value="{{ filters.sort|default:'recent' }}">
 
@@ -156,7 +157,7 @@
                         <circle cx="11" cy="11" r="8" />
                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
-                    <input type="text" name="q" id="filter-q-input" class="cat-search-input" placeholder="Rechercher par nom, race, matricule puce..." value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Recherche">
+                    <input type="text" name="q" id="filter-q-input" form="live-filter-form" class="cat-search-input" placeholder="Rechercher par nom, race, matricule puce..." value="{{ filters.q|default:'' }}" autocomplete="off" inputmode="search" enterkeyhint="search" aria-label="Recherche">
                     <button type="button" class="search-clear-btn{% if not filters.q %} hidden{% endif %}" id="search-clear-btn" aria-label="Effacer la recherche">&times;</button>
                 </div>
 

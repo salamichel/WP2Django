@@ -285,6 +285,14 @@ function initLiveFilters() {
             }
         }
 
+        // Guarantee search query from qInput is included
+        const queryVal = qInput ? qInput.value.trim() : "";
+        if (queryVal) {
+            params.set("q", queryVal);
+        } else {
+            params.delete("q");
+        }
+
         if (pageOverride) {
             params.set("page", String(pageOverride));
         }
@@ -323,6 +331,12 @@ function initLiveFilters() {
             .then(function (html) {
                 resultsWrapper.innerHTML = html;
                 resultsWrapper.classList.remove("is-loading");
+
+                // Update browser URL query string without reloading
+                if (pushHistory && window.history && window.history.replaceState) {
+                    const newUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+                    window.history.replaceState({ path: newUrl }, "", newUrl);
+                }
 
                 // Update Active Filter Chips and Reset Button
                 updateActiveChips(params);
@@ -442,6 +456,12 @@ function initLiveFilters() {
         form.reset();
         if (speciesInput) speciesInput.value = "";
         if (qInput) qInput.value = "";
+        const qHidden = document.getElementById("filter-q-hidden");
+        if (qHidden) qHidden.value = "";
+        const sortSelect = document.getElementById("cat-sort-select");
+        if (sortSelect) sortSelect.value = "recent";
+        const sortInput = document.getElementById("filter-sort-input");
+        if (sortInput) sortInput.value = "recent";
 
         speciesTabs.forEach(function (tab) {
             if (tab.getAttribute("data-species") === "") {
@@ -507,6 +527,12 @@ function initLiveFilters() {
         });
     });
 
+    // --- Event: Form Submit (Enter key or mobile search button) ---
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        applyFilters(null, true, false);
+    });
+
     // --- Event: Select Dropdowns Change ---
     const selects = form.querySelectorAll("select");
     selects.forEach(function (select) {
@@ -526,6 +552,9 @@ function initLiveFilters() {
     // --- Event: Search Input with Debounce ---
     if (qInput) {
         qInput.addEventListener("input", function () {
+            const qHidden = document.getElementById("filter-q-hidden");
+            if (qHidden) qHidden.value = this.value;
+
             if (clearBtn) {
                 if (this.value.trim().length > 0) {
                     clearBtn.classList.remove("hidden");
@@ -543,6 +572,8 @@ function initLiveFilters() {
             if (e.key === "Enter") {
                 e.preventDefault();
                 clearTimeout(debounceTimer);
+                const qHidden = document.getElementById("filter-q-hidden");
+                if (qHidden) qHidden.value = this.value;
                 applyFilters(null, true, false);
             }
         });
@@ -553,6 +584,8 @@ function initLiveFilters() {
         clearBtn.addEventListener("click", function () {
             if (qInput) {
                 qInput.value = "";
+                const qHidden = document.getElementById("filter-q-hidden");
+                if (qHidden) qHidden.value = "";
                 clearBtn.classList.add("hidden");
                 qInput.focus();
                 applyFilters(null, true, false);
@@ -592,6 +625,8 @@ function initLiveFilters() {
                 });
             } else if (fieldName === "q") {
                 if (qInput) qInput.value = "";
+                const qHidden = document.getElementById("filter-q-hidden");
+                if (qHidden) qHidden.value = "";
                 if (clearBtn) clearBtn.classList.add("hidden");
             } else {
                 const inputElement = form.elements[fieldName];
