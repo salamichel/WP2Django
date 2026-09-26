@@ -3408,8 +3408,9 @@ input[type="search"] {
 
 .footer-inner {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr;
-    gap: 3rem;
+    grid-template-columns: 1.4fr 1fr 1.05fr 1.05fr 1.35fr;
+    gap: 2.25rem;
+    align-items: start;
 }
 
 .footer-logo-wrap {
@@ -3468,6 +3469,37 @@ input[type="search"] {
     font-style: normal;
     line-height: 1.8;
     font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.footer-contact strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.footer-contact-link {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    word-break: break-all;
+}
+
+.footer-contact-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.footer-contact-phone {
+    font-weight: 600;
+    color: var(--color-primary-light, #e8f4fb);
+}
+
+.footer-opening-hours {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    display: inline-block;
+    margin-top: 0.35rem;
+    line-height: 1.4;
 }
 
 .social-links {
@@ -3561,7 +3593,13 @@ input[type="search"] {
     }
 
     .footer-inner {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem 2rem;
+    }
+
+    .footer-col.footer-about {
+        grid-column: 1 / -1;
+        max-width: 600px;
     }
 
     .filter-main-row {
@@ -3611,6 +3649,10 @@ input[type="search"] {
     .footer-inner {
         grid-template-columns: 1fr;
         gap: 2rem;
+    }
+    .footer-col.footer-about {
+        grid-column: auto;
+        max-width: 100%;
     }
 }
 

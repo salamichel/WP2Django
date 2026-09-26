@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.min.css' %}?v=2.9">
+    <link rel="stylesheet" href="{% static 'css/style.min.css' %}?v=3.0">
     <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
     {% block extra_head %}{% endblock %}
 </head>
@@ -387,8 +387,6 @@
                         <li><a href="/conditions-abandon/">Prise en charge & Abandon</a></li>
                         <li><a href="/a-propos/">L'association</a></li>
                         <li><a href="{% url 'blog:post_list' %}?status=adopte">Les Heureux Adoptés</a></li>
-                        <li><a href="/familles-accueil/">Devenir FA</a></li>
-                        <li><a href="/dons-parrainages/">Dons & Soutiens</a></li>
                         <li><a href="{% url 'contact:contact' %}">Contact</a></li>
                     </ul>
                 </div>
@@ -402,7 +400,6 @@
                         <li><a href="{% url 'blog:category' slug='chiens' %}">Nos chiens</a></li>
                         <li><a href="{% url 'blog:category' slug='chats' %}">Nos chats</a></li>
                         <li><a href="{% url 'blog:category' slug='rongeurs' %}">Nos rongeurs & NAC</a></li>
-                        <li><a href="{% url 'blog:post_list' %}?status=adopte">Les Heureux Adoptés</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -411,28 +408,27 @@
                         <li><a href="/familles-accueil/">Devenir Famille d'Accueil</a></li>
                         <li><a href="/dons-parrainages/">Dons & Parrainages</a></li>
                         <li><a href="https://www.teaming.net" target="_blank" rel="noopener">Groupe Teaming (1€/mois)</a></li>
-                        <li><a href="/a-propos/">L'association</a></li>
                         <li><a href="/mentions-legales/">Mentions légales</a></li>
                     </ul>
                 </div>
-                <div class="footer-col">
+                <div class="footer-col footer-contact">
                     <h3>Contactez-nous</h3>
                     <address>
                         <strong>{{ site_settings.association_name }}</strong><br>
                         {% if site_settings.address_line1 %}{{ site_settings.address_line1 }}<br>{% endif %}
                         {% if site_settings.postal_code or site_settings.city %}{{ site_settings.postal_code }} {{ site_settings.city }}<br>{% endif %}
                         {% if site_settings.region_coverage %}{{ site_settings.region_coverage }}<br>{% endif %}
-                        {% if site_settings.contact_email %}<a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a><br>{% endif %}
-                        {% if site_settings.phone %}<a href="{{ site_settings.phone_url }}">{{ site_settings.phone }}</a><br>{% endif %}
-                        {% if site_settings.opening_hours %}<span style="font-size:0.8rem;color:#b2bec3;display:inline-block;margin-top:4px;">{{ site_settings.opening_hours }}</span>{% endif %}
+                        {% if site_settings.contact_email %}<a href="mailto:{{ site_settings.contact_email }}" class="footer-contact-link">{{ site_settings.contact_email }}</a><br>{% endif %}
+                        {% if site_settings.phone %}<a href="{{ site_settings.phone_url }}" class="footer-contact-link footer-contact-phone">{{ site_settings.phone }}</a><br>{% endif %}
+                        {% if site_settings.opening_hours %}<span class="footer-opening-hours">{{ site_settings.opening_hours }}</span>{% endif %}
                     </address>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; {% now "Y" %} {{ site_settings.association_name }}. {% if site_settings.legal_status %}{{ site_settings.legal_status }} &middot; {% endif %}{% if site_settings.rna_number %}RNA : {{ site_settings.rna_number }} &middot; {% endif %}<a
                         href="/mentions-legales/" style="color:#b2bec3;text-decoration:underline;">Mentions légales</a>
-                    &middot; Réalisation : <a href="https://moka-web.net" target="_blank" rel="noopener"
-                        class="footer-moka-link">Moka-Web</a></p>
+                    &middot; Conception &amp; Réalisation : <a href="https://moka-web.net" target="_blank" rel="noopener noreferrer"
+                        class="footer-moka-link">Moka Studio</a></p>
                 {% if site_settings.footer_custom_text %}
                 <p style="font-size:0.8rem;color:#b2bec3;margin-top:0.35rem;">{{ site_settings.footer_custom_text }}</p>
                 {% endif %}
