@@ -84,6 +84,31 @@ python manage.py import_wordpress <fichier.sql> [options]
 - Les données SEO (Yoast, Rank Math)
 - La structure des permaliens pour générer les redirections
 
+## Optimisation & Redimensionnement des Médias (`resize_media`)
+
+Pour scanner et optimiser automatiquement les photos existantes ou importées dépassant la dimension maximale autorisée (ex. photos brutes d'appareils photo de plusieurs Mo) :
+
+```bash
+# Dans Docker (défaut : max 1600px, qualité 85)
+docker compose exec web python manage.py resize_media
+
+# Avec le Makefile
+make resize-media
+
+# En local
+python manage.py resize_media
+
+# Options personnalisées
+docker compose exec web python manage.py resize_media --media-dir /app/media --max-dim 1200 --quality 80
+```
+
+**Options :**
+- `--media-dir <path>` : Répertoire contenant les fichiers médias à scanner (défaut : `MEDIA_ROOT`, soit `/app/media`).
+- `--max-dim <pixels>` : Dimension maximale autorisée en largeur ou en hauteur (défaut : `1600` px).
+- `--quality <1-100>` : Taux de qualité de compression JPEG/WebP (défaut : `85`).
+
+Le traitement est effectué *in-place* (remplacement sur place) avec préservation de l'orientation EXIF, conversion sécurisée RGBA/CMYK et tolérance aux images volumineuses ou partiellement tronquées.
+
 ## Structure du projet
 
 ```
@@ -95,7 +120,8 @@ WP2Django/
 │   ├── sql_parser.py        # Parser SQL autonome
 │   ├── importers.py         # Importeurs par entité
 │   ├── content_processor.py # Réécriture du contenu HTML
-│   └── management/commands/ # Commande Django
+│   ├── image_optimizer.py   # Redimensionnement et optimisation d'images
+│   └── management/commands/ # Commandes Django (import_wordpress, resize_media)
 ├── templates/           # Templates HTML
 ├── static/              # CSS + JS
 ├── nginx/               # Configuration Nginx
@@ -115,6 +141,7 @@ make migrate        # Appliquer les migrations de base de données
 make shell          # Ouvrir le shell interactif Django
 make createsuperuser# Initialiser le compte administrateur
 make seed           # Ensemencer les pages CMS et menus (seed_rdc_pages)
+make resize-media   # Optimiser et redimensionner les images (max 1600px)
 make import-wp SQL=dump.sql # Importer un dump SQL WordPress
 ```
 

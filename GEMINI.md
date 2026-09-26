@@ -17,6 +17,7 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - `make import-wp SQL=chemin/vers/dump.sql` ou `python manage.py import_wordpress dump.sql` : Importe les données WordPress.
 - `make createsuperuser` ou `docker compose exec web python manage.py createsuperuser` : Initialise le compte administrateur (invite interactive pour nom d'utilisateur, email, mot de passe).
 - `docker compose exec -e DJANGO_SUPERUSER_PASSWORD=motdepasse web python manage.py createsuperuser --noinput --username admin --email contact@revesdechiens.fr` : Initialisation automatique sans prompt.
+- `make resize-media` ou `python manage.py resize_media` : Scanne et redimensionne in-place les photos dépassant 1600px.
 
 ## 🏗 Structure du Projet
 

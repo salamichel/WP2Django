@@ -1,4 +1,4 @@
-.PHONY: build up down logs migrate shell import-wp createsuperuser seed test collectstatic css css-watch
+.PHONY: build up down logs migrate shell import-wp createsuperuser seed test collectstatic css css-watch resize-media
 
 css:
 	npm run build:css
@@ -30,6 +30,9 @@ createsuperuser:
 seed:
 	docker compose exec web python manage.py seed_rdc_pages
 
+resize-media:
+	docker compose exec web python manage.py resize_media
+
 test:
 	docker compose exec web python manage.py test
 
@@ -39,4 +42,5 @@ import-wp:
 
 collectstatic:
 	docker compose exec web python manage.py collectstatic --noinput
+
 
