@@ -13,8 +13,10 @@
             <a href="{% url 'blog:home' %}" class="cms-breadcrumb-link">&larr; Accueil</a>
             <span class="cms-breadcrumb-sep">/</span>
             {% if page.slug == 'puis-je-adopter' or page.slug == 'conditions-adoption' or page.slug == 'formulaire-adoption' %}
-            <a href="/puis-je-adopter/" class="cms-breadcrumb-link">Adoption</a>
-            {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+            <a href="{% url 'blog:post_list' %}" class="cms-breadcrumb-link">Adoption</a>
+            {% elif page.slug == 'conditions-abandon' %}
+            <a href="/conditions-abandon/" class="cms-breadcrumb-link">Prise en charge</a>
+            {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' %}
             <a href="/dons-parrainages/" class="cms-breadcrumb-link">Agir & Soutenir</a>
             {% else %}
             <a href="/a-propos/" class="cms-breadcrumb-link">L'Association</a>
@@ -32,7 +34,9 @@
                     <header class="cms-article-header">
                         {% if page.slug == 'puis-je-adopter' or page.slug == 'conditions-adoption' or page.slug == 'formulaire-adoption' %}
                         <span class="cms-header-category-badge">🐾 Guide d'Adoption</span>
-                        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+                        {% elif page.slug == 'conditions-abandon' %}
+                        <span class="cms-header-category-badge cms-header-category-badge--orange">⚠️ Prise en charge & Abandon</span>
+                        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' %}
                         <span class="cms-header-category-badge cms-header-category-badge--orange">❤️ Solidarité & Entraide</span>
                         {% else %}
                         <span class="cms-header-category-badge cms-header-category-badge--green">ℹ️ Association Rêves de Chiens</span>

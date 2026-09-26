@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from blog.models import Page, Menu, MenuItem, Category, Redirect, AdoptionTariff
+from blog.models import Page, Menu, MenuItem, Category, Redirect, AdoptionTariff, SiteSettings
 
 
 class Command(BaseCommand):
@@ -264,9 +264,9 @@ class Command(BaseCommand):
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.5rem;margin:3rem 0;">
                     <div style="background:#ffffff;border:1px solid #e2e8f0;padding:1.5rem;border-radius:12px;">
                         <h3 style="color:#d90429;margin-top:0;display:flex;align-items:center;gap:8px;">
-                            <span>🩺</span> Stérilisation obligatoire
+                            <span>🩺</span> Stérilisation obligatoire & incluse
                         </h3>
-                        <p style="color:#475569;font-size:0.95rem;">La stérilisation est une <strong>condition indispensable à toute adoption</strong>. Chaque année, des milliers d'animaux sont abandonnés ou naissent sans perspective de foyer. Notre mission prioritaire est de contribuer à enrayer cette surpopulation animale.</p>
+                        <p style="color:#475569;font-size:0.95rem;">La stérilisation est une <strong>condition indispensable et obligatoire</strong> à toute adoption. Pour la sérénité des adoptants et la santé de l'animal, la stérilisation/castration est <strong>intégralement incluse dans les frais d'adoption</strong> (effectuée par nos vétérinaires partenaires avant adoption, ou sous forme d'un bon de stérilisation pris en charge pour les chiots et chatons trop jeunes).</p>
                     </div>
 
                     <div style="background:#ffffff;border:1px solid #e2e8f0;padding:1.5rem;border-radius:12px;">
@@ -323,7 +323,7 @@ class Command(BaseCommand):
                                 <span style="color:#2b9348;">✓</span> Antiparasitaires & vermifuges
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;color:#334155;font-size:0.92rem;">
-                                <span style="color:#2b9348;">✓</span> Stérilisation / Castration
+                                <span style="color:#2b9348;">✓</span> Stérilisation / Castration incluse
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;color:#334155;font-size:0.92rem;">
                                 <span style="color:#2b9348;">✓</span> Nourriture premium durant l'accueil
@@ -374,7 +374,7 @@ class Command(BaseCommand):
                     <h3 style="color:#0f172a;margin-top:0;font-size:1.25rem;">⚖️ Rappel de la réglementation en vigueur</h3>
                     <ul style="color:#475569;padding-left:1.25rem;line-height:1.7;">
                         <li><strong>Identification obligatoire :</strong> L'identification des chiens et chats est obligatoire avant toute cession, gratuite ou payante (chiens de + de 4 mois nés après le 06/01/1999 ; chats de + de 7 mois nés après le 01/01/2012).</li>
-                        <li><strong>Certificat d'engagement et de connaissances :</strong> Doit être obligatoirement signé au moins <strong>7 jours avant l'adoption</strong> (Loi n° 2021-1539 du 30 nov 2021) pour sensibiliser et éviter les achats coup de cœur.</li>
+                        <li><strong>Certificat d'engagement et de connaissances :</strong> Conformément à la loi (n° 2021-1539), ce certificat est <strong>fourni et rempli directement par l'association lors du premier contact / de la pré-adoption</strong>. L'adoptant n'a <strong>aucune démarche préalable</strong> ni document payant à obtenir par lui-même ; le délai de réflexion légal de 7 jours est automatiquement intégré dans le processus avant adoption définitive.</li>
                         <li><strong>Mise à jour ICAD :</strong> Tout changement d'adresse, de propriétaire ou décès doit être immédiatement signalé au fichier national ICAD.</li>
                         <li><strong>Voyager dans l'UE :</strong> L'animal doit être identifié (puce électronique), valablement vacciné contre la rage et disposer d'un passeport européen délivré par un vétérinaire habilité.</li>
                     </ul>
@@ -382,7 +382,7 @@ class Command(BaseCommand):
 
                 <div style="text-align:center;margin-top:3rem;">
                     <a href="/formulaire-adoption/" class="btn btn-primary btn-lg" style="margin-right:1rem;">Remplir le formulaire d'adoption &rarr;</a>
-                    <a href="/articles/" class="btn btn-outline btn-lg">Découvrir nos protégés</a>
+                    <a href="/adoptions/" class="btn btn-outline btn-lg">Découvrir nos protégés</a>
                 </div>
                 """
             },
@@ -439,7 +439,7 @@ class Command(BaseCommand):
                     <h4 style="margin-top:0;color:#0f172a;">📌 Rappels importants avant de postuler :</h4>
                     <ul style="color:#475569;margin-bottom:0;padding-left:1.25rem;">
                         <li>Les adoptions sont réservées aux résidents d'<strong>Île-de-France</strong>.</li>
-                        <li>Conformément à la loi, un <strong>certificat d'engagement et de connaissances</strong> doit être signé au minimum 7 jours avant l'adoption.</li>
+                        <li>Le <strong>certificat d'engagement et de connaissances</strong> obligatoire est fourni et rempli directement par l'association lors de la pré-adoption (aucune démarche préalable pour l'adoptant).</li>
                         <li>Pour toute question préalable, notre équipe de bénévoles reste à votre écoute via notre <a href="/contact/" style="color:#1982c4;text-decoration:underline;">formulaire de contact</a>.</li>
                     </ul>
                 </div>
@@ -454,7 +454,7 @@ class Command(BaseCommand):
                 "seo_description": "Découvrez l'histoire, la mission et le fonctionnement 100% bénévole en Familles d'Accueil de l'association Rêves de Chiens.",
                 "content": """
                 <div class="cms-page-hero">
-                    <p class="lead"><strong>Rêves de Chiens</strong> est une association de protection animale (loi 1901) à but non lucratif, animée par une équipe <strong>100% bénévole</strong>.</p>
+                    <p class="lead">Fondée en <strong>novembre 2002</strong>, <strong>Rêves de Chiens</strong> est une association de protection animale (loi 1901) à but non lucratif, animée depuis plus de 20 ans par une équipe dévouée et <strong>100% bénévole</strong>.</p>
                 </div>
 
                 <div class="cms-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:1.5rem;margin:2rem 0;">
@@ -501,6 +501,7 @@ class Command(BaseCommand):
                 <h2>Les Avantages & Engagements de l'Association</h2>
                 <ul>
                     <li><strong>Frais vétérinaires 100% pris en charge</strong> par Rêves de Chiens (consultations, chirurgies, médicaments).</li>
+                    <li><strong>Nourriture fournie par l'association</strong> : Les croquettes et l'alimentation adaptée sont intégralement fournies pendant toute la durée de l'accueil en FA (aucun frais de nourriture à votre charge).</li>
                     <li><strong>Fourniture du matériel si besoin</strong> (laisse, collier, harnais, panier, bac à litière).</li>
                     <li><strong>Accompagnement continu</strong> : Nos bénévoles référents sont disponibles 7j/7 pour vous conseiller et vous guider.</li>
                     <li><strong>Durée adaptée</strong> : Accueil d'urgence (quelques jours/semaines) ou accueil longue durée jusqu'à adoption.</li>
@@ -546,6 +547,15 @@ class Command(BaseCommand):
                     <li><strong>Frais de prise en charge</strong> : Une participation financière est demandée pour couvrir les frais de mise en règle sanitaire (vaccins, puce, stérilisation si non effectuée).</li>
                     <li><strong>Pas de pension temporaire</strong> : Toute prise en charge est définitive avec signature d'un acte officiel de cession au profit de l'association.</li>
                 </ul>
+
+                <div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:1.25rem;border-radius:0 10px 10px 0;margin:1.75rem 0;">
+                    <strong style="color:#b45309;">⚖️ Obligation légale — Certificat vétérinaire de santé avant cession :</strong>
+                    <p style="color:#78350f;margin:0.5rem 0 0 0;font-size:0.95rem;">
+                        Conformément à l'article L.214-8 du Code rural, toute cession d'un animal domestique (à titre gratuit ou onéreux)
+                        impose la remise obligatoire d'un <strong>certificat vétérinaire de santé avant cession</strong> datant de moins de 3 mois.
+                        Ce document officiel établi par un vétérinaire doit impérativement être remis à l'association lors de la prise en charge de l'animal.
+                    </p>
+                </div>
                 """
             },
 
@@ -644,18 +654,19 @@ class Command(BaseCommand):
         main_menu, _ = Menu.objects.get_or_create(slug="main", defaults={"name": "Menu Principal"})
         main_menu.items.all().delete()
         MenuItem.objects.create(menu=main_menu, title="Accueil", url="/", position=1)
-        MenuItem.objects.create(menu=main_menu, title="Adoption", url="/articles/", position=2)
+        MenuItem.objects.create(menu=main_menu, title="Adoption", url="/adoptions/", position=2)
         MenuItem.objects.create(menu=main_menu, title="Puis-je adopter ?", linked_page=created_pages.get("puis-je-adopter"), position=3)
-        MenuItem.objects.create(menu=main_menu, title="Conditions & Tarifs", linked_page=created_pages.get("conditions-adoption"), position=4)
+        MenuItem.objects.create(menu=main_menu, title="Conditions d'adoption & Tarifs", linked_page=created_pages.get("conditions-adoption"), position=4)
         MenuItem.objects.create(menu=main_menu, title="Formulaire d'adoption", linked_page=created_pages.get("formulaire-adoption"), position=5)
         MenuItem.objects.create(menu=main_menu, title="Agir & Soutenir", linked_page=created_pages.get("dons-parrainages"), position=6)
-        MenuItem.objects.create(menu=main_menu, title="L'Association", linked_page=created_pages.get("a-propos"), position=7)
-        MenuItem.objects.create(menu=main_menu, title="Contact", url="/contact/", position=8)
+        MenuItem.objects.create(menu=main_menu, title="Prise en charge", linked_page=created_pages.get("conditions-abandon"), position=7)
+        MenuItem.objects.create(menu=main_menu, title="L'Association", linked_page=created_pages.get("a-propos"), position=8)
+        MenuItem.objects.create(menu=main_menu, title="Contact", url="/contact/", position=9)
 
         # 2. Adoptions Sidebar Menu
         adoptions_menu, _ = Menu.objects.get_or_create(slug="adoptions", defaults={"name": "Adopter un animal"})
         adoptions_menu.items.all().delete()
-        MenuItem.objects.create(menu=adoptions_menu, title="Tous nos protégés", url="/articles/", position=1)
+        MenuItem.objects.create(menu=adoptions_menu, title="Tous les rêveurs", url="/adoptions/", position=1)
         MenuItem.objects.create(menu=adoptions_menu, title="Puis-je adopter ?", linked_page=created_pages.get("puis-je-adopter"), position=2)
         MenuItem.objects.create(menu=adoptions_menu, title="Conditions d'adoption & Tarifs", linked_page=created_pages.get("conditions-adoption"), position=3)
         MenuItem.objects.create(menu=adoptions_menu, title="Formulaire d'adoption", linked_page=created_pages.get("formulaire-adoption"), position=4)
@@ -669,7 +680,7 @@ class Command(BaseCommand):
         plus_infos_menu.items.all().delete()
         MenuItem.objects.create(menu=plus_infos_menu, title="Qui sommes-nous ?", linked_page=created_pages.get("a-propos"), position=1)
         MenuItem.objects.create(menu=plus_infos_menu, title="Devenir Famille d'Accueil", linked_page=created_pages.get("familles-accueil"), position=2)
-        MenuItem.objects.create(menu=plus_infos_menu, title="Conditions d'abandon & prise en charge", linked_page=created_pages.get("conditions-abandon"), position=3)
+        MenuItem.objects.create(menu=plus_infos_menu, title="Prise en charge & Abandon", linked_page=created_pages.get("conditions-abandon"), position=3)
         MenuItem.objects.create(menu=plus_infos_menu, title="Faire un don / Parrainer", linked_page=created_pages.get("dons-parrainages"), position=4)
         MenuItem.objects.create(menu=plus_infos_menu, title="Que sont-ils devenus ?", linked_category=les_adoptes_cat, position=5)
         MenuItem.objects.create(menu=plus_infos_menu, title="Mentions légales & Transparence", linked_page=created_pages.get("mentions-legales"), position=6)
@@ -678,13 +689,21 @@ class Command(BaseCommand):
         footer_menu, _ = Menu.objects.get_or_create(slug="footer", defaults={"name": "Menu Pied de Page"})
         footer_menu.items.all().delete()
         MenuItem.objects.create(menu=footer_menu, title="Accueil", url="/", position=1)
-        MenuItem.objects.create(menu=footer_menu, title="À l'adoption", url="/articles/", position=2)
+        MenuItem.objects.create(menu=footer_menu, title="À l'adoption", url="/adoptions/", position=2)
         MenuItem.objects.create(menu=footer_menu, title="Puis-je adopter ?", linked_page=created_pages.get("puis-je-adopter"), position=3)
-        MenuItem.objects.create(menu=footer_menu, title="Conditions & Tarifs", linked_page=created_pages.get("conditions-adoption"), position=4)
+        MenuItem.objects.create(menu=footer_menu, title="Conditions d'adoption & Tarifs", linked_page=created_pages.get("conditions-adoption"), position=4)
         MenuItem.objects.create(menu=footer_menu, title="Formulaire d'adoption", linked_page=created_pages.get("formulaire-adoption"), position=5)
         MenuItem.objects.create(menu=footer_menu, title="Devenir FA", linked_page=created_pages.get("familles-accueil"), position=6)
-        MenuItem.objects.create(menu=footer_menu, title="Dons & Soutiens", linked_page=created_pages.get("dons-parrainages"), position=7)
-        MenuItem.objects.create(menu=footer_menu, title="Mentions légales", linked_page=created_pages.get("mentions-legales"), position=8)
-        MenuItem.objects.create(menu=footer_menu, title="Contact", url="/contact/", position=9)
+        MenuItem.objects.create(menu=footer_menu, title="Prise en charge", linked_page=created_pages.get("conditions-abandon"), position=7)
+        MenuItem.objects.create(menu=footer_menu, title="Dons & Soutiens", linked_page=created_pages.get("dons-parrainages"), position=8)
+        MenuItem.objects.create(menu=footer_menu, title="Mentions légales", linked_page=created_pages.get("mentions-legales"), position=9)
+        MenuItem.objects.create(menu=footer_menu, title="Contact", url="/contact/", position=10)
+
+        # 5. Ensure SiteSettings has the official logo configured
+        settings = SiteSettings.get_solo()
+        if not settings.logo:
+            settings.logo = "site/logo_reves_de_chiens.png"
+            settings.save(update_fields=["logo"])
+            self.stdout.write("  [Logo] Configuration du logo officiel dans SiteSettings")
 
         self.stdout.write(self.style.SUCCESS("Successfully seeded all Rêves de Chiens CMS pages, tariffs, and dynamic menus!"))

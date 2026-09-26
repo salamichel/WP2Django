@@ -494,6 +494,12 @@ class PluginData(models.Model):
 
 class SiteSettings(models.Model):
     """Singleton model for site-wide configuration, contact info, and social links."""
+    # Logo & Identité visuelle
+    logo = models.ImageField(
+        "Logo officiel du site", upload_to="site/", blank=True, null=True,
+        help_text="Logo officiel de l'association (PNG, SVG, WEBP ou JPG). Si vide, le logo par défaut est utilisé."
+    )
+
     # Coordonnées de contact
     association_name = models.CharField(
         "Nom de l'association", max_length=255, default="Association Rêves de Chiens"
@@ -554,6 +560,50 @@ class SiteSettings(models.Model):
         help_text="Message ou mention additionnelle affichée dans le pied de page."
     )
 
+    # Paramètres d'affichage & Navigation
+    home_animals_count = models.PositiveIntegerField(
+        "Nombre d'animaux affichés en accueil", default=6,
+        help_text="Nombre de fiches d'animaux à l'adoption visibles sur la page d'accueil."
+    )
+    posts_per_page = models.PositiveIntegerField(
+        "Nombre d'éléments par page (pagination)", default=10,
+        help_text="Nombre de fiches ou articles affichés par page dans le catalogue, les catégories et les recherches."
+    )
+    topbar_enabled = models.BooleanField(
+        "Barre d'annonce (Top Bar) activée", default=True,
+        help_text="Cocher pour afficher le bandeau supérieur d'annonce au-dessus de l'en-tête."
+    )
+    topbar_text = models.CharField(
+        "Texte de la barre d'annonce", max_length=512, blank=True,
+        default="Refuge solidaire 100% Familles d'Accueil · Adoptez, sauvez une vie",
+        help_text="Message affiché dans le bandeau supérieur d'annonce."
+    )
+    cta_main_label = models.CharField(
+        "Texte du bouton CTA principal", max_length=100, default="Adopter un animal",
+        help_text="Libellé du bouton d'action principal (menu mobile et navigation)."
+    )
+
+    # Paramètres Email & Notifications
+    brevo_sender_email = models.EmailField(
+        "Email d'expédition des notifications", blank=True, default="",
+        help_text="Email utilisé comme expéditeur des accusés de réception Brevo. Si vide, utilise la configuration système."
+    )
+    email_template_adoption = CKEditor5Field(
+        "Template Email - Accusé et Questionnaire Adoption (HTML)", blank=True, default="",
+        config_name="default",
+        help_text="Corps HTML de l'email automatique envoyé après une demande d'adoption. Variables disponibles : {{ name }}, {{ email }}, {{ phone }}, {{ animal_name }}, {{ subject }}."
+    )
+    email_template_abandon = CKEditor5Field(
+        "Template Email - Accusé Prise en charge / Abandon (HTML)", blank=True, default="",
+        config_name="default",
+        help_text="Corps HTML de l'email automatique envoyé après une demande de prise en charge. Variables disponibles : {{ name }}, {{ email }}, {{ phone }}, {{ animal_name }}, {{ subject }}."
+    )
+    email_template_fa = CKEditor5Field(
+        "Template Email - Accusé Famille d'Accueil / Bénévolat (HTML)", blank=True, default="",
+        config_name="default",
+        help_text="Corps HTML de l'email automatique envoyé après une candidature FA. Variables disponibles : {{ name }}, {{ email }}, {{ phone }}, {{ animal_name }}, {{ subject }}."
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -578,6 +628,13 @@ class SiteSettings(models.Model):
         if clean.startswith("0") and len(clean) == 10:
             clean = "+33" + clean[1:]
         return f"tel:{clean}"
+
+    @property
+    def logo_url(self):
+        """Returns the URL of the uploaded logo, or falls back to static default."""
+        if self.logo and hasattr(self.logo, "url") and self.logo.name:
+            return self.logo.url
+        return "/static/img/logo_rdc.png"
 
     @property
     def has_social_links(self):

@@ -3211,8 +3211,8 @@ input[type="search"] {
 
 .solidarity-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
 }
 
 .solidarity-card {
@@ -3232,6 +3232,11 @@ input[type="search"] {
     border: 1px solid #f5ccd3;
 }
 
+.solidarity-card--facebook {
+    background: linear-gradient(135deg, #eef3fc 0%, #dce8fa 100%);
+    border: 1px solid #c2d8f6;
+}
+
 .solidarity-badge {
     display: inline-block;
     align-self: flex-start;
@@ -3248,6 +3253,10 @@ input[type="search"] {
 
 .solidarity-badge--insta {
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.solidarity-badge--facebook {
+    background: linear-gradient(45deg, #1877f2, #166fe5);
 }
 
 .solidarity-card h3 {

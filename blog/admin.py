@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin, TabularInline, StackedInline
 from blog.models import (
     Post, Animal, Article, Page, Category, Tag, Comment, Media, Menu, MenuItem, Redirect, PluginData,
     PostGalleryImage, SiteSettings, AdoptionTariff,
@@ -14,7 +15,7 @@ from blog.models import (
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ModelAdmin):
     list_display = ("name", "slug", "parent", "post_count")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name",)
@@ -26,7 +27,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(ModelAdmin):
     list_display = ("name", "slug", "post_count")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name",)
@@ -38,7 +39,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 @admin.register(Media)
-class MediaAdmin(admin.ModelAdmin):
+class MediaAdmin(ModelAdmin):
     list_display = ("thumbnail_preview", "title", "mime_type", "uploaded_at")
     search_fields = ("title", "alt_text")
     list_filter = ("mime_type",)
@@ -60,7 +61,7 @@ class MediaAdmin(admin.ModelAdmin):
     thumbnail_preview.short_description = ""
 
 
-class GalleryImageInline(admin.TabularInline):
+class GalleryImageInline(TabularInline):
     model = PostGalleryImage
     extra = 1
     fields = ("media", "position")
@@ -72,14 +73,14 @@ class GalleryImageInline(admin.TabularInline):
         js = ("js/admin_gallery_dnd.js",)
 
 
-class CommentInline(admin.TabularInline):
+class CommentInline(TabularInline):
     model = Comment
     extra = 0
     fields = ("author_name", "content", "status", "created_at")
     readonly_fields = ("created_at",)
 
 
-class BasePostAdmin(admin.ModelAdmin):
+class BasePostAdmin(ModelAdmin):
     """Base Admin class providing media upload and visual badges."""
     inlines = [GalleryImageInline, CommentInline]
 
@@ -460,7 +461,7 @@ class ArticleAdmin(BasePostAdmin):
 
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(ModelAdmin):
     """Hidden / Fallback PostAdmin if needed directly via URL and for autocomplete."""
     search_fields = ("title", "animal_name")
 
@@ -470,7 +471,7 @@ class PostAdmin(admin.ModelAdmin):
 
 
 @admin.register(Page)
-class PageAdmin(admin.ModelAdmin):
+class PageAdmin(ModelAdmin):
     list_display = ("title", "status_badge", "menu_order", "parent")
     list_filter = ("status",)
     search_fields = ("title", "content")
@@ -498,7 +499,7 @@ class PageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(ModelAdmin):
     list_display = ("author_name", "post", "status_badge", "short_content", "created_at")
     list_filter = ("status", "created_at")
     search_fields = ("author_name", "content")
@@ -538,7 +539,7 @@ class CommentAdmin(admin.ModelAdmin):
         self.message_user(request, f"{count} commentaire(s) marque(s) comme spam.")
 
 
-class MenuItemInline(admin.StackedInline):
+class MenuItemInline(StackedInline):
     model = MenuItem
     extra = 1
     fieldsets = (
@@ -561,7 +562,7 @@ class MenuItemInline(admin.StackedInline):
 
 
 @admin.register(Menu)
-class MenuAdmin(admin.ModelAdmin):
+class MenuAdmin(ModelAdmin):
     list_display = ("name", "slug", "location", "item_count")
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ("name",)
@@ -573,13 +574,17 @@ class MenuAdmin(admin.ModelAdmin):
 
 
 @admin.register(MenuItem)
-class MenuItemAdmin(admin.ModelAdmin):
+class MenuItemAdmin(ModelAdmin):
     list_display = ("title", "menu", "position", "linked_content_display", "parent")
     list_filter = ("menu",)
     search_fields = ("title",)
     list_editable = ("position",)
     autocomplete_fields = ("linked_post", "linked_page", "linked_category", "parent", "menu")
     list_per_page = 50
+
+    def get_model_perms(self, request):
+        # Hide standalone MenuItem from admin index (managed directly inside Menu inline)
+        return {}
     fieldsets = (
         (None, {"fields": ("menu", "title", "position", "parent")}),
         ("Lien interne", {
@@ -630,7 +635,7 @@ class MenuItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(Redirect)
-class RedirectAdmin(admin.ModelAdmin):
+class RedirectAdmin(ModelAdmin):
     list_display = ("old_path", "arrow_icon", "new_path", "redirect_type")
     search_fields = ("old_path", "new_path")
     list_per_page = 50
@@ -656,15 +661,22 @@ class RedirectAdmin(admin.ModelAdmin):
 
 
 @admin.register(PluginData)
-class PluginDataAdmin(admin.ModelAdmin):
+class PluginDataAdmin(ModelAdmin):
     list_display = ("plugin_name", "source_table", "related_post", "created_at")
     list_filter = ("plugin_name",)
     search_fields = ("plugin_name", "source_table")
 
 
 @admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
+class SiteSettingsAdmin(ModelAdmin):
+    readonly_fields = ("logo_preview",)
     fieldsets = (
+        ("🎨 Identité Visuelle & Logo du Site", {
+            "fields": (
+                ("logo", "logo_preview"),
+            ),
+            "description": "Téléversez le logo officiel de l'association (PNG, SVG, WEBP ou JPG). Il est automatiquement affiché dans l'en-tête, le pied de page et le menu mobile.",
+        }),
         ("📞 Coordonnées & Permanence", {
             "fields": (
                 ("contact_email", "phone"),
@@ -696,7 +708,53 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 ("footer_custom_text",),
             ),
         }),
+        ("🖥️ Affichage & Navigation (Catalogue & Accueil)", {
+            "fields": (
+                ("home_animals_count", "posts_per_page"),
+                ("topbar_enabled", "topbar_text"),
+                ("cta_main_label",),
+            ),
+            "description": "Pilotez le nombre d'animaux en page d'accueil, le nombre d'articles par page, le bandeau supérieur d'annonce et le libellé du bouton principal.",
+        }),
+        ("✉️ Configuration Email Expéditeur", {
+            "fields": (
+                ("brevo_sender_email",),
+            ),
+            "description": "Email utilisé comme expéditeur officiel lors de l'envoi des accusés et questionnaires automatiques.",
+        }),
+        ("📋 Templates Emails Automatiques (HTML)", {
+            "classes": ("collapse",),
+            "fields": (
+                "email_template_adoption",
+                "email_template_abandon",
+                "email_template_fa",
+            ),
+            "description": "Personnalisez le contenu HTML des emails de réponse automatique envoyés aux demandeurs. Variables Django disponibles : {{ name }}, {{ email }}, {{ phone }}, {{ animal_name }}, {{ subject }}.",
+        }),
     )
+
+    def logo_preview(self, obj):
+        if obj.logo and hasattr(obj.logo, "url") and obj.logo.name:
+            return format_html(
+                '<div style="display:flex;align-items:center;gap:16px;padding:8px 0;">'
+                '<img src="{}" style="width:72px;height:72px;object-fit:contain;border-radius:12px;'
+                'background:#ffffff;padding:4px;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,0.08);" />'
+                '<div>'
+                '<span style="font-weight:700;color:#0f172a;display:block;font-size:0.95rem;">Logo actuellement en ligne</span>'
+                '<span style="font-size:0.82rem;color:#64748b;display:block;margin-top:2px;">{}</span>'
+                '</div>'
+                '</div>',
+                obj.logo.url,
+                obj.logo.name,
+            )
+        return format_html(
+            '<div style="display:flex;align-items:center;gap:12px;padding:6px 0;">'
+            '<img src="/static/img/logo_rdc.png" style="width:48px;height:48px;object-fit:contain;border-radius:8px;'
+            'background:#ffffff;padding:2px;border:1px solid #e2e8f0;" />'
+            '<span style="color:#64748b;font-size:0.85rem;">Aucun fichier personnalisé téléversé. Le logo statique par défaut (/static/img/logo_rdc.png) est utilisé.</span>'
+            '</div>'
+        )
+    logo_preview.short_description = "Aperçu du logo"
 
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()
@@ -710,7 +768,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 
 @admin.register(AdoptionTariff)
-class AdoptionTariffAdmin(admin.ModelAdmin):
+class AdoptionTariffAdmin(ModelAdmin):
     list_display = ("species_badge", "age_bracket", "amount_display", "amount", "notes", "order", "is_active")
     list_editable = ("amount", "order", "is_active")
     list_filter = ("species", "is_active")
@@ -742,6 +800,101 @@ class AdoptionTariffAdmin(admin.ModelAdmin):
         )
     amount_display.short_description = "Tarif public"
     amount_display.admin_order_field = "amount"
+
+
+# ==============================================================================
+# ORGANISATION INTUITIVE DES SECTIONS D'ADMINISTRATION
+# ==============================================================================
+
+def intuitive_get_app_list(self, request, app_label=None):
+    """
+    Organise les modèles de l'administration Django en sections intuitives
+    orientées métier pour l'équipe du refuge :
+    1. 🐾 Refuge & Animaux (Fiches Rêveurs, Tarifs d'adoption)
+    2. 📝 Contenu & Communication (Pages CMS, Articles Blog, Médiathèque, Commentaires)
+    3. 🧭 Navigation & Structure (Menus, Catégories, Tags)
+    4. 📬 Demandes & Contact (Messages & Candidatures)
+    5. ⚙️ Paramètres & Système (Configuration & Logo, Redirections SEO, Données plugins)
+    6. 👥 Utilisateurs & Accès (Comptes, Groupes)
+    """
+    app_dict = self._build_app_dict(request, app_label)
+    all_models = {}
+    for app in app_dict.values():
+        for m in app.get("models", []):
+            all_models[m["object_name"]] = m
+
+    all_models.pop("MenuItem", None)
+    all_models.pop("Post", None)
+
+    SECTION_CONFIG = [
+        {
+            "name": "🐾 Refuge & Animaux",
+            "app_label": "section_refuge",
+            "models": ["Animal", "AdoptionTariff"],
+        },
+        {
+            "name": "📝 Contenu & Communication",
+            "app_label": "section_content",
+            "models": ["Page", "Article", "Media", "Comment"],
+        },
+        {
+            "name": "🧭 Navigation & Structure",
+            "app_label": "section_navigation",
+            "models": ["Menu", "Category", "Tag"],
+        },
+        {
+            "name": "📬 Demandes & Contact",
+            "app_label": "section_contact",
+            "models": ["ContactMessage"],
+        },
+        {
+            "name": "⚙️ Paramètres & Système",
+            "app_label": "section_settings",
+            "models": ["SiteSettings", "Redirect", "PluginData"],
+        },
+        {
+            "name": "👥 Utilisateurs & Accès",
+            "app_label": "section_auth",
+            "models": ["User", "Group"],
+        },
+    ]
+
+    custom_app_list = []
+    used_model_names = set()
+
+    for sec in SECTION_CONFIG:
+        sec_models = []
+        for model_name in sec["models"]:
+            if model_name in all_models:
+                sec_models.append(all_models[model_name])
+                used_model_names.add(model_name)
+        if sec_models:
+            custom_app_list.append({
+                "name": sec["name"],
+                "app_label": sec["app_label"],
+                "app_url": "",
+                "has_module_perms": True,
+                "models": sec_models,
+            })
+
+    # Catch-all pour les modèles additionnels éventuels
+    remaining = [m for name, m in all_models.items() if name not in used_model_names]
+    if remaining:
+        custom_app_list.append({
+            "name": "📦 Autres Modules",
+            "app_label": "section_other",
+            "app_url": "",
+            "has_module_perms": True,
+            "models": remaining,
+        })
+
+    return custom_app_list
+
+
+# Remplacement global de get_app_list sur l'AdminSite Django
+from django.contrib.admin import AdminSite
+AdminSite.get_app_list = intuitive_get_app_list
+
 
 
 

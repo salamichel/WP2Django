@@ -1,4 +1,10 @@
-.PHONY: build up down logs migrate shell import-wp createsuperuser seed test collectstatic
+.PHONY: build up down logs migrate shell import-wp createsuperuser seed test collectstatic css css-watch
+
+css:
+	npm run build:css
+
+css-watch:
+	npm run watch:css
 
 build:
 	docker compose build

@@ -96,10 +96,7 @@
         <div class="card-meta-tags-row">
             <div class="card-sanitary-tags">
                 {% if post.is_sterilized %}
-                <span class="card-tag-sanitary">Stérilisé(e)</span>
-                {% endif %}
-                {% if post.is_vaccinated %}
-                <span class="card-tag-sanitary">Vacciné(e)</span>
+                <span class="card-tag-sanitary card-tag-sanitary--sterilized">✓ Stérilisé(e)</span>
                 {% endif %}
             </div>
             {% if post.identification %}

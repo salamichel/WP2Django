@@ -166,12 +166,37 @@ docker compose exec web python manage.py seed_rdc_pages
 ### 4. Modèles `blog.Menu` & `blog.MenuItem` (Navigation Dynamique)
 - `Menu` : Identifiant par slug (`main`, `adoptions`, `plus_infos`, `footer`).
 - `MenuItem` : Liens hiérarchiques avec support de clés étrangères polymorphiques vers `linked_page`, `linked_post`, `linked_category` ou `url` personnalisée.
+- **Arborescence & Rubriques clés** :
+  - Catalogue des Rêveurs : `/adoptions/` (avec redirection 301 permanente depuis l'ancienne URL `/articles/`).
+  - Conditions d'adoption : `/conditions-adoption/` harmonisé en « Conditions d'adoption & Tarifs » (avec table dynamique injectée via `AdoptionTariff`).
+  - Prise en charge & Abandon : `/conditions-abandon/` découplé de « Agir & Soutenir » et disposant de sa propre entrée de navigation dédiée.
+  - Filtres dynamiques : compteurs restreints aux profils animaux réellement adoptables (exclusion des statuts décédé/adopté et des articles de blog), filtre « Rêveurs », mise en avant du statut « Stérilisé » (suppression du filtre « Vacciné » obsolète).
 
 ### 5. Modèles `blog.Category` & `blog.Tag` (Taxonomies)
 - Catégories animales et thématiques avec résolution flexible des slugs et support des alias canoniques (`chiens`, `chats`, `rongeurs`, `urgences`, et alias `les-chiens`, `les-chats`...).
 
-### 6. Modèle `blog.Redirect` (Redirections SEO WordPress)
-- `old_path`, `new_url`, `is_permanent` (301/302). Géré via le middleware `WPRedirectMiddleware` pour préserver 100% de l'historique d'indexation Google (`/?p=123`, etc.).
+### 6. Modèle `blog.Redirect` (Redirections SEO WordPress & Évolutions de Slugs)
+- `old_path`, `new_url`, `is_permanent` (301/302). Géré via le middleware `WPRedirectMiddleware` pour préserver 100% de l'historique d'indexation Google (`/?p=123`, anciennes pages `/articles/`, etc.).
+
+### 7. Modèle `blog.SiteSettings` (Paramètres & Identité Visuelle)
+- **Logo officiel du site** : Champ `logo` (ImageField) administrable en direct dans l'admin, avec aperçu temps réel et repli automatique sur le logo par défaut (`/static/img/logo_rdc.png`). Utilisé harmonieusement dans l'en-tête desktop, le pied de page, le menu mobile et l'administration Django.
+- **Coordonnées & Réseaux sociaux** : Téléphone avec formatage `tel:`, permanences, email public, liens Facebook, Instagram, HelloAsso, etc.
+
+### 8. Organisation Intuitive de l'Administration Django (Thème Django Unfold)
+L'administration Django est propulsée par **Django Unfold** (interface moderne basée sur Tailwind CSS, composants réactifs, mode sombre natif et icônes Material Symbols). Elle regroupe automatiquement les modèles par pôles d'activités concrets et ordonnés, tant dans la barre latérale rétractable que sur le tableau de bord :
+1. **🐾 1. Refuge & Animaux** : Fiches des Rêveurs à l'adoption (`Animal` avec badge dynamique du nombre d'adoptables), Tarifs et frais d'adoption (`AdoptionTariff`).
+2. **📝 2. Contenu & Communication** : Pages institutionnelles CMS (`Page`), Articles et actualités (`Article`), Médiathèque (`Media`), Commentaires (`Comment` avec badge des commentaires en attente).
+3. **🧭 3. Navigation & Structure** : Menus de navigation (`Menu`), Catégories (`Category`), Étiquettes (`Tag`).
+4. **📬 4. Demandes & Contact** : Messages reçus, demandes d'adoption et candidatures FA (`ContactMessage` avec badge des messages non lus).
+5. **⚙️ 5. Paramètres & Système** : Paramètres Généraux & Logo (`SiteSettings`), Redirections d'URLs SEO (`Redirect`), Données d'extensions (`PluginData`).
+6. **👥 6. Utilisateurs & Accès** : Comptes utilisateurs (`User`) et Groupes de permissions (`Group`).
+
+**Fonctionnalités du Dashboard Unfold :**
+- **Cartes KPI en temps réel** : Compteurs d'animaux à l'adoption (alertes SOS), boîte de réception des messages, modération des commentaires et volume des contenus publiés.
+- **Barre d'actions rapides** : Création instantanée d'un nouvel animal, d'un article, accès direct aux paramètres du site / logo et lien vers le site public.
+- **Widgets d'activité récente** : Vignettes visuelles des derniers animaux entrés au refuge et des dernières demandes de contact.
+- **Badges dynamiques en barre latérale** : Remontée en direct des éléments requérant une action des bénévoles.
+
 
 ---
 

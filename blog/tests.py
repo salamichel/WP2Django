@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from blog.models import (
     Post, Page, Category, Tag, Comment, Menu, MenuItem, Redirect, Media, PostGalleryImage,
-    AdoptionTariff,
+    AdoptionTariff, SiteSettings,
 )
 
 
@@ -55,7 +55,7 @@ class PostModelTest(TestCase):
         self.assertEqual(str(self.post), "Test Post")
 
     def test_get_absolute_url(self):
-        self.assertEqual(self.post.get_absolute_url(), "/articles/test-post/")
+        self.assertEqual(self.post.get_absolute_url(), "/adoptions/test-post/")
 
     def test_category_relation(self):
         self.assertIn(self.cat, self.post.categories.all())
@@ -142,12 +142,21 @@ class ViewTests(TestCase):
         self.assertContains(resp, "Published Post")
 
     def test_post_list(self):
-        resp = self.client.get("/articles/")
+        resp = self.client.get("/adoptions/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Published Post")
 
+    def test_legacy_articles_redirect(self):
+        resp = self.client.get("/articles/")
+        self.assertEqual(resp.status_code, 301)
+        self.assertEqual(resp.url, "/adoptions/")
+
+        resp_detail = self.client.get("/articles/published-post/")
+        self.assertEqual(resp_detail.status_code, 301)
+        self.assertEqual(resp_detail.url, "/adoptions/published-post/")
+
     def test_post_detail(self):
-        resp = self.client.get("/articles/published-post/")
+        resp = self.client.get("/adoptions/published-post/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Content")
 
@@ -156,7 +165,7 @@ class ViewTests(TestCase):
         m2 = Media.objects.create(title="Gallery2", file="uploads/2024/01/g2.jpg", mime_type="image/jpeg")
         PostGalleryImage.objects.create(post=self.post, media=m1, position=0)
         PostGalleryImage.objects.create(post=self.post, media=m2, position=1)
-        resp = self.client.get("/articles/published-post/")
+        resp = self.client.get("/adoptions/published-post/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Galerie photos")
         self.assertContains(resp, "glightbox")
@@ -164,13 +173,13 @@ class ViewTests(TestCase):
         self.assertContains(resp, "g2.jpg")
 
     def test_post_detail_without_gallery(self):
-        resp = self.client.get("/articles/published-post/")
+        resp = self.client.get("/adoptions/published-post/")
         self.assertNotContains(resp, "Galerie photos")
         self.assertNotContains(resp, "glightbox.min.css")
 
     def test_post_detail_draft_returns_404(self):
         Post.objects.create(title="Draft", slug="draft", status="draft", published_at=timezone.now())
-        resp = self.client.get("/articles/draft/")
+        resp = self.client.get("/adoptions/draft/")
         self.assertEqual(resp.status_code, 404)
 
     def test_page_detail(self):
@@ -431,40 +440,40 @@ class AdoptionAndEmergencyFeaturesTest(TestCase):
 
     def test_post_list_filtering(self):
         # Filter dogs only
-        resp = self.client.get("/articles/?species=chien")
+        resp = self.client.get("/adoptions/?species=chien")
         self.assertEqual(resp.status_code, 200)
         posts = resp.context["posts"]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0].slug, "max-chien-adorable")
 
         # Filter emergency only
-        resp = self.client.get("/articles/?emergency=1")
+        resp = self.client.get("/adoptions/?emergency=1")
         self.assertEqual(resp.status_code, 200)
         posts = resp.context["posts"]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0].slug, "max-chien-adorable")
 
         # Filter recherche_fa status
-        resp = self.client.get("/articles/?status=recherche_fa")
+        resp = self.client.get("/adoptions/?status=recherche_fa")
         self.assertEqual(resp.status_code, 200)
         posts = resp.context["posts"]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0].slug, "bella-chatte-douce")
 
         # Filter search keyword q
-        resp = self.client.get("/articles/?q=adorable")
+        resp = self.client.get("/adoptions/?q=adorable")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp.context["posts"]), 1)
         self.assertEqual(resp.context["posts"][0].animal_name, "Max")
 
         # Filter combined
-        resp = self.client.get("/articles/?species=chat&status=recherche_fa&ok_cats=oui")
+        resp = self.client.get("/adoptions/?species=chat&status=recherche_fa&ok_cats=oui")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(resp.context["posts"]), 1)
         self.assertEqual(resp.context["posts"][0].slug, "bella-chatte-douce")
 
     def test_post_list_ajax_response(self):
-        resp = self.client.get("/articles/?species=chien", HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        resp = self.client.get("/adoptions/?species=chien", HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "includes/_post_grid.html")
         self.assertContains(resp, "Max")
@@ -739,6 +748,95 @@ class AdoptionTariffTest(TestCase):
         resp = self.client.get("/admin/blog/adoptiontariff/")
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "350 €")
+
+
+class SiteSettingsConfigTest(TestCase):
+    def setUp(self):
+        self.settings_obj = SiteSettings.get_solo()
+        self.user = User.objects.create_user("author", "a@a.com", "pass")
+        # Create 15 published adoptable posts
+        for i in range(15):
+            Post.objects.create(
+                title=f"Animal {i}",
+                slug=f"animal-{i}",
+                animal_name=f"Animal {i}",
+                species="chien",
+                status="published",
+                adoption_status="adoptable",
+                author=self.user,
+                published_at=timezone.now(),
+            )
+
+    def test_home_animals_count_config(self):
+        self.settings_obj.home_animals_count = 3
+        self.settings_obj.save()
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.context["posts"]), 3)
+
+    def test_posts_per_page_config(self):
+        self.settings_obj.posts_per_page = 4
+        self.settings_obj.save()
+        resp = self.client.get("/adoptions/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.context["posts"]), 4)
+
+    def test_topbar_toggle_and_text(self):
+        self.settings_obj.topbar_enabled = True
+        self.settings_obj.topbar_text = "Message Promo Spécial Adoption 2026"
+        self.settings_obj.cta_main_label = "Trouver mon compagnon"
+        self.settings_obj.save()
+
+        resp = self.client.get("/")
+        self.assertContains(resp, "Message Promo Spécial Adoption 2026")
+        self.assertContains(resp, "Trouver mon compagnon")
+
+        # Disable top bar
+        self.settings_obj.topbar_enabled = False
+        self.settings_obj.save()
+        resp = self.client.get("/")
+        self.assertNotContains(resp, "top-bar-badge")
+
+    def test_logo_config_and_display(self):
+        # Default logo fallback
+        self.settings_obj.logo = None
+        self.settings_obj.save()
+        self.assertEqual(self.settings_obj.logo_url, "/static/img/logo_rdc.png")
+
+        # Custom logo configured
+        self.settings_obj.logo = "site/logo_reves_de_chiens.png"
+        self.settings_obj.save()
+        self.assertEqual(self.settings_obj.logo_url, "/media/site/logo_reves_de_chiens.png")
+
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "/media/site/logo_reves_de_chiens.png")
+
+    def test_admin_intuitive_sections(self):
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        rf = RequestFactory()
+        req = rf.get("/admin/")
+        req.user = User.objects.create_superuser("adminuser", "admin@test.com", "pass")
+
+        app_list = admin.site.get_app_list(req)
+        section_names = [app["name"] for app in app_list]
+
+        self.assertIn("🐾 Refuge & Animaux", section_names)
+        self.assertIn("📝 Contenu & Communication", section_names)
+        self.assertIn("🧭 Navigation & Structure", section_names)
+        self.assertIn("📬 Demandes & Contact", section_names)
+        self.assertIn("⚙️ Paramètres & Système", section_names)
+        self.assertIn("👥 Utilisateurs & Accès", section_names)
+
+        # Check Animal is in Refuge & Animaux
+        refuge_sec = next(s for s in app_list if s["name"] == "🐾 Refuge & Animaux")
+        model_names = [m["object_name"] for m in refuge_sec["models"]]
+        self.assertIn("Animal", model_names)
+        self.assertIn("AdoptionTariff", model_names)
+
+
 
 
 

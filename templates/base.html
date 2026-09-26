@@ -13,19 +13,19 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.8">
+    <link rel="stylesheet" href="{% static 'css/style.min.css' %}?v=2.9">
     <link rel="alternate" type="application/rss+xml" title="{{ site_name }} RSS" href="{% url 'rss-feed' %}">
     {% block extra_head %}{% endblock %}
 </head>
 
 <body>
     <!-- Top announcement bar -->
+    {% if site_settings.topbar_enabled %}
     <div class="top-bar">
         <div class="container top-bar-inner">
             <div class="top-bar-badge">
                 <span class="pulse-dot"></span>
-                <span class="top-bar-text">Refuge solidaire 100% Familles d'Accueil &middot; Adoptez, sauvez une
-                    vie</span>
+                <span class="top-bar-text">{{ site_settings.topbar_text|default:"Refuge solidaire 100% Familles d'Accueil · Adoptez, sauvez une vie" }}</span>
             </div>
             <div class="top-bar-links">
                 <a href="{% url 'contact:contact' %}">
@@ -47,13 +47,14 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Main Navigation Header with Mega Menu -->
     <header class="site-header" id="site-header">
         <div class="container">
             <div class="header-inner">
                 <a href="{% url 'blog:home' %}" class="site-logo" aria-label="Retour à l'accueil">
-                    <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="site-logo-img">
+                    <img src="{{ site_settings.logo_url }}" alt="Logo {{ site_settings.association_name }}" class="site-logo-img">
                     <span class="logo-text-group">
                         <span class="logo-text-sub">Refuge Solidaire</span>
                         <span class="logo-text-main">Rêves de Chiens</span>
@@ -79,7 +80,7 @@
                         <!-- 2. Mega Menu : Adoption -->
                         <li class="nav-item has-megamenu">
                             <a href="{% url 'blog:post_list' %}"
-                                class="nav-link{% if '/articles/' in request.path or '/puis-je-adopter/' in request.path or '/conditions-adoption/' in request.path or '/formulaire-adoption/' in request.path %} active{% endif %}"
+                                class="nav-link{% if '/adoptions/' in request.path or '/puis-je-adopter/' in request.path or '/conditions-adoption/' in request.path or '/formulaire-adoption/' in request.path %} active{% endif %}"
                                 aria-haspopup="true" aria-expanded="false">
                                 <span>Adoption</span>
                                 <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
@@ -120,7 +121,7 @@
                                                 <a href="{% url 'blog:category' slug='rongeurs' %}" class="megamenu-item">
                                                     <span class="megamenu-item-icon megamenu-item-icon--rabbit">🐹</span>
                                                     <div class="megamenu-item-content">
-                                                        <strong class="megamenu-item-title">Les Rongeurs</strong>
+                                                        <strong class="megamenu-item-title">Les Rongeurs & NAC</strong>
                                                         <span class="megamenu-item-desc">Lapins, cochons d'Inde et petits animaux</span>
                                                     </div>
                                                 </a>
@@ -157,7 +158,7 @@
                                                 <a href="/conditions-adoption/" class="megamenu-item">
                                                     <span class="megamenu-item-icon">📋</span>
                                                     <div class="megamenu-item-content">
-                                                        <strong class="megamenu-item-title">Conditions & Tarifs</strong>
+                                                        <strong class="megamenu-item-title">Conditions d'adoption & Tarifs</strong>
                                                         <span class="megamenu-item-desc">Étapes, contrat et grille tarifaire 2026</span>
                                                     </div>
                                                 </a>
@@ -200,7 +201,7 @@
 
                         <!-- 3. Mega Menu : Agir & Soutenir -->
                         <li class="nav-item has-megamenu">
-                            <a href="/dons-parrainages/" class="nav-link" aria-haspopup="true" aria-expanded="false">
+                            <a href="/dons-parrainages/" class="nav-link{% if '/dons-parrainages/' in request.path or '/familles-accueil/' in request.path %} active{% endif %}" aria-haspopup="true" aria-expanded="false">
                                 <span>Agir & Soutenir</span>
                                 <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -223,8 +224,7 @@
                                                     <span class="megamenu-item-icon">🪙</span>
                                                     <div class="megamenu-item-content">
                                                         <strong class="megamenu-item-title">Dons & Parrainages</strong>
-                                                        <span class="megamenu-item-desc">Déductibles d'impôt à
-                                                            66%</span>
+                                                        <span class="megamenu-item-desc">Déductibles d'impôt à 66%</span>
                                                     </div>
                                                 </a>
                                             </li>
@@ -232,10 +232,8 @@
                                                 <a href="/familles-accueil/" class="megamenu-item">
                                                     <span class="megamenu-item-icon">🏡</span>
                                                     <div class="megamenu-item-content">
-                                                        <strong class="megamenu-item-title">Devenir Famille
-                                                            d'Accueil</strong>
-                                                        <span class="megamenu-item-desc">Offrez un foyer temporaire
-                                                            bénévole</span>
+                                                        <strong class="megamenu-item-title">Devenir Famille d'Accueil</strong>
+                                                        <span class="megamenu-item-desc">Nourriture & soins 100% pris en charge</span>
                                                     </div>
                                                 </a>
                                             </li>
@@ -244,18 +242,16 @@
 
                                     <div class="megamenu-col">
                                         <div class="megamenu-col-header">
-                                            <span class="megamenu-col-badge megamenu-col-badge--orange">Urgences</span>
-                                            <h4 class="megamenu-col-title">Sauvetages & Contact</h4>
+                                            <span class="megamenu-col-badge megamenu-col-badge--orange">Micro-don & Contact</span>
+                                            <h4 class="megamenu-col-title">Soutien continu</h4>
                                         </div>
                                         <ul class="megamenu-links">
                                             <li>
-                                                <a href="/conditions-abandon/" class="megamenu-item">
-                                                    <span class="megamenu-item-icon">⚠️</span>
+                                                <a href="https://www.teaming.net" target="_blank" rel="noopener" class="megamenu-item">
+                                                    <span class="megamenu-item-icon">🪙</span>
                                                     <div class="megamenu-item-content">
-                                                        <strong class="megamenu-item-title">Animal trouvé ou
-                                                            abandon</strong>
-                                                        <span class="megamenu-item-desc">Procédure légale et prise en
-                                                            charge</span>
+                                                        <strong class="megamenu-item-title">Groupe Teaming (1€/mois)</strong>
+                                                        <span class="megamenu-item-desc">Aide automatique sans engagement</span>
                                                     </div>
                                                 </a>
                                             </li>
@@ -263,10 +259,8 @@
                                                 <a href="{% url 'contact:contact' %}" class="megamenu-item">
                                                     <span class="megamenu-item-icon">✉️</span>
                                                     <div class="megamenu-item-content">
-                                                        <strong class="megamenu-item-title">Formulaire de
-                                                            contact</strong>
-                                                        <span class="megamenu-item-desc">Écrivez directement à nos
-                                                            bénévoles</span>
+                                                        <strong class="megamenu-item-title">Formulaire de contact</strong>
+                                                        <span class="megamenu-item-desc">Écrivez directement à nos bénévoles</span>
                                                     </div>
                                                 </a>
                                             </li>
@@ -276,12 +270,18 @@
                             </div>
                         </li>
 
-                        <!-- 4. L'Association -->
+                        <!-- 4. Prise en charge & Abandon (Dédié) -->
                         <li class="nav-item">
-                            <a href="/a-propos/" class="nav-link">L'Association</a>
+                            <a href="/conditions-abandon/"
+                                class="nav-link{% if '/conditions-abandon/' in request.path %} active{% endif %}">Prise en charge</a>
                         </li>
 
-                        <!-- 5. Contact -->
+                        <!-- 5. L'Association -->
+                        <li class="nav-item">
+                            <a href="/a-propos/" class="nav-link{% if '/a-propos/' in request.path %} active{% endif %}">L'Association</a>
+                        </li>
+
+                        <!-- 6. Contact -->
                         <li class="nav-item">
                             <a href="{% url 'contact:contact' %}"
                                 class="nav-link{% if '/contact/' in request.path %} active{% endif %}">Contact</a>
@@ -333,7 +333,7 @@
             <div class="footer-inner">
                 <div class="footer-col footer-about">
                     <div class="footer-logo-wrap">
-                        <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="footer-logo-img">
+                        <img src="{{ site_settings.logo_url }}" alt="Logo {{ site_settings.association_name }}" class="footer-logo-img">
                         <h3 class="footer-logo-title">{{ site_settings.association_name }}</h3>
                     </div>
                     <p>{{ site_settings.tagline|default:"Association de protection animale (loi 1901). Nous sauvons, soignons et replaçons chiens, chats et rongeurs en Familles d'Accueil bénévoles." }}</p>
@@ -384,6 +384,7 @@
                     <ul>
                         <li><a href="{% url 'blog:home' %}">Accueil</a></li>
                         <li><a href="{% url 'blog:post_list' %}">À l'adoption</a></li>
+                        <li><a href="/conditions-abandon/">Prise en charge & Abandon</a></li>
                         <li><a href="/a-propos/">L'association</a></li>
                         <li><a href="{% url 'blog:post_list' %}?status=adopte">Les Heureux Adoptés</a></li>
                         <li><a href="/familles-accueil/">Devenir FA</a></li>
@@ -395,11 +396,12 @@
                     <h3>Adoption</h3>
                     <ul>
                         <li><a href="/puis-je-adopter/">Puis-je adopter ?</a></li>
-                        <li><a href="/conditions-adoption/">Conditions & Tarifs</a></li>
+                        <li><a href="/conditions-adoption/">Conditions d'adoption & Tarifs</a></li>
                         <li><a href="/formulaire-adoption/">Formulaire d'adoption</a></li>
                         <li><a href="{% url 'blog:post_list' %}">Tous nos protégés</a></li>
                         <li><a href="{% url 'blog:category' slug='chiens' %}">Nos chiens</a></li>
                         <li><a href="{% url 'blog:category' slug='chats' %}">Nos chats</a></li>
+                        <li><a href="{% url 'blog:category' slug='rongeurs' %}">Nos rongeurs & NAC</a></li>
                         <li><a href="{% url 'blog:post_list' %}?status=adopte">Les Heureux Adoptés</a></li>
                     </ul>
                 </div>
@@ -408,7 +410,7 @@
                     <ul>
                         <li><a href="/familles-accueil/">Devenir Famille d'Accueil</a></li>
                         <li><a href="/dons-parrainages/">Dons & Parrainages</a></li>
-                        <li><a href="/conditions-abandon/">Conditions d'abandon</a></li>
+                        <li><a href="https://www.teaming.net" target="_blank" rel="noopener">Groupe Teaming (1€/mois)</a></li>
                         <li><a href="/a-propos/">L'association</a></li>
                         <li><a href="/mentions-legales/">Mentions légales</a></li>
                     </ul>
@@ -444,7 +446,7 @@
         <div class="drawer-panel" id="drawer-panel">
             <div class="drawer-header">
                 <div class="drawer-logo">
-                    <img src="{% static 'img/logo_rdc.png' %}" alt="Logo Rêves de Chiens" class="drawer-logo-img">
+                    <img src="{{ site_settings.logo_url }}" alt="Logo {{ site_settings.association_name }}" class="drawer-logo-img">
                     <div class="drawer-logo-text">
                         <span class="drawer-logo-sub">Refuge Solidaire</span>
                         <strong class="drawer-logo-main">Rêves de Chiens</strong>
@@ -475,10 +477,10 @@
                             <a href="{% url 'blog:post_list' %}" class="drawer-sub-link">🐾 Tous nos protégés</a>
                             <a href="{% url 'blog:category' slug='chiens' %}" class="drawer-sub-link">🐕 Les Chiens</a>
                             <a href="{% url 'blog:category' slug='chats' %}" class="drawer-sub-link">🐈 Les Chats</a>
-                            <a href="{% url 'blog:category' slug='rongeurs' %}" class="drawer-sub-link">🐹 Les Rongeurs</a>
+                            <a href="{% url 'blog:category' slug='rongeurs' %}" class="drawer-sub-link">🐹 Les Rongeurs & NAC</a>
                             <a href="{% url 'blog:category' slug='urgences' %}" class="drawer-sub-link drawer-sub-link--urgent">🚨 Urgences SOS</a>
                             <a href="/puis-je-adopter/" class="drawer-sub-link">💡 Puis-je adopter ?</a>
-                            <a href="/conditions-adoption/" class="drawer-sub-link">📋 Conditions & Tarifs</a>
+                            <a href="/conditions-adoption/" class="drawer-sub-link">📋 Conditions d'adoption & Tarifs</a>
                             <a href="/formulaire-adoption/" class="drawer-sub-link">📝 Formulaire d'adoption</a>
                             <a href="{% url 'blog:post_list' %}?status=adopte" class="drawer-sub-link">❤️ Les Heureux Adoptés</a>
                         </div>
@@ -493,17 +495,20 @@
                         <div class="drawer-accordion-content">
                             <a href="/dons-parrainages/" class="drawer-sub-link">🪙 Dons & Parrainages</a>
                             <a href="/familles-accueil/" class="drawer-sub-link">🏡 Devenir Famille d'Accueil</a>
-                            <a href="/conditions-abandon/" class="drawer-sub-link">⚠️ Animal trouvé ou abandon</a>
+                            <a href="https://www.teaming.net" target="_blank" rel="noopener" class="drawer-sub-link">🪙 Teaming (1€/mois)</a>
                         </div>
                     </li>
 
-                    <li><a href="/a-propos/" class="drawer-nav-link"><span class="drawer-icon">ℹ️</span> L'Association</a></li>
+                    <!-- Prise en charge & Abandon (Dédié) -->
+                    <li><a href="/conditions-abandon/" class="drawer-nav-link{% if '/conditions-abandon/' in request.path %} active{% endif %}"><span class="drawer-icon">⚠️</span> Prise en charge & Abandon</a></li>
+
+                    <li><a href="/a-propos/" class="drawer-nav-link{% if '/a-propos/' in request.path %} active{% endif %}"><span class="drawer-icon">ℹ️</span> L'Association</a></li>
                     <li><a href="{% url 'contact:contact' %}" class="drawer-nav-link{% if '/contact/' in request.path %} active{% endif %}"><span class="drawer-icon">✉️</span> Contact</a></li>
                 </ul>
 
                 <div class="drawer-footer-cta">
                     <a href="{% url 'blog:post_list' %}" class="btn btn-primary btn-block">
-                        <span>Adopter un animal</span>
+                        <span>{{ site_settings.cta_main_label|default:"Adopter un animal" }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
                     </a>
                 </div>
@@ -517,7 +522,7 @@
             <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span class="mobile-nav-label">Accueil</span>
         </a>
-        <a href="{% url 'blog:post_list' %}" class="mobile-nav-item{% if '/articles/' in request.path %} active{% endif %}">
+        <a href="{% url 'blog:post_list' %}" class="mobile-nav-item{% if '/adoptions/' in request.path %} active{% endif %}">
             <svg class="mobile-nav-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm15 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM7 14.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-5 6.5c-3.5 0-5.5-2.5-5.5-5.5 0-2 1.5-3.5 3-4.2a5.5 5.5 0 0 1 5 0c1.5.7 3 2.2 3 4.2 0 3-2 5.5-5.5 5.5Z"/></svg>
             <span class="mobile-nav-label">Protégés</span>
         </a>

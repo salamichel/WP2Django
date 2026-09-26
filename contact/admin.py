@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
 from contact.models import ContactMessage
 
 
 @admin.register(ContactMessage)
-class ContactMessageAdmin(admin.ModelAdmin):
+class ContactMessageAdmin(ModelAdmin):
     list_display = ("name", "category_badge", "animal_name", "email", "phone", "created_at", "read_badge")
     list_filter = ("category", "is_read", "created_at")
     search_fields = ("name", "email", "phone", "animal_name", "subject", "message")

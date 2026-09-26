@@ -18,7 +18,7 @@
                 <li>
                     <a href="/conditions-adoption/" class="cms-section-link{% if page.slug == 'conditions-adoption' %} active{% endif %}">
                         <span class="cms-link-icon">📋</span>
-                        <span class="cms-link-text">Conditions & Tarifs</span>
+                        <span class="cms-link-text">Conditions d'adoption & Tarifs</span>
                     </a>
                 </li>
                 <li>
@@ -43,7 +43,7 @@
                 <li>
                     <a href="{% url 'blog:category' slug='rongeurs' %}" class="cms-section-link">
                         <span class="cms-link-icon">🐹</span>
-                        <span class="cms-link-text">Les Rongeurs</span>
+                        <span class="cms-link-text">Les Rongeurs & NAC</span>
                     </a>
                 </li>
                 <li>
@@ -71,7 +71,47 @@
             </a>
         </div>
 
-        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' or page.slug == 'conditions-abandon' %}
+        {% elif page.slug == 'conditions-abandon' %}
+        <!-- Rubrique : Prise en charge & Abandon (Dédié) -->
+        <nav class="cms-section-nav" aria-label="Dans cette rubrique">
+            <div class="cms-section-nav-header">
+                <span class="cms-section-badge cms-section-badge--orange">Démarches</span>
+                <h3 class="cms-section-nav-title">Prise en charge</h3>
+            </div>
+            <ul class="cms-section-list">
+                <li>
+                    <a href="/conditions-abandon/" class="cms-section-link active">
+                        <span class="cms-link-icon">⚠️</span>
+                        <span class="cms-link-text">Procédure & Abandon</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'contact:contact' %}?category=abandon" class="cms-section-link">
+                        <span class="cms-link-icon">📝</span>
+                        <span class="cms-link-text">Demande de prise en charge</span>
+                    </a>
+                </li>
+                <li class="cms-section-divider"></li>
+                <li>
+                    <a href="{% url 'contact:contact' %}" class="cms-section-link">
+                        <span class="cms-link-icon">✉️</span>
+                        <span class="cms-link-text">Contacter l'équipe</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CTA Card Abandon / Contact -->
+        <div class="cms-sidebar-cta cms-sidebar-cta--lost">
+            <div class="cms-cta-icon-pill">💬 À votre écoute</div>
+            <h4 class="cms-cta-title">Une difficulté avec votre animal ?</h4>
+            <p class="cms-cta-desc">Des solutions existent avant toute rupture définitive. Échangez en toute bienveillance avec nos référents.</p>
+            <a href="{% url 'contact:contact' %}?category=abandon" class="btn btn-primary btn-block btn-sm">
+                Nous exposer votre situation &rarr;
+            </a>
+        </div>
+
+        {% elif page.slug == 'familles-accueil' or page.slug == 'dons-parrainages' %}
         <!-- Rubrique : Agir & Soutenir -->
         <nav class="cms-section-nav" aria-label="Dans cette rubrique">
             <div class="cms-section-nav-header">
@@ -92,18 +132,12 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/conditions-abandon/" class="cms-section-link{% if page.slug == 'conditions-abandon' %} active{% endif %}">
-                        <span class="cms-link-icon">⚠️</span>
-                        <span class="cms-link-text">Prise en charge & Abandon</span>
+                    <a href="https://www.teaming.net" target="_blank" rel="noopener" class="cms-section-link">
+                        <span class="cms-link-icon">🪙</span>
+                        <span class="cms-link-text">Teaming (1€/mois)</span>
                     </a>
                 </li>
                 <li class="cms-section-divider"></li>
-                <li>
-                    <a href="/conditions-adoption/" class="cms-section-link">
-                        <span class="cms-link-icon">📋</span>
-                        <span class="cms-link-text">Conditions d'adoption</span>
-                    </a>
-                </li>
                 <li>
                     <a href="{% url 'contact:contact' %}" class="cms-section-link">
                         <span class="cms-link-icon">✉️</span>
@@ -117,7 +151,7 @@
         <div class="cms-sidebar-cta cms-sidebar-cta--fa">
             <div class="cms-cta-icon-pill">🏡 Devenir FA</div>
             <h4 class="cms-cta-title">Ouvrez votre cœur et votre foyer</h4>
-            <p class="cms-cta-desc">Frais vétérinaires 100% pris en charge par Rêves de Chiens. Accompagnement continu.</p>
+            <p class="cms-cta-desc">Frais vétérinaires et nourriture 100% pris en charge par Rêves de Chiens. Accompagnement continu.</p>
             <a href="{% url 'contact:contact' %}?category=fa" class="btn btn-secondary btn-block btn-sm">
                 Proposer ma candidature FA &rarr;
             </a>
@@ -140,7 +174,7 @@
                 <li>
                     <a href="/conditions-adoption/" class="cms-section-link">
                         <span class="cms-link-icon">📋</span>
-                        <span class="cms-link-text">Conditions d'adoption</span>
+                        <span class="cms-link-text">Conditions d'adoption & Tarifs</span>
                     </a>
                 </li>
                 <li>

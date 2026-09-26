@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% if page_title %}{{ page_title }}{% else %}Catalogue des Résidents{% endif %} - {{ site_name }}{% endblock %}
+{% block title %}{% if page_title %}{{ page_title }}{% else %}Catalogue des Rêveurs{% endif %} - {{ site_name }}{% endblock %}
 {% block meta_description %}{% if category and category.description %}{{ category.description }}{% else %}Découvrez tous nos chiens, chats et rongeurs disponibles à l'adoption ou en recherche de famille d'accueil au refuge Rêves de Chiens.{% endif %}{% endblock %}
 
 {% block content %}
@@ -14,14 +14,14 @@
         <span class="cms-breadcrumb-sep">/</span>
         <span class="cms-breadcrumb-curr">{% if page_title %}{{ page_title }}{% else %}{{ category.name }}{% endif %}</span>
         {% else %}
-        <span class="cms-breadcrumb-curr">{% if page_title %}{{ page_title }}{% else %}Catalogue des Résidents{% endif %}</span>
+        <span class="cms-breadcrumb-curr">{% if page_title %}{{ page_title }}{% else %}Catalogue des Rêveurs{% endif %}</span>
         {% endif %}
     </nav>
 
     <!-- Page Header (Standardisé) -->
     <div class="page-header">
         <span class="cms-header-category-badge">🐾 Nos Protégés</span>
-        <h1>{% if page_title %}{{ page_title }}{% else %}Nos Protégés à l'Adoption{% endif %}</h1>
+        <h1>{% if page_title %}{{ page_title }}{% else %}Nos Rêveurs à l'Adoption{% endif %}</h1>
         <p class="page-header-sub">{% if category and category.description %}{{ category.description }}{% else %}Nos fidèles compagnons en attente d'une famille aimante et bienveillante pour la vie.{% endif %}</p>
     </div>
 
@@ -47,14 +47,14 @@
                     </div>
                 </div>
 
-                <!-- Widget 1: Filtrer les Résidents (Espèces) -->
+                <!-- Widget 1: Filtrer les Rêveurs (Espèces) -->
                 <div class="sidebar-filter-widget">
-                    <h3 class="filter-widget-title">Filtrer les résidents</h3>
+                    <h3 class="filter-widget-title">Filtrer les rêveurs</h3>
                     <div class="species-sidebar-list">
                         <button type="button"
                             class="species-sidebar-item{% if not filters.species and not filters.emergency %} active{% endif %}"
                             data-species="" data-emergency="">
-                            <span class="species-item-left"><span class="species-ico">🐾</span> Tous les résidents</span>
+                            <span class="species-item-left"><span class="species-ico">🐾</span> Tous les rêveurs</span>
                             <span class="species-count-badge">{{ species_counts.total|default:0 }}</span>
                         </button>
                         <button type="button"
@@ -106,19 +106,14 @@
                     </div>
                 </div>
 
-                <!-- Widget 3: Statut Sanitaire -->
+                <!-- Widget 3: Statut Sanitaire (Stérilisation mise en avant) -->
                 <div class="sidebar-filter-widget">
-                    <h3 class="filter-widget-title">Statut Sanitaire</h3>
+                    <h3 class="filter-widget-title">Stérilisation</h3>
                     <div class="sidebar-checkbox-list">
-                        <label class="sidebar-checkbox-label">
-                            <input type="checkbox" name="vaccinated" value="1" {% if filters.vaccinated == "1" %}checked{% endif %}>
-                            <span class="chk-box"></span>
-                            <span class="chk-text">Vacciné(e)</span>
-                        </label>
                         <label class="sidebar-checkbox-label">
                             <input type="checkbox" name="sterilized" value="1" {% if filters.sterilized == "1" %}checked{% endif %}>
                             <span class="chk-box"></span>
-                            <span class="chk-text">Stérilisé(e)</span>
+                            <span class="chk-text"><strong>✓ Stérilisé(e) / Castré(e)</strong></span>
                         </label>
                     </div>
                 </div>

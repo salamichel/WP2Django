@@ -17,7 +17,13 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost
 _csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
 
+from django.urls import reverse_lazy
+
 INSTALLED_APPS = [
+    # Unfold Modern Tailwind Admin Theme (must precede django.contrib.admin)
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -189,3 +195,150 @@ LOGGING = {
         },
     },
 }
+
+# ==============================================================================
+# DJANGO UNFOLD MODERN ADMIN CONFIGURATION
+# ==============================================================================
+
+UNFOLD = {
+    "SITE_TITLE": "Rêves de Chiens",
+    "SITE_HEADER": "Rêves de Chiens",
+    "SITE_SUBHEADER": "Refuge Solidaire & Protection Animale",
+    "SITE_URL": "/",
+    "SITE_ICON": {
+        "light": lambda request: "/media/site/logo_reves_de_chiens.png",
+        "dark": lambda request: "/media/site/logo_reves_de_chiens.png",
+    },
+    "SITE_LOGO": {
+        "light": lambda request: "/media/site/logo_reves_de_chiens.png",
+        "dark": lambda request: "/media/site/logo_reves_de_chiens.png",
+    },
+    "DASHBOARD_CALLBACK": "blog.admin_callbacks.dashboard_callback",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Refuge & Animaux",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Animaux à l'adoption",
+                        "icon": "pets",
+                        "link": reverse_lazy("admin:blog_animal_changelist"),
+                        "badge": "blog.admin_callbacks.badge_adoptable_animals",
+                    },
+                    {
+                        "title": "Tarifs d'adoption",
+                        "icon": "payments",
+                        "link": reverse_lazy("admin:blog_adoptiontariff_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Contenu & Communication",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Pages du site (CMS)",
+                        "icon": "description",
+                        "link": reverse_lazy("admin:blog_page_changelist"),
+                    },
+                    {
+                        "title": "Articles de blog",
+                        "icon": "newspaper",
+                        "link": reverse_lazy("admin:blog_article_changelist"),
+                    },
+                    {
+                        "title": "Médiathèque (Photos)",
+                        "icon": "photo_library",
+                        "link": reverse_lazy("admin:blog_media_changelist"),
+                    },
+                    {
+                        "title": "Commentaires",
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:blog_comment_changelist"),
+                        "badge": "blog.admin_callbacks.badge_pending_comments",
+                    },
+                ],
+            },
+            {
+                "title": "Navigation & Structure",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Menus de navigation",
+                        "icon": "menu",
+                        "link": reverse_lazy("admin:blog_menu_changelist"),
+                    },
+                    {
+                        "title": "Catégories",
+                        "icon": "category",
+                        "link": reverse_lazy("admin:blog_category_changelist"),
+                    },
+                    {
+                        "title": "Étiquettes (Tags)",
+                        "icon": "label",
+                        "link": reverse_lazy("admin:blog_tag_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Demandes & Contact",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Messages & Candidatures",
+                        "icon": "mail",
+                        "link": reverse_lazy("admin:contact_contactmessage_changelist"),
+                        "badge": "blog.admin_callbacks.badge_unread_messages",
+                    },
+                ],
+            },
+            {
+                "title": "Paramètres & Système",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Paramètres du Site & Logo",
+                        "icon": "settings",
+                        "link": reverse_lazy("admin:blog_sitesettings_changelist"),
+                    },
+                    {
+                        "title": "Redirections d'URLs (SEO)",
+                        "icon": "alt_route",
+                        "link": reverse_lazy("admin:blog_redirect_changelist"),
+                    },
+                    {
+                        "title": "Données d'import (WordPress)",
+                        "icon": "archive",
+                        "link": reverse_lazy("admin:blog_plugindata_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Utilisateurs & Accès",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Utilisateurs",
+                        "icon": "people",
+                        "link": reverse_lazy("admin:auth_user_changelist"),
+                    },
+                    {
+                        "title": "Groupes & Rôles",
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}
+

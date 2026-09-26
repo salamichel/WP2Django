@@ -1,18 +1,22 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponsePermanentRedirect
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Q
 
-from blog.models import Post, Page, Category, Tag, AdoptionTariff
+from blog.models import Post, Page, Category, Tag, AdoptionTariff, SiteSettings
 
 
 def home(request):
+    site_settings = SiteSettings.get_solo()
+    limit = site_settings.home_animals_count or 6
+
     latest_posts = Post.objects.filter(
         status="published",
         adoption_status="adoptable"
     ).select_related(
         "author", "featured_image"
-    ).prefetch_related("categories", "tags")[:6]
+    ).prefetch_related("categories", "tags")[:limit]
 
     return render(request, "blog/home.html", {
         "posts": latest_posts,
@@ -83,7 +87,10 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
             Q(identification__icontains=q)
         )
     if species:
-        queryset = queryset.filter(species=species)
+        if species == "rongeur":
+            queryset = queryset.filter(Q(species="rongeur") | Q(species="autre"))
+        else:
+            queryset = queryset.filter(species=species)
     if sex:
         queryset = queryset.filter(sex=sex)
     if adoption_status:
@@ -113,18 +120,26 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
     else:
         queryset = queryset.order_by("-published_at", "-created_at")
 
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+
     total_count = queryset.count()
-    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    paginator = Paginator(queryset, per_page)
     page = request.GET.get("page")
     posts = paginator.get_page(page)
 
-    # Compute global species counters (focused on adoptable residents)
-    base_active = Post.objects.filter(status="published", adoption_status="adoptable")
+    # Compute global species counters (focused on adoptable animal profiles)
+    base_active = Post.objects.filter(
+        status="published",
+        adoption_status="adoptable"
+    ).filter(
+        Q(species__in=["chien", "chat", "rongeur", "autre"]) | ~Q(animal_name="")
+    )
     species_counts = {
         "chiens": base_active.filter(species="chien").count(),
         "chats": base_active.filter(species="chat").count(),
-        "rongeurs": base_active.filter(species="rongeur").count(),
-        "urgences": Post.objects.filter(status="published", is_emergency=True).count(),
+        "rongeurs": base_active.filter(Q(species="rongeur") | Q(species="autre")).count(),
+        "urgences": base_active.filter(is_emergency=True).count(),
         "total": base_active.count(),
     }
 
@@ -166,7 +181,25 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
 
 
 def post_list(request):
-    return _render_post_catalogue(request, page_title="Nos protégés & Actualités")
+    return _render_post_catalogue(request, page_title="Catalogue des Rêveurs")
+
+
+def legacy_articles_redirect(request):
+    """Permanent 301 redirect from old /articles/ to /adoptions/."""
+    query_string = request.META.get("QUERY_STRING", "")
+    target = "/adoptions/"
+    if query_string:
+        target += f"?{query_string}"
+    return HttpResponsePermanentRedirect(target)
+
+
+def legacy_post_detail_redirect(request, slug):
+    """Permanent 301 redirect from old /articles/<slug>/ to /adoptions/<slug>/."""
+    query_string = request.META.get("QUERY_STRING", "")
+    target = f"/adoptions/{slug}/"
+    if query_string:
+        target += f"?{query_string}"
+    return HttpResponsePermanentRedirect(target)
 
 
 def post_detail(request, slug):
@@ -239,7 +272,9 @@ def adoptions_by_year(request, year):
         Q(adoption_date__year=year) | Q(categories=category) | Q(categories__slug=f"les-adoptes-{year}")
     ).distinct().select_related("author", "featured_image").prefetch_related("categories", "tags")
 
-    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+    paginator = Paginator(queryset, per_page)
     posts = paginator.get_page(request.GET.get("page"))
 
     return render(request, "blog/category.html", {
@@ -307,7 +342,9 @@ def category_detail(request, slug):
         queryset = Post.objects.filter(status="published").filter(
             Q(categories=category) | Q(adoption_status="adopte") | Q(categories__slug__startswith="les-adoptes")
         ).distinct().select_related("author", "featured_image").prefetch_related("categories", "tags")
-        paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+        site_settings = SiteSettings.get_solo()
+        per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+        paginator = Paginator(queryset, per_page)
         posts = paginator.get_page(request.GET.get("page"))
         return render(request, "blog/category.html", {
             "category": category,
@@ -323,7 +360,9 @@ def category_detail(request, slug):
         queryset = Post.objects.filter(
             status="published", categories=category
         ).select_related("author", "featured_image").prefetch_related("categories", "tags")
-        paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+        site_settings = SiteSettings.get_solo()
+        per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+        paginator = Paginator(queryset, per_page)
         posts = paginator.get_page(request.GET.get("page"))
         return render(request, "blog/category.html", {
             "category": category,
@@ -337,7 +376,9 @@ def tag_detail(request, slug):
     queryset = Post.objects.filter(
         status="published", tags=tag
     ).select_related("author", "featured_image")
-    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+    paginator = Paginator(queryset, per_page)
     posts = paginator.get_page(request.GET.get("page"))
     return render(request, "blog/tag.html", {"tag": tag, "posts": posts})
 
@@ -346,7 +387,9 @@ def archive_year(request, year):
     queryset = Post.objects.filter(
         status="published", published_at__year=year
     ).select_related("author", "featured_image")
-    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+    paginator = Paginator(queryset, per_page)
     posts = paginator.get_page(request.GET.get("page"))
     return render(request, "blog/archive.html", {"posts": posts, "year": year, "month": None})
 
@@ -355,7 +398,9 @@ def archive_month(request, year, month):
     queryset = Post.objects.filter(
         status="published", published_at__year=year, published_at__month=month
     ).select_related("author", "featured_image")
-    paginator = Paginator(queryset, settings.POSTS_PER_PAGE)
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+    paginator = Paginator(queryset, per_page)
     posts = paginator.get_page(request.GET.get("page"))
     return render(request, "blog/archive.html", {"posts": posts, "year": year, "month": month})
 
@@ -368,7 +413,9 @@ def search(request):
             Q(title__icontains=query) | Q(content__icontains=query) | Q(excerpt__icontains=query),
             status="published",
         ).select_related("author", "featured_image")
-    paginator = Paginator(posts, settings.POSTS_PER_PAGE)
+    site_settings = SiteSettings.get_solo()
+    per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
+    paginator = Paginator(posts, per_page)
     return render(request, "blog/search.html", {
         "posts": paginator.get_page(request.GET.get("page")),
         "query": query,

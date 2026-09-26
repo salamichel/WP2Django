@@ -8,7 +8,10 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 ## 🛠 Commandes Essentielles (Docker & Local)
 - `make build` : Construit les conteneurs Docker.
 - `make up` : Lance le projet en arrière-plan.
-- `docker compose exec web python manage.py test` : Exécute toute la suite de tests (65+ tests) dans le conteneur.
+- `make css` ou `npm run build:css` : Compile, purge et minifie le CSS (`static/css/style.css` ➔ `static/css/style.min.css`).
+- `make css-watch` ou `npm run watch:css` : Surveille les modifications du CSS source et recompile automatiquement.
+- `make collectstatic` : Synchronise les fichiers statiques (dont `style.min.css`) vers `./staticfiles/` pour Nginx.
+- `docker compose exec web python manage.py test` : Exécute toute la suite de tests (90+ tests) dans le conteneur.
 - `python manage.py test` : Exécute les tests en local (bascule automatiquement sur SQLite).
 - `make migrate` ou `python manage.py migrate` : Applique les migrations Django.
 - `make import-wp SQL=chemin/vers/dump.sql` ou `python manage.py import_wordpress dump.sql` : Importe les données WordPress.
@@ -42,6 +45,7 @@ Site CMS et plateforme de gestion pour l'association **Rêves de Chiens** (refug
 - **Sécurité Admin** : Préférer `format_html()` pour le rendu HTML sécurisé dans `admin.py`.
 
 ### 4. Standards UI/UX, Éditeur WYSIWYG & Intégration Front-End
+- **Pipeline CSS (PurgeCSS + cssnano)** : `static/css/style.css` est la source de vérité. Toute modification de style doit être compilée vers `static/css/style.min.css` via `make css` avant `collectstatic` ou déploiement. Les classes dynamiques (GLightbox, modales, badges d'entente, états `is-`, `active`, CKEditor) doivent être déclarées dans la `safelist` de `postcss.config.js`. `base.html` charge systématiquement `style.min.css` avec son paramètre de version (`?v=X.Y`).
 - **Éditeur WYSIWYG (CKEditor 5)** : Toujours activer `htmlSupport` (GHS) dans `settings.py` pour préserver les attributs `style="..."` et classes custom. Déclarer dans `admin_custom.css` un miroir complet du CSS front-end pour `.ck-content` (polices `Playfair Display`/`Inter`, boutons `.btn`, grilles de cartes et alertes).
 - **Règle d'Urgence Animaux** : Priorité absolue `Décédé > Adopté > Réservé > Urgence > Adoptable`. Un animal adopté ou décédé ne doit jamais recevoir `is_emergency = True` ni le tag `Urgence`.
 - **Menus déroulants & Mega Menus** : Toujours inclure un pont invisible (`::before`) et un délai de grâce (150-200ms) pour éviter les fermetures prématurées au survol.

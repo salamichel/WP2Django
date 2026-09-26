@@ -1,0 +1,16 @@
+{
+  "name": "reve-de-chiens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Asset pipeline for Reve de Chiens",
+  "scripts": {
+    "build:css": "postcss static/css/style.css -o static/css/style.min.css",
+    "watch:css": "postcss static/css/style.css -o static/css/style.min.css --watch"
+  },
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^6.0.0",
+    "cssnano": "^7.0.6",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0"
+  }
+}
