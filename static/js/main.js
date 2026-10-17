@@ -392,11 +392,13 @@ function initLiveFilters() {
             ok_dogs: function () { return "🐕 Ok chiens"; },
             ok_cats: function () { return "🐈 Ok chats"; },
             ok_children: function () { return "👶 Ok enfants"; },
-            emergency: function () { return "🚨 Urgences"; }
+            sterilized: function () { return "✓ Stérilisé(e)"; },
+            emergency: function () { return "🚨 SOS Urgences"; }
         };
 
         for (const [key, value] of params.entries()) {
             if (key === "page" || !value) continue;
+            if (key === "sort" && value === "recent") continue;
             if (key === "status" && value === "adoptable") continue;
             hasAnyFilter = true;
 
@@ -472,6 +474,16 @@ function initLiveFilters() {
                 tab.setAttribute("aria-selected", "false");
             }
         });
+
+        const sidebarItems = document.querySelectorAll(".species-sidebar-item");
+        sidebarItems.forEach(function (item) {
+            if (item.getAttribute("data-species") === "" && !item.getAttribute("data-emergency")) {
+                item.classList.add("active");
+            } else {
+                item.classList.remove("active");
+            }
+        });
+        if (emergencyInput) emergencyInput.value = "";
 
         if (clearBtn) clearBtn.classList.add("hidden");
         applyFilters(null, true, false);
@@ -621,6 +633,25 @@ function initLiveFilters() {
                     } else {
                         t.classList.remove("active");
                         t.setAttribute("aria-selected", "false");
+                    }
+                });
+                const sidebarItems = document.querySelectorAll(".species-sidebar-item");
+                sidebarItems.forEach(item => {
+                    if (item.getAttribute("data-species") === "" && !item.getAttribute("data-emergency")) {
+                        item.classList.add("active");
+                    } else {
+                        item.classList.remove("active");
+                    }
+                });
+            } else if (fieldName === "emergency") {
+                const emgInp = document.getElementById("filter-emergency-input");
+                if (emgInp) emgInp.value = "";
+                const sidebarItems = document.querySelectorAll(".species-sidebar-item");
+                sidebarItems.forEach(item => {
+                    if (item.getAttribute("data-species") === (speciesInput ? speciesInput.value : "") && !item.getAttribute("data-emergency")) {
+                        item.classList.add("active");
+                    } else {
+                        item.classList.remove("active");
                     }
                 });
             } else if (fieldName === "q") {

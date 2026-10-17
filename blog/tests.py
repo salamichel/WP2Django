@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -260,6 +260,7 @@ class RedirectMiddlewareTest(TestCase):
         self.assertEqual(resp["Location"], "/tag/adoption/")
 
 
+@override_settings(BREVO_API_KEY="")
 class ContactViewTest(TestCase):
     def test_contact_get(self):
         resp = self.client.get("/contact/")
@@ -500,6 +501,7 @@ class AdoptionAndEmergencyFeaturesTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context["filters"]["species"], "chien")
 
+    @override_settings(BREVO_API_KEY="")
     def test_contact_form_with_categories(self):
         from contact.models import ContactMessage
         resp = self.client.post("/contact/", {

@@ -186,7 +186,7 @@ class Command(BaseCommand):
 
                 <div style="text-align:center;margin-top:3rem;">
                     <a href="/conditions-adoption/" class="btn btn-primary btn-lg" style="margin-right:1rem;">Découvrir les conditions d'adoption &rarr;</a>
-                    <a href="/articles/" class="btn btn-outline btn-lg">Voir tous nos protégés à l'adoption</a>
+                    <a href="/adoptions/" class="btn btn-outline btn-lg">Voir tous nos protégés à l'adoption</a>
                 </div>
                 """
             },

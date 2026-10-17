@@ -32,15 +32,15 @@
             <div class="animal-hero-visuals">
                 <div class="animal-main-photo-wrap">
                     <!-- Badges Overlay -->
-                    {% if post.is_emergency %}
+                    {% if post.adoption_status == "adopte" %}
+                    <span class="hero-badge-left hero-badge--adopted">Adopté(e) ❤️</span>
+                    {% elif post.adoption_status == "reserve" %}
+                    <span class="hero-badge-left hero-badge--reserved">Réservé(e) ⏳</span>
+                    {% elif post.is_emergency %}
                     <span class="hero-badge-left hero-badge--emergency">SOS Urgence Sauvetage 🚨</span>
                     <span class="hero-badge-right hero-badge--urgent-pill">! URGENCE SAUVETAGE</span>
                     {% elif post.adoption_status == "recherche_fa" %}
                     <span class="hero-badge-left hero-badge--fa">Recherche Famille d'Accueil 🏡</span>
-                    {% elif post.adoption_status == "reserve" %}
-                    <span class="hero-badge-left hero-badge--reserved">Réservé(e) ⏳</span>
-                    {% elif post.adoption_status == "adopte" %}
-                    <span class="hero-badge-left hero-badge--adopted">Adopté(e) ❤️</span>
                     {% else %}
                     <span class="hero-badge-left hero-badge--adoptable">À l'Adoption 🐾</span>
                     {% endif %}
@@ -178,7 +178,7 @@
                 </div>
 
                 <!-- Big CTA Button -->
-                {% if post.adoption_status == "adoptable" or post.is_adoptable or post.adoption_status == "recherche_fa" %}
+                {% if post.adoption_status == "adoptable" or post.adoption_status == "recherche_fa" or post.is_adoptable and post.adoption_status != "adopte" and post.adoption_status != "reserve" %}
                 <div class="animal-profile-cta">
                     <a href="{% url 'contact:contact' %}?category={% if post.adoption_status == 'recherche_fa' %}fa{% else %}adoption{% endif %}&animal={{ post.animal_name|default:post.title|urlencode }}" class="btn-adopt-main">
                         {% if post.adoption_status == 'recherche_fa' %}

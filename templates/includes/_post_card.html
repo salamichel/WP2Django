@@ -11,14 +11,14 @@
         </a>
 
         <!-- Top Status Badge -->
-        {% if post.is_emergency %}
+        {% if post.adoption_status == "adopte" %}
+        <span class="card-top-badge card-top-badge--adopted">Adopté(e) ❤️</span>
+        {% elif post.adoption_status == "reserve" %}
+        <span class="card-top-badge card-top-badge--reserved">Réservé(e) ⏳</span>
+        {% elif post.is_emergency %}
         <span class="card-top-badge card-top-badge--emergency">SOS Urgence Sauvetage 🚨</span>
         {% elif post.adoption_status == "recherche_fa" %}
         <span class="card-top-badge card-top-badge--fa">Recherche Famille d'Accueil 🏡</span>
-        {% elif post.adoption_status == "reserve" %}
-        <span class="card-top-badge card-top-badge--reserved">Réservé(e) ⏳</span>
-        {% elif post.adoption_status == "adopte" %}
-        <span class="card-top-badge card-top-badge--adopted">Adopté(e) ❤️</span>
         {% elif post.is_adoptable or post.adoption_status == "adoptable" %}
         <span class="card-top-badge card-top-badge--adoptable">À l'Adoption 🐾</span>
         {% endif %}
@@ -46,7 +46,7 @@
             <h3 class="card-animal-name">
                 <a href="{{ post.get_absolute_url }}">{{ post.animal_name|default:post.title }}</a>
             </h3>
-            {% if post.is_emergency %}
+            {% if post.is_emergency and post.adoption_status != "adopte" and post.adoption_status != "reserve" %}
             <span class="card-sos-pill">🚨 SOS</span>
             {% endif %}
         </div>

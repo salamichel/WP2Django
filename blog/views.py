@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponsePermanentRedirect
 from django.core.paginator import Paginator
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from blog.models import Post, Page, Category, Tag, AdoptionTariff, SiteSettings
 
@@ -16,7 +16,7 @@ def home(request):
         adoption_status="adoptable"
     ).select_related(
         "author", "featured_image"
-    ).prefetch_related("categories", "tags")[:limit]
+    ).prefetch_related("categories", "tags", "gallery_images")[:limit]
 
     return render(request, "blog/home.html", {
         "posts": latest_posts,
@@ -29,7 +29,7 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
     else:
         queryset = base_queryset.filter(status="published")
 
-    queryset = queryset.select_related("author", "featured_image").prefetch_related("categories", "tags")
+    queryset = queryset.select_related("author", "featured_image").prefetch_related("categories", "tags", "gallery_images")
 
     init_f = initial_filters or {}
 
@@ -68,7 +68,6 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
     ok_cats = request.GET.get("ok_cats", init_f.get("ok_cats", "")).strip()
     ok_children = request.GET.get("ok_children", init_f.get("ok_children", "")).strip()
     housing = request.GET.get("housing", init_f.get("housing", "")).strip()
-    vaccinated = request.GET.get("vaccinated", init_f.get("vaccinated", "")).strip()
     sterilized = request.GET.get("sterilized", init_f.get("sterilized", "")).strip()
     sort = request.GET.get("sort", "recent").strip()
 
@@ -103,8 +102,6 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         queryset = queryset.filter(ok_children=ok_children)
     if housing:
         queryset = queryset.filter(housing_requirement=housing)
-    if vaccinated == "1" or vaccinated == "true":
-        queryset = queryset.filter(is_vaccinated=True)
     if sterilized == "1" or sterilized == "true":
         queryset = queryset.filter(is_sterilized=True)
     if emergency in ["1", "true", "True", "urgence", "urgences"]:
@@ -152,7 +149,6 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
         "ok_cats": ok_cats,
         "ok_children": ok_children,
         "housing": housing,
-        "vaccinated": vaccinated,
         "sterilized": sterilized,
         "emergency": emergency,
         "sort": sort,
@@ -160,7 +156,7 @@ def _render_post_catalogue(request, base_queryset=None, initial_filters=None, pa
 
     has_custom_filters = bool(
         q or species or sex or ok_dogs or ok_cats or ok_children or housing
-        or vaccinated or sterilized or emergency
+        or sterilized or emergency
         or (status_filter_val and status_filter_val != "adoptable")
     )
 
@@ -417,7 +413,7 @@ def search(request):
             Q(excerpt__icontains=query) |
             Q(identification__icontains=query),
             status="published",
-        ).select_related("author", "featured_image").prefetch_related("categories", "tags").order_by("-published_at", "-created_at")
+        ).select_related("author", "featured_image").prefetch_related("categories", "tags", "gallery_images").order_by("-published_at", "-created_at")
     site_settings = SiteSettings.get_solo()
     per_page = site_settings.posts_per_page or getattr(settings, "POSTS_PER_PAGE", 10)
     paginator = Paginator(posts, per_page)
